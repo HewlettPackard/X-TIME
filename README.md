@@ -18,6 +18,10 @@ optimize their hyperparameters. The documentation provides details on what datas
 are available out of the box and how to train new models.
 
 
+## License
+XTIME is licensed under [Apache 2.0](https://github.com/HewlettPackard/X-TIME/blob/master/LICENSE) license.
+
+
 ## References
 [^1]: Li, C., Graves, C.E., Sheng, X. et al. Analog content-addressable memories with memristors. Nat Commun 11, 1638 (2020). https://doi.org/10.1038/s41467-020-15254-4
 [^2]: Pedretti, G., Graves, C.E., Serebryakov, S. et al. Tree-based machine learning performed in-memory with memristive analog CAM. Nat Commun 12, 5806 (2021). https://doi.org/10.1038/s41467-021-25873-0
