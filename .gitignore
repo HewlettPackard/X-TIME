@@ -1,0 +1,62 @@
+# Ignore Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache folders for pytests
+.pytest_cache/
+
+# Editors, OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+#MLflow runs
+mlruns/
+
+# CatBoost, serialized models etc.
+catboost_info/
+*.bin
+*.pkl
+model.txt
+run_context.yaml
+
+# cycle_accurate folder
+## autogen.sh
+cycle_accurate/src/libltdl/
+cycle_accurate/autom4te.cache/
+cycle_accurate/config/*
+!cycle_accurate/config/sst_core_check_install.m4
+cycle_accurate/*.m4
+cycle_accurate/configure
+cycle_accurate/Makefile.in
+
+## run_config.sh
+cycle_accurate/src/sst_xtime_config.h
+cycle_accurate/src/sst_xtime_config.h.in
+cycle_accurate/src/stamp-h1
+cycle_accurate/Makefile
+cycle_accurate/libtool
+cycle_accurate/*.log
+cycle_accurate/*.status
+
+## make install
+cycle_accurate/lib/
+cycle_accurate/.libs/
+cycle_accurate/.deps/
+cycle_accurate/*.la
+cycle_accurate/*.lo
+cycle_accurate/*.inc
+
+## run code
+cycle_accurate/tests/__pycache__/
+cycle_accurate/log/
+cycle_accurate/data/**/*.dat
+cycle_accurate/docs/
+
+compiler/notebooks/dac23_variability_xgb.ipynb
+compiler/notebooks/master_notebook_single_task.ipynb
