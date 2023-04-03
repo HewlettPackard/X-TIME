@@ -17,6 +17,8 @@ The [training](./training) Python-based subproject implements scripts to train m
 optimize their hyperparameters. The documentation provides details on what datasets and machine learning models 
 are available out of the box and how to train new models.
 
+## Compiling machine learning models for the X-TIME architecture
+The [compiler](./compiler) Python-based subproject implements scripts to compiler pre-trained machine learning models (currently supporting sklearn, XGBoost and CatBoost) in a format accepted by the cycle accurate simulator, and currently support all models trained with the [training](./training) subproject. 
 
 ## Contributing to XTIME
 Thank you for your interest in contributing to XTIME! If you have found a bug or want to ask a question or discuss a 
@@ -47,7 +49,6 @@ Signed-off-by: First Second <email>
 XTIME is licensed under [Apache 2.0](https://github.com/HewlettPackard/X-TIME/blob/master/LICENSE) license.
 
 
-## References
 [^1]: Li, C., Graves, C.E., Sheng, X. et al. Analog content-addressable memories with memristors. Nat Commun 11, 1638 (2020). https://doi.org/10.1038/s41467-020-15254-4
 [^2]: Pedretti, G., Graves, C.E., Serebryakov, S. et al. Tree-based machine learning performed in-memory with memristive analog CAM. Nat Commun 12, 5806 (2021). https://doi.org/10.1038/s41467-021-25873-0
 [^3]: Pedretti, G., Moon, J., Bruel, P. et al. X-TIME: An in-memory engine for accelerating machine learning on tabular data with CAMs
