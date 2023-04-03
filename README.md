@@ -1,6 +1,7 @@
 # X-TIME: An in-memory engine for accelerating machine learning on tabular data with CAMs
 
-X-TIME is a simualtor framework for tree based machine learning (ML) accelerator based on analog content addressable memories (CAM). 
+## Introduction
+X-TIME is a simulator framework for tree based machine learning (ML) accelerator based on analog content addressable memories (CAM). 
 
 At Hewlett Packard Labs we recently developed analog CAMs based on memristors[^1]. Compared to traditional CAM that can store values, the analog CAM stores a range returning a match if the analog input is within the stored range. We demonstrated that analog CAM can map and accelerate decision trees, resulting in tremendous speedup comparaed to other accelerators thank to the massively parallel threshold look-up operation[^2].
 
@@ -11,6 +12,13 @@ Abstract: "Structured, or tabular, data is the most common format in data scienc
 contact: [giacomo.pedretti@hpe.com](giacomo.pedretti@hpe.com)
 
 
+## Training machine learning models
+The [training](./training) Python-based subproject implements scripts to train machine learning models and
+optimize their hyperparameters. The documentation provides details on what datasets and machine learning models 
+are available out of the box and how to train new models.
+
+
+## References
 [^1]: Li, C., Graves, C.E., Sheng, X. et al. Analog content-addressable memories with memristors. Nat Commun 11, 1638 (2020). https://doi.org/10.1038/s41467-020-15254-4
 [^2]: Pedretti, G., Graves, C.E., Serebryakov, S. et al. Tree-based machine learning performed in-memory with memristive analog CAM. Nat Commun 12, 5806 (2021). https://doi.org/10.1038/s41467-021-25873-0
 [^3]: Pedretti, G., Moon, J., Bruel, P. et al. X-TIME: An in-memory engine for accelerating machine learning on tabular data with CAMs

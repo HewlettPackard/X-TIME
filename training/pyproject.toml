@@ -1,0 +1,21 @@
+[tool.black]
+# python -m black --config pyproject.toml ./xtime ./tests
+line-length = 120
+skip-magic-trailing-comma = true
+
+
+[tool.isort]
+# python -m isort ./xtime ./tests
+profile = "black"
+
+
+[tool.flake8]
+max-line-length = 120
+
+
+[tool.pytest.ini_options]
+markers = [
+    "datasets: marks tests as ML datasets unit tests (deselect with '-m \"not datasets\"')",
+    "estimators: marks tests as ML models unit tests (deselect with '-m \"not models\"')",
+    "cli: marks tests as Command Line Interface (CLI) unit tests (deselect with '-m \"not cli\"')"
+]

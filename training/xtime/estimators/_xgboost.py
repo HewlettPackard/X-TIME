@@ -1,0 +1,96 @@
+###
+# Copyright (2023) Hewlett Packard Enterprise Development LP
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# You may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+###
+
+import copy
+import typing as t
+from pathlib import Path
+
+import xgboost as xgb
+
+from xtime.contrib.tune_ext import gpu_available
+from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
+from xtime.ml import TaskType
+
+from .estimator import Estimator
+
+
+class XGBoostEstimator(Estimator):
+    """
+    Categorical data:
+        https://xgboost.readthedocs.io/en/stable/tutorials/categorical.html
+        Supported tree methods are `gpu_hist`, `approx`, and `hist` (e.g., tree_method="hist")
+    """
+
+    NAME = "xgboost"
+
+    OBJECTIVES: t.Dict[TaskType, str] = {
+        # Logistic Regression for binary classification, output probability.
+        TaskType.BINARY_CLASSIFICATION: "binary:logistic",
+        TaskType.MULTI_CLASS_CLASSIFICATION: "multi:softproba",
+        TaskType.REGRESSION: "reg:squarederror",
+    }
+
+    EVAL_METRICS: t.Dict[TaskType, t.List[str]] = {
+        # `error`: 1.0 - accuracy, `log_Loss`: negative log likelihood
+        TaskType.BINARY_CLASSIFICATION: ["error", "logloss"],
+        # `merror`: 1.0 - accuracy, `mlogloss`: cross entropy loss
+        TaskType.MULTI_CLASS_CLASSIFICATION: ["merror", "mlogloss"],
+        TaskType.REGRESSION: ["rmse"],
+    }
+
+    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+        super().__init__()
+        params = copy.deepcopy(params)
+        params.update(
+            {
+                "objective": XGBoostEstimator.OBJECTIVES[dataset_metadata.task.type],
+                "enable_categorical": dataset_metadata.has_categorical_features(),
+                # The selection of these metrics does not affect objective. We use these to score the progress
+                # guided by the objective. In particular, the last metric is used for early stopping.
+                "eval_metric": XGBoostEstimator.EVAL_METRICS[dataset_metadata.task.type],
+            }
+        )
+        if gpu_available():
+            params.update({"gpu_id": 0, "tree_method": "gpu_hist"})
+
+        self.params = params
+        self.model: xgb.XGBModel = self.make_model(dataset_metadata, xgb.XGBClassifier, xgb.XGBRegressor, params)
+
+    def save_model(self, save_dir: Path) -> None:
+        self.model.save_model(save_dir / "model.ubj")
+
+    def fit_model(self, dataset: Dataset, **kwargs) -> None:
+        # Early stopping is active only when at least one dataset split is present in `eval_set`. Early stopping
+        # will be determined using last dataset split in `eval_set` and last metric in `eval_metric`. Generally, it
+        # is recommended to use 10% of `n_estimators` parameter.
+        # Actual number of trees can differ from `clf.n_estimators`. Total number of trees will be
+        # clf.best_ntree_limit + early_stopping_rounds (predict will use best_ntree_limit to use the best model).
+        # The `clf.best_iteration` will point to the best iteration (clf.best_ntree_limit - 1).
+        kwargs = copy.deepcopy(kwargs)
+        if "early_stopping_rounds" not in kwargs:
+            kwargs["early_stopping_rounds"] = 15
+            if "n_estimators" in self.params:
+                kwargs["early_stopping_rounds"] = max(15, int(0.1 * self.params["n_estimators"]))
+
+        train_split = dataset.split(DatasetSplit.TRAIN)
+        eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+
+        kwargs.update(
+            #         validation_0                    validation_1
+            eval_set=[(train_split.x, train_split.y), (eval_split.x, eval_split.y)],
+            verbose=kwargs.get("verbose", False),
+        )
+        self.model.fit(train_split.x, train_split.y, **kwargs)
