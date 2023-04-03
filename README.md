@@ -18,6 +18,31 @@ optimize their hyperparameters. The documentation provides details on what datas
 are available out of the box and how to train new models.
 
 
+## Contributing to XTIME
+Thank you for your interest in contributing to XTIME! If you have found a bug or want to ask a question or discuss a 
+new feature (such as adding support for new datasets or ML models), please open an 
+[issue](https://github.com/HewlettPackard/X-TIME/issues).
+Once a new feature has been implemented and tested, or a bug has been fixed, please submit a 
+[pull](https://github.com/HewlettPackard/X-TIME/pulls) request.
+
+- `Python`. Some of the subprojects provide unit tests. Make sure they run. It's also a good idea to provide unit tests
+  along with new features. We generally follow [PEP-8](https://peps.python.org/pep-0008/) programming guidelines. 
+  Development environments such as PyCharm and VSCode can help you follow these guidelines. Some subprojects (example 
+  [pyproject.toml](https://github.com/HewlettPackard/X-TIME/blob/main/training/pyproject.toml) file) provide
+  configurations for tools such as 
+  [isort](https://pycqa.github.io/isort/), 
+  [black](https://black.readthedocs.io/en/stable/) and 
+  [flake8](https://flake8.pycqa.org/en/latest/). 
+  Please make sure to run these tools before submitting a pull request.
+
+In order for us to accept your pull request, you will need to `sign-off` your commit. 
+This [page](https://wiki.linuxfoundation.org/dco) contains more information about it. In short, please add the 
+following line at the end of your commit message:
+```text
+Signed-off-by: First Second <email>
+```
+
+
 ## License
 XTIME is licensed under [Apache 2.0](https://github.com/HewlettPackard/X-TIME/blob/master/LICENSE) license.
 
