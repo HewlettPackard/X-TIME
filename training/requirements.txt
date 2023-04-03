@@ -1,0 +1,19 @@
+scikit-learn == 1.2.2         # core dependency
+catboost == 1.1.1             # optional
+lightgbm == 3.3.5             # optional
+xgboost == 1.7.5              # optional
+
+openml == 0.13.1              # core dependency
+
+mlflow == 2.2.2               # core dependency
+ray [tune,default] == 2.3.1   # core dependency
+
+numpy == 1.23.5               # core dependency
+pandas == 1.5.3               # core dependency (need to fix the code to work with pandas 2.0.0)
+
+pyaml == 21.10.1              # core dependency
+requests == 2.28.2            # core dependency
+
+tinydb == 4.7.1               # core dependency
+
+prettytable == 3.6.0          # command line interface
