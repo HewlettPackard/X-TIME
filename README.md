@@ -20,6 +20,9 @@ are available out of the box and how to train new models.
 ## Compiling machine learning models for the X-TIME architecture
 The [compiler](./compiler) Python-based subproject implements scripts to compiler pre-trained machine learning models (currently supporting sklearn, XGBoost and CatBoost) in a format accepted by the cycle accurate simulator, and currently support all models trained with the [training](./training) subproject. 
 
+## Running functional and cycle-accurate simulation
+The [cycle_accurate](./cycle_accurate) subproject implements C++ scripts to build functional blocks and Python scripts to create X-TIME architecture and run the cycle-accurate simulation. In addition to the functional verification of the simulated system, it evaluates the performance (accruacy, latency, throughput, energy efficiency, area, utilization) of the system.
+
 ## Contributing to XTIME
 Thank you for your interest in contributing to XTIME! If you have found a bug or want to ask a question or discuss a 
 new feature (such as adding support for new datasets or ML models), please open an 
