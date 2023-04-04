@@ -1,0 +1,40 @@
+{
+    "tree" : {
+        "numPortControl" : {
+            "type"  : "choice",
+            "value" : [1, 4, 16]
+        },
+        "numPort" : {
+            "type"  : "constant",
+            "value" : 4
+        },
+        "numLevel" : {
+            "type"  : "range",
+            "min"   : 2,
+            "max"   : 5,
+            "step"  : 1
+        },
+        "mappingCore" : {
+            "type"  : "choice",
+            "value" : ["numTreePerCore"]
+        }
+    },
+    "acam" : {
+        "acamQueue" : {
+            "type"  : "constant",
+            "value" : 2
+        },
+        "acamStack" : {
+            "type"  : "constant",
+            "value" : 1
+        },
+        "acamCol" : {
+            "type"  : "constant",
+            "value" : 16
+        },
+        "acamRow" : {
+            "type"  : "constant",
+            "value" : 256
+        }
+    }
+}

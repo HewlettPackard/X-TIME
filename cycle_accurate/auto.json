@@ -1,0 +1,150 @@
+{
+    "linkLatency" : {
+        "Control-Demux" : 0,
+        "Demux-Core" : 0,
+        "Core-Accumulator" : 0,
+        "Accumulator-Control" : 0,
+        "Demux-Demux" : 0,
+        "Accumulator-Accumulator" : 0,
+    
+        "Driver-Acam(EN)" : 1,
+        "Driver-Acam(DL)" : 1,
+        "Acam-Mmr" : 1,
+        "Mmr-Memory" : 1,
+        "Memory-Adder" : 1,
+        "Acam-Acam" : 1
+    },
+
+    "tree" : {
+        "numPortControl" : 16,
+        "numPort" : 4,
+        "numLevel" : 4,
+        "mappingCore" : "numTreePerCore",
+        "mappingNoc" : "numCoreClass",
+        "numCoreClass" : 256,
+        "numCoreBatch" : 1280,
+        "numTreePerCore" : 2,
+        "numTreePerCoreCol" : 1,
+        "sizeBus" : 32
+    },
+
+    "bus" : {
+        "numPortControl" : 4,
+        "numPort" : 4,
+        "numLevel" : 4,
+        "mappingCore" : "numTreePerCore",
+        "mappingNoc" : "numCoreClass",
+        "numCoreClass" : 512,
+        "numCoreBatch" : 256,
+        "numTreePerCore" : 1,
+        "numTreePerCoreCol" : 1,
+        "sizeBus" : 32
+    },
+
+    "booster" : {
+        "numPortControl" : 256,
+        "numPort" : 16,
+        "numLevel" : 1,
+        "mappingCore" : "numTreePerCore",
+        "mappingNoc" : "numCoreClass",
+        "numCoreClass" : 379,
+        "numCoreBatch" : 256,
+        "numTreePerCore" : 1,
+        "numTreePerCoreCol" : 1,
+        "sizeBus" : 512
+    },
+
+    "area" : {
+        "array" : 1.0e-6,
+        "finger" : 1.0e-6,
+        "mirror" : 1.0e-6,
+        "gate" : 1.0e-6,
+        "FF" : 1.0e-6,
+        "sram" : 1.0e-6,
+        "adder" : 1.0e-6,
+        "demux" : 1.0e-6
+    },
+
+    "control" : {
+        "latency" : 1,
+        "freq" : "1GHz"
+    },
+
+    "demux" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.reg" : 1.0e-6,
+        "power.demux" : 1.0e-6
+    },
+
+    "driver" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.reg" : 1.0e-6
+    },
+
+    "acam" : {
+        "latency" : 4,
+        "freq" : "1GHz",
+        "acamQueue" : 2,
+        "acamStack" : 1,
+        "acamCol" : 16,
+        "acamRow" : 256,
+
+        "gBit" : 4,
+        "gMax" : 3.3e-6,
+        "gMin" : 1e-6,
+        "gHRS" : 1e-8,
+        "power.Cml" : 1.0e-15,
+        "power.Cpre" : 1.0e-15,
+        "power.Cmlso" : 1.0e-15,
+        "power.Cdl" : 1.0e-15,
+        "power.Rw" : 1.0,
+        "power.K1" : 1.0e-6,
+        "power.Vth" : 1.0e-3,
+        "power.Vml" : 1.0,
+        "power.Vns" : 0.0,
+        "power.Vsl" : 1.0,
+        "power.Vdd" : 1.0,
+        "power.Tclk" : 1.0e-9,
+
+        "power.dac" : 1.0e-6,
+        "power.sa" : 1.0e-6,
+        "power.pc" : 1.0e-6,
+        "power.reg.static" : 1.0e-7,
+        "power.reg.dynamic" : 1.0e-6
+    },
+
+    "mmr" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.mmr" : 1.0e-6
+    },
+
+    "memory" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.memory" : 1.0e-6
+    },
+
+    "adder" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.adder" : 1.0e-6
+    },
+
+    "accumulator" : {
+        "latency" : 1,
+        "freq" : "1GHz",
+        "power.reg" : 1.0e-6,
+        "power.accumulator" : 1.0e-6
+    },
+
+    "mpe" : {
+        "latency" : 1,
+        "freq" : "1GHz"
+    }
+}
+
+
+
