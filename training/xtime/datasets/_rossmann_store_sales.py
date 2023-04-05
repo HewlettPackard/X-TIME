@@ -61,7 +61,7 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
         train["StateHoliday"].replace(0, "n", inplace=True)
 
         # Convert Date column (e.g., 2015-07-31) into three integer columns - year, month and day
-        train[["Year", "Month", "Day"]] = train["Date"].str.split("-", 3, expand=True).astype(int)
+        train[["Year", "Month", "Day"]] = train["Date"].str.split(pat="-", n=3, expand=True).astype(int)
         train.drop(["Date"], axis=1, inplace=True)
 
         # Join with store table
