@@ -13,5 +13,24 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+from pathlib import Path
+from unittest import TestCase
 
-from xtime.datasets.dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
+from xtime.contrib.unittest_ext import with_temp_work_dir
+from xtime.datasets.dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit, build_dataset
+
+
+class TestDataset(TestCase):
+    @with_temp_work_dir
+    def test_save_load(self) -> None:
+        ds: Dataset = build_dataset("churn_modelling:default")
+        self.assertEqual(ds.metadata.name, "churn_modelling")
+        self.assertEqual(ds.metadata.version, "default")
+
+        ds.save(Path.cwd())
+        loaded_ds: Dataset = Dataset.load(Path.cwd())
+
+        self.assertDictEqual(ds.metadata.to_json(), loaded_ds.metadata.to_json())
+        self.assertEqual(sorted(list(ds.splits.keys())), sorted(list(loaded_ds.splits.keys())))
+
+        # TODO: add unit tests for features and targets
