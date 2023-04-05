@@ -17,7 +17,6 @@
 import abc
 import copy
 import os
-import shutil
 import typing as t
 from pathlib import Path
 from unittest import TestCase
@@ -34,14 +33,7 @@ from xtime.ml import METRICS, Task
 from xtime.registry import ClassRegistry
 from xtime.run import Context, Metadata, RunType
 
-__all__ = [
-    "Estimator",
-    "get_estimator_registry",
-    "get_estimator",
-    "unit_test_train_model",
-    "unit_test_check_metrics",
-    "unit_test_tear_down_steps",
-]
+__all__ = ["Estimator", "get_estimator_registry", "get_estimator", "unit_test_train_model", "unit_test_check_metrics"]
 
 
 class Callback(object):
@@ -282,13 +274,3 @@ def unit_test_check_metrics(test_case: TestCase, task: Task, metrics: t.Dict) ->
         test_case.assertIn(metric, metrics)
         test_case.assertIsInstance(metrics[metric], float)
         test_case.assertTrue(metrics[metric] >= 0)
-
-
-def unit_test_tear_down_steps(test_dir: Path) -> None:
-    """Remove all files and directories created by estimators during training."""
-    for directory in ["catboost_info"]:
-        if (test_dir / directory).exists():
-            shutil.rmtree(test_dir / directory)
-    for file in ["data_info.yaml", "exec_info.yaml", "model.bin", "test_info.yaml", "model.txt", "model.ubj"]:
-        if (test_dir / file).exists():
-            (test_dir / file).unlink()
