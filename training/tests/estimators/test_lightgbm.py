@@ -13,24 +13,21 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
 import typing as t
-from pathlib import Path
 from unittest import TestCase
 
 import pytest
 
+from xtime.contrib.unittest_ext import with_temp_work_dir
 from xtime.datasets import Dataset, build_dataset
 from xtime.estimators._lightgbm import LightGBMClassifierEstimator
-from xtime.estimators.estimator import unit_test_check_metrics, unit_test_tear_down_steps, unit_test_train_model
+from xtime.estimators.estimator import unit_test_check_metrics, unit_test_train_model
 
 pytestmark = pytest.mark.estimators
 
 
 class TestXGBoost(TestCase):
-    def tearDown(self) -> None:
-        unit_test_tear_down_steps(test_dir=Path(__name__).parent)
-
+    @with_temp_work_dir
     def test_churn_modelling_numerical(self) -> None:
         ds: Dataset = build_dataset("churn_modelling:numerical")
         self.assertIsInstance(ds, Dataset)
@@ -38,6 +35,7 @@ class TestXGBoost(TestCase):
         metrics: t.Dict = unit_test_train_model(self, "lightgbm", LightGBMClassifierEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
 
+    @with_temp_work_dir
     def test_year_prediction_msd_default(self) -> None:
         ds: Dataset = build_dataset("year_prediction_msd:default")
         self.assertIsInstance(ds, Dataset)
