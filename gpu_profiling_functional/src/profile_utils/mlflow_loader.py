@@ -1,3 +1,19 @@
+#
+#  Copyright (2023) Hewlett Packard Enterprise Development LP
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  You may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
 import json
 import os
 import sys
@@ -37,7 +53,7 @@ def _load_yaml(file_path: t.Union[str, Path]) -> t.Any:
     """
     with open(file_path, 'r') as stream:
         return yaml.load(stream, Loader=yaml.SafeLoader)
-    
+
 def _get_best_run_info(uri: str, use_numerical: bool = True) -> t.Dict:
     """
     Prerequisites:
@@ -65,10 +81,10 @@ def _get_best_run_info(uri: str, use_numerical: bool = True) -> t.Dict:
     experiment = tune.ExperimentAnalysis((artifact_path / 'ray_tune').as_posix())
     # We need to retrieve the task for this run in order to identify the target metric.
     dataset_info = _load_yaml(artifact_path / 'dataset_info.yaml')
-    
+
     perf_metric = 'valid_mse' if dataset_info['Dataset']['task'] == 'REGRESSION' else 'valid_loss_mean'
     accuracy = 'test_mse' if dataset_info['Dataset']['task'] == 'REGRESSION' else 'test_accuracy'
-    
+
     # Get the best Ray Tune trial that minimizes given metric
     best_trial: Trial = experiment.get_best_trial(perf_metric, mode='min')
     # Create return object
@@ -76,10 +92,10 @@ def _get_best_run_info(uri: str, use_numerical: bool = True) -> t.Dict:
     models = dict(
         xgboost='model.ubj', light_gbm_clf='model.txt', catboost='model.bin', rf_clf='model.pkl', rf='model.pkl'
     )
-    
+
     succeeded_trials: pd.DataFrame = experiment.results_df[experiment.results_df[perf_metric].notna()]
-    
-    if use_numerical == True:    
+
+    if use_numerical == True:
         X_test_path = "/opt/mlflow/datasets/numerical/"
     elif model in ["rf_clf"]:
         X_test_path = "/opt/mlflow/datasets/rf/"
@@ -87,7 +103,7 @@ def _get_best_run_info(uri: str, use_numerical: bool = True) -> t.Dict:
         X_test_path = "/opt/mlflow/datasets/numerical/"
     else:
         X_test_path = "/opt/mlflow/datasets/gb/"
-            
+
     best_run_info = {
         # Local path to ray tune trial directory
         'trial_path': best_trial.logdir,
@@ -122,23 +138,23 @@ def _get_best_run_info(uri: str, use_numerical: bool = True) -> t.Dict:
 def load_dataset(model_info: t.Dict) -> t.Union[pd.DataFrame, xgboost.DMatrix]:
     with open(model_info['X_test_path'], "rb") as X_test_file:
         X_test = pickle.load(X_test_file)
-        
+
     if model_info["model"] == "xgboost":
         return xgboost.DMatrix(X_test["x"])
     else:
         return X_test["x"]
-    
+
 def load_dataset_from_str(dataset_path: str, model_type: str, batch_size: int) -> t.Union[pd.DataFrame, xgboost.DMatrix]:
     with open(dataset_path, "rb") as X_test_file:
         X_test = pickle.load(X_test_file)
-        
+
     X_test = X_test["x"]
-    
+
     # With replacement
     selected = np.random.choice(X_test.shape[0], batch_size)
-    
+
     X_test = X_test.iloc[selected, :]
-    
+
     if model_type == "xgboost":
         return xgboost.DMatrix(X_test.apply(pd.to_numeric))
     else:
@@ -148,70 +164,70 @@ def load_model_from_str(model_path: str, model_type: str):
     if model_type == "xgboost":
         model = xgboost.Booster(model_file = model_path)
         model.set_param({'predictor': 'gpu_predictor'})
-        
+
     elif model_type == "catboost":
         catboost_clf = catboost.CatBoostClassifier()
         model = catboost_clf.load_model(model_path)
-    
+
     elif model_type == "light_gbm_clf":
         model = lightgbm.Booster(model_file = model_path)
-        
+
     elif model_type in ["rf_clf", "rf"]:
         with open(model_path, "rb") as model_file:
             rf_model = pickle.load(model_file)
-            
+
         model = cuml.ForestInference.load_from_sklearn(rf_model)
     else:
         raise ValueError(f"Unknown model type \"{model_type}\"")
-        
+
     return model
 
 def load_model(model_info: t.Dict) -> t.Dict:
     print(f"Loading model of type {model_info['model']}, dataset {model_info['dataset']}")
-    
+
     if model_info["model"] == "xgboost":
         model = xgboost.Booster(model_file = model_info["model_path"])
         tree_df = model.trees_to_dataframe()
-        
+
         model_info["n_trees"] = np.max(tree_df["Tree"]) + 1
         model_info["max_leaves"] = np.max(tree_df[tree_df["Feature"] == "Leaf"].groupby("Tree")["Feature"].count())
-        
+
     elif model_info["model"] == "catboost":
         if model_info["task"] == "REGRESSION":
             catboost_clf = catboost.CatBoostClassifier()
         else:
             catboost_clf = catboost.CatBoostRegressor()
-            
+
         model = catboost_clf.load_model(model_info["model_path"])
-        
+
         if model_info["num_classes"] != 0:
             model_info["n_trees"] = model.tree_count_ * model_info["num_classes"]
         else:
             model_info["n_trees"] = model.tree_count_
-            
+
         model_info["max_leaves"] = np.max([len(model._get_tree_leaf_values(t)) for t in range(model.tree_count_)])
-    
+
     elif model_info["model"] == "light_gbm_clf":
         model = lightgbm.Booster(model_file = model_info["model_path"])
         tree_df = model.trees_to_dataframe()
-        
+
         model_info["n_trees"] = np.max(tree_df["tree_index"])
         model_info["max_leaves"] = np.max(tree_df[tree_df.decision_type.isnull()].groupby("tree_index").node_depth.count())
-        
+
     elif model_info["model"] in ["rf_clf", "rf"]:
         with open(model_info["model_path"], "rb") as model_file:
             model = pickle.load(model_file)
-            
+
         if model_info["num_classes"] > 2:
             model_info["n_trees"] = model.n_estimators * model_info["num_classes"]
         else:
             model_info["n_trees"] = model.n_estimators
-            
+
         model_info["max_leaves"] = np.max([estimator.get_n_leaves() for estimator in model.estimators_])
-        
+
     else:
         raise ValueError(f"Unknown model type \"{model_info['model']}\"")
-        
+
     model_info["trained_model"] = model
-        
+
     return model_info

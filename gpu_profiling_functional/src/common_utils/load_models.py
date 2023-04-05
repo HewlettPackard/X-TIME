@@ -1,3 +1,19 @@
+#
+#  Copyright (2023) Hewlett Packard Enterprise Development LP
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  You may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
 import os
 import sys
 
@@ -34,7 +50,7 @@ def _load_yaml(file_path: t.Union[str, Path]) -> t.Any:
     """
     with open(file_path, 'r') as stream:
         return yaml.load(stream, Loader=yaml.SafeLoader)
-    
+
 def get_best_run_info(uri: str) -> t.Dict:
     """
     Prerequisites:
@@ -71,9 +87,9 @@ def get_best_run_info(uri: str) -> t.Dict:
     models = dict(
         xgboost='model.ubj', light_gbm_clf='model.txt', catboost='model.bin', rf_clf='model.pkl'
     )
-    
+
     succeeded_trials: pd.DataFrame = experiment.results_df[experiment.results_df[perf_metric].notna()]
-    
+
     best_run_info = {
         # Local path to ray tune trial directory
         'trial_path': best_trial.logdir,
@@ -101,44 +117,44 @@ def get_best_run_info(uri: str) -> t.Dict:
 
 def load_model(model_info: t.Dict) -> t.Dict:
     print(f"Loading model of type {model_info['model']}, dataset {model_info['dataset']}")
-    
+
     if model_info["model"] == "xgboost":
         model = xgboost.Booster(model_file = model_info["model_path"])
         tree_df = model.trees_to_dataframe()
-        
+
         model_info["n_trees"] = np.max(tree_df["Tree"]) + 1
         model_info["max_leaves"] = np.max(tree_df[tree_df["Feature"] == "Leaf"].groupby("Tree")["Feature"].count())
-        
+
     elif model_info["model"] == "catboost":
         catboost_clf = catboost.CatBoostClassifier()
         model = catboost_clf.load_model(model_info["model_path"])
-        
+
         if model_info["num_classes"] > 2:
             model_info["n_trees"] = model.tree_count_ * model_info["num_classes"]
         else:
             model_info["n_trees"] = model.tree_count_ * model_info["num_classes"]
-            
+
         model_info["max_leaves"] = np.max([len(model._get_tree_leaf_values(t)) for t in range(model.tree_count_)])
-    
+
     elif model_info["model"] == "light_gbm_clf":
         model = lightgbm.Booster(model_file = model_info["model_path"])
         tree_df = model.trees_to_dataframe()
-        
+
         model_info["n_trees"] = np.max(tree_df["tree_index"])
         model_info["max_leaves"] = np.max(tree_df[tree_df.decision_type.isnull()].groupby("tree_index").node_depth.count())
-        
+
     elif model_info["model"] == "rf_clf":
         with open(model_info["model_path"], "rb") as model_file:
             model = pickle.load(model_file)
-            
+
         if model_info["num_classes"] > 2:
             model_info["n_trees"] = model.n_estimators * model_info["num_classes"]
         else:
             model_info["n_trees"] = model.n_estimators
-            
+
         model_info["max_leaves"] = np.max([estimator.get_n_leaves() for estimator in model.estimators_])
-        
+
     else:
         raise ValueError(f"Unknown model type \"{model_info['model']}\"")
-        
+
     return model

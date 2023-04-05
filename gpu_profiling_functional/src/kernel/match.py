@@ -1,3 +1,19 @@
+#
+#  Copyright (2023) Hewlett Packard Enterprise Development LP
+#
+#  Licensed under the Apache License, Version 2.0 (the "License");
+#  You may not use this file except in compliance with the License.
+#  You may obtain a copy of the License at
+#
+#  http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#  See the License for the specific language governing permissions and
+#  limitations under the License.
+#
+
 import numpy as np
 from math import sqrt
 
@@ -21,15 +37,15 @@ cuda_match = kernel.get_function(CUDA_kernel)
 def match(cam_input, cam_table, leaves):
     input_matrix = cam_input.flatten(order = "C").astype(np.float32)
     cam_table_matrix = cam_table.flatten(order = "C").astype(np.float32)
-    
+
     output_vector = np.zeros(cam_input.shape[0]).astype(np.float32)
     leaves_vector = leaves.flatten(order = "C").astype(np.float32)
-    
+
     features = cam_input.shape[1]
 
     max_block_size = 1024
     total_threads_needed = cam_input.shape[0] * cam_table.shape[0]
-    
+
     optimal_thread_layout = (int(cam_input.shape[0]),
                              int(cam_table.shape[0]),
                              int(1))
