@@ -12,7 +12,7 @@ conda env create --name xtime-training --file environment.yml
 conda activate xtime-training
 
 # Optionally, install EDA and DEV dependencies
-pip install -r ./requirements-eda.txt ./requirements-dev.txt
+pip install -r ./requirements-eda.txt -r ./requirements-dev.txt
 ```
 
 I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
