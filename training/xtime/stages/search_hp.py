@@ -32,7 +32,7 @@ from ray.tune.search.hyperopt import HyperOptSearch
 import xtime.hparams as hp
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.contrib.tune_ext import Analysis, RayTuneDriverToMLflowLoggerCallback
-from xtime.datasets import Dataset
+from xtime.datasets import Dataset, build_dataset
 from xtime.estimators import Estimator, get_estimator
 from xtime.hparams import HParamsSource, get_hparams
 from xtime.io import IO, encode
@@ -64,8 +64,8 @@ def search_hp(
         artifact_path: Path = MLflow.get_artifact_path(active_run)
         run_id: str = active_run.info.run_id
 
-        ctx = Context(Metadata(dataset=dataset, model=model, run_type=RunType.HPO))
-        Dataset.load(ctx, save_info_dir=artifact_path)
+        ctx = Context(Metadata(dataset=dataset, model=model, run_type=RunType.HPO), dataset=build_dataset(dataset))
+        IO.save_yaml(ctx.dataset.metadata.to_json(), artifact_path / "dataset_info.yaml")
         _set_tags(
             dataset=dataset,
             model=model,

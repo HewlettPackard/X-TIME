@@ -147,11 +147,16 @@ class Dataset:
         return info
 
     def save(self, directory: t.Optional[t.Union[str, Path]] = None) -> None:
+        """Save dataset to disk.
+
+        Args:
+            directory: Directory where to save the dataset.
+        """
         import pickle
 
         from xtime.io import IO
 
-        directory = Path(directory or Path.cwd().as_posix()) / (self.metadata.name + "_" + self.metadata.version)
+        directory = Path(directory or Path.cwd().as_posix())
         directory.mkdir(parents=True, exist_ok=True)
 
         def _save_split(_ds: DatasetSplit, _split_name: str) -> None:
@@ -167,21 +172,25 @@ class Dataset:
             _save_split(split, name)
         IO.save_yaml(self.metadata.to_json(), directory / "metadata.yaml")
 
-    @staticmethod
-    def load(ctx: "Context", save_info_dir: t.Optional[Path] = None) -> None:
-        """Load datasets and save their information to `dataset_info.yaml` file.
+    @classmethod
+    def load(cls, directory: t.Union[str, Path]) -> "Dataset":
+        """Load dataset from disk.
 
-        Loaded dataset object (Dataset) will be available under the `dataset` key in `context`. Any existing dataset
-        will be replaced / reloaded with the new one.
         Args:
-            ctx: Dataclass containing context parameters.
-            save_info_dir: Path to directory where dataset information file will be serialized.
-
-        TODO: remove thus function.
+            directory: Directory where dataset is stored.
         """
-        ctx.dataset = build_dataset(ctx.metadata.dataset)
-        if save_info_dir is not None:
-            IO.save_yaml(ctx.dataset.metadata.to_json(), save_info_dir / "dataset_info.yaml")
+        import pickle
+
+        if not (directory / "metadata.yaml").is_file():
+            raise FileNotFoundError(f"Can't locate dataset in '{directory}' directory.")
+
+        ds = Dataset(metadata=DatasetMetadata.from_json(IO.load_yaml(directory / "metadata.yaml")))
+        for file_name in directory.glob("*.pickle"):
+            split_name = file_name.stem
+            with open(file_name, "rb") as file:
+                data = pickle.load(file)
+                ds.splits[split_name] = DatasetSplit(x=data["x"], y=data["y"])
+        return ds
 
 
 class DatasetBuilder(object):
