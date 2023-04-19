@@ -15,7 +15,7 @@
 ###
 
 from xtime.stages.search_hp import (
-    _get_metrics,
+    _get_metrics_for_best_trial,
     _init_search_algorithm,
     _save_best_trial_info,
     _save_summary,
