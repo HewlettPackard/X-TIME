@@ -23,7 +23,15 @@ from unittest import TestCase
 
 import mlflow
 import numpy as np
-from sklearn.metrics import accuracy_score, log_loss, mean_squared_error
+from sklearn.metrics import (
+    accuracy_score,
+    f1_score,
+    log_loss,
+    mean_squared_error,
+    precision_score,
+    recall_score,
+    roc_auc_score,
+)
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
@@ -179,10 +187,17 @@ class Estimator(object):
 
         def _evaluate(x, y, name: str) -> None:
             nonlocal _num_examples
-            probs = self.model.predict_proba(x)
-            metrics[f"{name}_accuracy"] = accuracy_score(y, np.argmax(probs, axis=1))
-            metrics[f"{name}_loss_mean"] = log_loss(y, probs, normalize=True)
-            metrics[f"{name}_loss_total"] = metrics["train_loss_mean"] * len(y)
+            predicted_probas = self.model.predict_proba(x)  # (n_samples, 2)
+            predicted_labels = np.argmax(predicted_probas, axis=1)  # (n_samples,)
+            metrics[f"{name}_accuracy"] = float(accuracy_score(y, predicted_labels))
+            metrics[f"{name}_loss_mean"] = float(log_loss(y, predicted_probas, normalize=True))
+            metrics[f"{name}_loss_total"] = float(metrics["train_loss_mean"] * len(y))
+
+            if dataset.metadata.task.num_classes == 2:
+                metrics[f"{name}_auc"] = float(roc_auc_score(y, predicted_probas[:, 1]))  # clas-1 probabilities
+                metrics[f"{name}_f1"] = float(f1_score(y, predicted_labels))
+                metrics[f"{name}_precision"] = float(precision_score(y, predicted_labels))
+                metrics[f"{name}_recall"] = float(recall_score(y, predicted_labels))
 
             _num_examples += len(y)
             metrics["dataset_loss_total"] += metrics[f"{name}_loss_total"]
