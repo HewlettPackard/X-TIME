@@ -81,7 +81,7 @@ class MLflowCallback(Callback):
         MLflow.set_tags(task=dataset.metadata.task)
 
     def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
-        mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task]})
+        mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task.type]})
 
 
 class TrainCallback(Callback):
