@@ -32,7 +32,7 @@ from ray.tune.search.hyperopt import HyperOptSearch
 import xtime.hparams as hp
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.contrib.tune_ext import Analysis, RayTuneDriverToMLflowLoggerCallback
-from xtime.datasets import Dataset, build_dataset
+from xtime.datasets import build_dataset
 from xtime.estimators import Estimator, get_estimator
 from xtime.hparams import HParamsSource, get_hparams
 from xtime.io import IO, encode
@@ -97,9 +97,9 @@ def search_hp(
         results: ResultGrid = tuner.fit()
 
         _set_run_status(results)
-        metrics: t.Dict = _get_metrics(results, ctx)
-        mlflow.log_metrics(metrics)
-        _save_best_trial_info(results, artifact_path, metrics, active_run)
+        best_trial_metrics: t.Dict = _get_metrics_for_best_trial(results, ctx)
+        MLflow.log_metrics(best_trial_metrics)
+        _save_best_trial_info(results, artifact_path, best_trial_metrics, active_run)
         _save_summary(artifact_path, active_run)
         print(f"MLFlow run URI: mlflow:///{active_run.info.run_id}")
     ray.shutdown()
@@ -139,7 +139,7 @@ def _set_run_status(results: ResultGrid) -> None:
         mlflow.set_tag("status", "PARTIALLY_COMPLETED")
 
 
-def _get_metrics(results: ResultGrid, ctx: Context) -> t.Dict:
+def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
     """Return dictionary that maps a metric name to its value for this task.
 
     Returns:
@@ -147,7 +147,10 @@ def _get_metrics(results: ResultGrid, ctx: Context) -> t.Dict:
             for classification tasks it will include metrics such as `dataset_accuracy`, `train_accuracy` etc.
     """
     best_result: Result = results.get_best_result()
-    metrics = {name: float(best_result.metrics[name]) for name in METRICS[ctx.dataset.metadata.task.type]}
+    metrics: t.Dict = copy.deepcopy(best_result.metrics or {})
+    missing_metrics: t.Set = {m for m in METRICS[ctx.dataset.metadata.task.type] if m not in metrics}
+    if missing_metrics:
+        print(f"[WARNING] Missing metrics in the best trial: {missing_metrics}. Program may crash.")
     return metrics
 
 
