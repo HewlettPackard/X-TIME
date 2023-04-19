@@ -172,3 +172,27 @@ class MLflow(object):
             run: MLflow run to initialize. If none, currently active run will be used.
         """
         _ = MLflow.get_artifact_path(run, ensure_exists=True)
+
+    @staticmethod
+    def log_metrics(metrics: t.Dict[str, t.Any]) -> None:
+        """Log metrics with current MLflow run ignoring some metrics and checking for MLflow exceptions.
+
+        This function logs metrics with current MLflow run. These metrics can come from different platforms, such as
+        Ray Tune. Certain metrics are ignored. Only metrics with certain value types are logged. MLflow exceptions
+        are caught on a per-metric basis and are ignored.
+
+        Args:
+            metrics: Dictionary with metrics from frameworks such as Ray Tune.
+        """
+        # Some metrics produced by Ray Tune we are not interested in.
+        _metrics_to_ignore = {
+            "timesteps_total", "time_this_iter_s", "timesteps_total", "episodes_total", "training_iteration",
+            "timestamp", "time_total_s", "pid", "time_since_restore", "timesteps_since_restore",
+            "iterations_since_restore", "warmup_time"
+        }
+        for name, value in metrics.items():
+            try:
+                if isinstance(value, (int, float)) and name not in _metrics_to_ignore:
+                    mlflow.log_metric(name, value)
+            except mlflow.MlflowException:
+                continue
