@@ -126,18 +126,18 @@ def get_hparams(source: t.Optional[HParamsSource] = None, ctx: t.Optional[Contex
                 hp = {}
             else:
                 from tinydb import Query
-
                 from xtime.hparams.recommender import DefaultRecommender
 
-                print(ctx.metadata.model, ctx.dataset.metadata.task)
-                q = Query()
-                q = q.tags.model == ctx.metadata.model and q.tags.tasks.any([ctx.dataset.metadata.task.type.value])
+                query = Query()
+                query = (query.tags.model == ctx.metadata.model)
+                if ctx.dataset and ctx.dataset.metadata.task:
+                    query = query & Query().tags.tasks.any([ctx.dataset.metadata.task.type.value])
                 recommender = DefaultRecommender()
 
                 if ctx.metadata.run_type == RunType.TRAIN:
-                    recommendations: t.List[t.Dict] = recommender.recommend_default_values(q)
+                    recommendations: t.List[t.Dict] = recommender.recommend_default_values(query)
                 elif ctx.metadata.run_type == RunType.HPO:
-                    recommendations: t.List[t.Dict] = recommender.recommend_search_space(q)
+                    recommendations: t.List[t.Dict] = recommender.recommend_search_space(query)
                 else:
                     raise ValueError(f"Unknown run_type={ctx.metadata.run_type}")
 
