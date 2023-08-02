@@ -17,3 +17,5 @@ requests == 2.28.2            # core dependency
 tinydb == 4.7.1               # core dependency
 
 prettytable == 3.6.0          # command line interface
+
+pydantic < 2                  # indirect dependency (why here: https://github.com/aws/aws-sdk-pandas/issues/2379)
