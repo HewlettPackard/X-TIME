@@ -1,9 +1,11 @@
 [tool.poetry]
 name = "campie"
-version = "0.3.0"
+version = "0.3.1"
 description = "Python APIs to simulate various CAMs on GPUs at scale"
 readme = "README.md"
 authors = []
+repository = "https://github.com/HewlettPackard/X-TIME"
+homepage = "https://github.com/HewlettPackard/X-TIME/tree/main/campie"
 packages = [{ include = "campie" }]
 
 [tool.poetry.dependencies]
