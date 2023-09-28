@@ -1,0 +1,1761 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wave_config>
+   <wave_state>
+   </wave_state>
+   <db_ref_list>
+      <db_ref path="xilinx_u250_gen3x16_xdma_4_1_202210_1-0-vadd.link.wdb" id="1">
+         <top_modules>
+            <top_module name="\$unit_alt_counter_sv_1499725063 " />
+            <top_module name="\$unit_bd_d216_ddr4_mem00_0_stub_sv_669500447 " />
+            <top_module name="\$unit_bd_d216_ddr4_mem01_0_stub_sv_831232903 " />
+            <top_module name="\$unit_bd_d216_interconnect_DDR4_MEM00_0_stub_sv " />
+            <top_module name="\$unit_bd_d216_interconnect_DDR4_MEM01_0_stub_sv " />
+            <top_module name="\$unit_bd_d216_interconnect_M00_AXI_MEM00_0_stub_sv_2487316693 " />
+            <top_module name="\$unit_bd_d216_interconnect_S04_AXI_0_stub_sv " />
+            <top_module name="\$unit_pfm_dynamic_irq_const_tieoff_0_stub_sv_2145154316 " />
+            <top_module name="\$unit_pfm_dynamic_profile_vip_0_0_stub_sv " />
+            <top_module name="\$unit_pfm_dynamic_smartconn_data_0_0_stub_sv " />
+            <top_module name="\$unit_pfm_top_embedded_schedular_0_stub_sv_2172676908 " />
+            <top_module name="\$unit_pfm_top_sim_ddr_0_0_stub_sv_2018382472 " />
+            <top_module name="glbl" />
+            <top_module name="ipif_pkg" />
+            <top_module name="pfm_top_wrapper" />
+         </top_modules>
+      </db_ref>
+   </db_ref_list>
+   <zoom_setting>
+      <ZoomStartTime time="227,480.448 ns"></ZoomStartTime>
+      <ZoomEndTime time="227,500.499 ns"></ZoomEndTime>
+      <Cursor1Time time="227,487.155 ns"></Cursor1Time>
+   </zoom_setting>
+   <column_width_setting>
+      <NameColumnWidth column_width="588"></NameColumnWidth>
+      <ValueColumnWidth column_width="287"></ValueColumnWidth>
+   </column_width_setting>
+   <WVObjectSize size="13" />
+   <wave_markers>
+      <marker label="" time="145374069" />
+   </wave_markers>
+   <wvobject type="group" fp_name="HLS_Process_Summary_group">
+      <obj_property name="label">HLS Process Summary</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="device_group">
+      <obj_property name="label">Device &quot;xilinx_u250_gen3x16_xdma_4_1_202210_1-0&quot;</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="group" fp_name="bin_group">
+         <obj_property name="label">Binary Container &quot;vadd.link&quot;</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+         <wvobject type="group" fp_name="kernel_group">
+            <obj_property name="label">Kernel &quot;krnl_vadd_rtl&quot; 1:1:1</obj_property>
+            <obj_property name="DisplayName">label</obj_property>
+            <obj_property name="isExpanded"></obj_property>
+            <wvobject type="group" fp_name="cu_group">
+               <obj_property name="label">Compute Unit: krnl_vadd_rtl_1</obj_property>
+               <obj_property name="DisplayName">label</obj_property>
+               <obj_property name="isExpanded"></obj_property>
+               <obj_property name="Description_Data">Activity for compute unit krnl_vadd_rtl_1</obj_property>
+               <obj_property name="EnumTransactionColorTable">1=blank</obj_property>
+               <obj_property name="EnumTransactionValueTable">1=blank;0=Running</obj_property>
+               <obj_property name="CustomSignalColor">#4DB34D</obj_property>
+               <obj_property name="WaveformStyle">STYLE_ENUM_TRANSACTION</obj_property>
+               <obj_property name="UseCustomSignalColor">true</obj_property>
+               <obj_property name="Render_Data">/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/ap_idle</obj_property>
+               <wvobject type="group" fp_name="trans_group">
+                  <obj_property name="label">Data Transfers</obj_property>
+                  <obj_property name="DisplayName">label</obj_property>
+                  <obj_property name="isExpanded"></obj_property>
+                  <wvobject type="protoinst" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/m_axi_gmem">
+                     <obj_property name="ElementShortName">m_axi_gmem</obj_property>
+                     <obj_property name="ObjectShortName">m_axi_gmem</obj_property>
+                  </wvobject>
+               </wvobject>
+            </wvobject>
+         </wvobject>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="HLS_FIFO_group">
+      <obj_property name="label">HLS FIFO</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+   </wvobject>
+   <wvobject type="group" fp_name="group303">
+      <obj_property name="label">axi_write_master_old</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aw_transactions_to_go">
+         <obj_property name="ElementShortName">aw_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">aw_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aw_final_transaction">
+         <obj_property name="ElementShortName">aw_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">aw_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wxfers_to_go">
+         <obj_property name="ElementShortName">wxfers_to_go[5:0]</obj_property>
+         <obj_property name="ObjectShortName">wxfers_to_go[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_transactions_to_go">
+         <obj_property name="ElementShortName">w_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">w_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_start">
+         <obj_property name="ElementShortName">ctrl_start</obj_property>
+         <obj_property name="ObjectShortName">ctrl_start</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_done">
+         <obj_property name="ElementShortName">ctrl_done</obj_property>
+         <obj_property name="ObjectShortName">ctrl_done</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/start">
+         <obj_property name="ElementShortName">start</obj_property>
+         <obj_property name="ObjectShortName">start</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/num_transactions">
+         <obj_property name="ElementShortName">num_transactions[19:0]</obj_property>
+         <obj_property name="ObjectShortName">num_transactions[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/final_burst_len">
+         <obj_property name="ElementShortName">final_burst_len[5:0]</obj_property>
+         <obj_property name="ObjectShortName">final_burst_len[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/single_transaction">
+         <obj_property name="ElementShortName">single_transaction</obj_property>
+         <obj_property name="ObjectShortName">single_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aclk">
+         <obj_property name="ElementShortName">aclk</obj_property>
+         <obj_property name="ObjectShortName">aclk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/areset">
+         <obj_property name="ElementShortName">areset</obj_property>
+         <obj_property name="ObjectShortName">areset</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wxfer">
+         <obj_property name="ElementShortName">wxfer</obj_property>
+         <obj_property name="ObjectShortName">wxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst">
+         <obj_property name="ElementShortName">wfirst</obj_property>
+         <obj_property name="ObjectShortName">wfirst</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/load_burst_cntr">
+         <obj_property name="ElementShortName">load_burst_cntr</obj_property>
+         <obj_property name="ObjectShortName">load_burst_cntr</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_final_transaction">
+         <obj_property name="ElementShortName">w_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">w_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_almost_final_transaction">
+         <obj_property name="ElementShortName">w_almost_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">w_almost_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/awxfer">
+         <obj_property name="ElementShortName">awxfer</obj_property>
+         <obj_property name="ObjectShortName">awxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/awvalid_r">
+         <obj_property name="ElementShortName">awvalid_r</obj_property>
+         <obj_property name="ObjectShortName">awvalid_r</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/addr">
+         <obj_property name="ElementShortName">addr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">addr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst_d1">
+         <obj_property name="ElementShortName">wfirst_d1</obj_property>
+         <obj_property name="ObjectShortName">wfirst_d1</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst_pulse">
+         <obj_property name="ElementShortName">wfirst_pulse</obj_property>
+         <obj_property name="ObjectShortName">wfirst_pulse</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/dbg_w_to_aw_outstanding">
+         <obj_property name="ElementShortName">dbg_w_to_aw_outstanding[7:0]</obj_property>
+         <obj_property name="ObjectShortName">dbg_w_to_aw_outstanding[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/idle_aw">
+         <obj_property name="ElementShortName">idle_aw</obj_property>
+         <obj_property name="ObjectShortName">idle_aw</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/bxfer">
+         <obj_property name="ElementShortName">bxfer</obj_property>
+         <obj_property name="ObjectShortName">bxfer</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/b_transactions_to_go">
+         <obj_property name="ElementShortName">b_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">b_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/b_final_transaction">
+         <obj_property name="ElementShortName">b_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">b_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_LOG_MAX_W_TO_AW">
+         <obj_property name="ElementShortName">LP_LOG_MAX_W_TO_AW[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_LOG_MAX_W_TO_AW[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_TRANSACTION_CNTR_WIDTH">
+         <obj_property name="ElementShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group416">
+      <obj_property name="label">others</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aclk">
+         <obj_property name="ElementShortName">aclk</obj_property>
+         <obj_property name="ObjectShortName">aclk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_done">
+         <obj_property name="ElementShortName">ctrl_done</obj_property>
+         <obj_property name="ObjectShortName">ctrl_done</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wxfers_to_go">
+         <obj_property name="ElementShortName">wxfers_to_go[5:0]</obj_property>
+         <obj_property name="ObjectShortName">wxfers_to_go[5:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_transactions_to_go">
+         <obj_property name="ElementShortName">w_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">w_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/bxfer">
+         <obj_property name="ElementShortName">bxfer</obj_property>
+         <obj_property name="ObjectShortName">bxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/b_final_transaction">
+         <obj_property name="ElementShortName">b_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">b_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="vbus" fp_name="vbus916">
+         <obj_property name="label">m_axis_tdata[31:0]</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group586">
+      <obj_property name="label">axi_write_master_new</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aclk">
+         <obj_property name="ElementShortName">aclk</obj_property>
+         <obj_property name="ObjectShortName">aclk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/areset">
+         <obj_property name="ElementShortName">areset</obj_property>
+         <obj_property name="ObjectShortName">areset</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_start">
+         <obj_property name="ElementShortName">ctrl_start</obj_property>
+         <obj_property name="ObjectShortName">ctrl_start</obj_property>
+         <obj_property name="CustomSignalColor">#FFA500</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_done">
+         <obj_property name="ElementShortName">ctrl_done</obj_property>
+         <obj_property name="ObjectShortName">ctrl_done</obj_property>
+         <obj_property name="CustomSignalColor">#FFA500</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_addr_offset">
+         <obj_property name="ElementShortName">ctrl_addr_offset[63:0]</obj_property>
+         <obj_property name="ObjectShortName">ctrl_addr_offset[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_xfer_size_in_bytes">
+         <obj_property name="ElementShortName">ctrl_xfer_size_in_bytes[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ctrl_xfer_size_in_bytes[31:0]</obj_property>
+         <obj_property name="Radix">UNSIGNEDDECRADIX</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_awvalid">
+         <obj_property name="ElementShortName">m_axi_awvalid</obj_property>
+         <obj_property name="ObjectShortName">m_axi_awvalid</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_awready">
+         <obj_property name="ElementShortName">m_axi_awready</obj_property>
+         <obj_property name="ObjectShortName">m_axi_awready</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_awaddr">
+         <obj_property name="ElementShortName">m_axi_awaddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">m_axi_awaddr[63:0]</obj_property>
+         <obj_property name="CustomSignalColor">#00FFFF</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_awlen">
+         <obj_property name="ElementShortName">m_axi_awlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">m_axi_awlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wvalid">
+         <obj_property name="ElementShortName">m_axi_wvalid</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wvalid</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wready">
+         <obj_property name="ElementShortName">m_axi_wready</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wready</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="vbus" fp_name="vbus1646">
+         <obj_property name="label">m_axi_wdata</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[15]">
+            <obj_property name="ElementShortName">[15]</obj_property>
+            <obj_property name="ObjectShortName">[15]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[14]">
+            <obj_property name="ElementShortName">[14]</obj_property>
+            <obj_property name="ObjectShortName">[14]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[13]">
+            <obj_property name="ElementShortName">[13]</obj_property>
+            <obj_property name="ObjectShortName">[13]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[12]">
+            <obj_property name="ElementShortName">[12]</obj_property>
+            <obj_property name="ObjectShortName">[12]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[11]">
+            <obj_property name="ElementShortName">[11]</obj_property>
+            <obj_property name="ObjectShortName">[11]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[10]">
+            <obj_property name="ElementShortName">[10]</obj_property>
+            <obj_property name="ObjectShortName">[10]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[9]">
+            <obj_property name="ElementShortName">[9]</obj_property>
+            <obj_property name="ObjectShortName">[9]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[8]">
+            <obj_property name="ElementShortName">[8]</obj_property>
+            <obj_property name="ObjectShortName">[8]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[7]">
+            <obj_property name="ElementShortName">[7]</obj_property>
+            <obj_property name="ObjectShortName">[7]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[6]">
+            <obj_property name="ElementShortName">[6]</obj_property>
+            <obj_property name="ObjectShortName">[6]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[5]">
+            <obj_property name="ElementShortName">[5]</obj_property>
+            <obj_property name="ObjectShortName">[5]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[4]">
+            <obj_property name="ElementShortName">[4]</obj_property>
+            <obj_property name="ObjectShortName">[4]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[3]">
+            <obj_property name="ElementShortName">[3]</obj_property>
+            <obj_property name="ObjectShortName">[3]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[2]">
+            <obj_property name="ElementShortName">[2]</obj_property>
+            <obj_property name="ObjectShortName">[2]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[1]">
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">[1]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata[0]">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">[0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wdata">
+         <obj_property name="ElementShortName">m_axi_wdata[511:0]</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wdata[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wstrb">
+         <obj_property name="ElementShortName">m_axi_wstrb[63:0]</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wstrb[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wlast">
+         <obj_property name="ElementShortName">m_axi_wlast</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wlast</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_bvalid">
+         <obj_property name="ElementShortName">m_axi_bvalid</obj_property>
+         <obj_property name="ObjectShortName">m_axi_bvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_bready">
+         <obj_property name="ElementShortName">m_axi_bready</obj_property>
+         <obj_property name="ObjectShortName">m_axi_bready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_aclk">
+         <obj_property name="ElementShortName">s_axis_aclk</obj_property>
+         <obj_property name="ObjectShortName">s_axis_aclk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_areset">
+         <obj_property name="ElementShortName">s_axis_areset</obj_property>
+         <obj_property name="ObjectShortName">s_axis_areset</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tvalid">
+         <obj_property name="ElementShortName">s_axis_tvalid</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tvalid</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tready">
+         <obj_property name="ElementShortName">s_axis_tready</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tready</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="vbus" fp_name="vbus1116">
+         <obj_property name="label">s_axis_tdata</obj_property>
+         <obj_property name="DisplayName">label</obj_property>
+         <obj_property name="CustomSignalColor">#FFD700</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[15]">
+            <obj_property name="ElementShortName">[15]</obj_property>
+            <obj_property name="ObjectShortName">[15]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[14]">
+            <obj_property name="ElementShortName">[14]</obj_property>
+            <obj_property name="ObjectShortName">[14]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[13]">
+            <obj_property name="ElementShortName">[13]</obj_property>
+            <obj_property name="ObjectShortName">[13]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[12]">
+            <obj_property name="ElementShortName">[12]</obj_property>
+            <obj_property name="ObjectShortName">[12]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[11]">
+            <obj_property name="ElementShortName">[11]</obj_property>
+            <obj_property name="ObjectShortName">[11]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[10]">
+            <obj_property name="ElementShortName">[10]</obj_property>
+            <obj_property name="ObjectShortName">[10]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[9]">
+            <obj_property name="ElementShortName">[9]</obj_property>
+            <obj_property name="ObjectShortName">[9]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[8]">
+            <obj_property name="ElementShortName">[8]</obj_property>
+            <obj_property name="ObjectShortName">[8]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[7]">
+            <obj_property name="ElementShortName">[7]</obj_property>
+            <obj_property name="ObjectShortName">[7]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[6]">
+            <obj_property name="ElementShortName">[6]</obj_property>
+            <obj_property name="ObjectShortName">[6]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[5]">
+            <obj_property name="ElementShortName">[5]</obj_property>
+            <obj_property name="ObjectShortName">[5]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[4]">
+            <obj_property name="ElementShortName">[4]</obj_property>
+            <obj_property name="ObjectShortName">[4]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[3]">
+            <obj_property name="ElementShortName">[3]</obj_property>
+            <obj_property name="ObjectShortName">[3]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[2]">
+            <obj_property name="ElementShortName">[2]</obj_property>
+            <obj_property name="ObjectShortName">[2]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[1]">
+            <obj_property name="ElementShortName">[1]</obj_property>
+            <obj_property name="ObjectShortName">[1]</obj_property>
+         </wvobject>
+         <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata[0]">
+            <obj_property name="ElementShortName">[0]</obj_property>
+            <obj_property name="ObjectShortName">[0]</obj_property>
+         </wvobject>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tdata">
+         <obj_property name="ElementShortName">s_axis_tdata[511:0]</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tdata[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/done">
+         <obj_property name="ElementShortName">done</obj_property>
+         <obj_property name="ObjectShortName">done</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/has_partial_bursts">
+         <obj_property name="ElementShortName">has_partial_bursts</obj_property>
+         <obj_property name="ObjectShortName">has_partial_bursts</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/ctrl_start_d1">
+         <obj_property name="ElementShortName">ctrl_start_d1</obj_property>
+         <obj_property name="ObjectShortName">ctrl_start_d1</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/addr_offset_r">
+         <obj_property name="ElementShortName">addr_offset_r[63:0]</obj_property>
+         <obj_property name="ObjectShortName">addr_offset_r[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/total_len_r">
+         <obj_property name="ElementShortName">total_len_r[25:0]</obj_property>
+         <obj_property name="ObjectShortName">total_len_r[25:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/byte_remainder_r">
+         <obj_property name="ElementShortName">byte_remainder_r[5:0]</obj_property>
+         <obj_property name="ObjectShortName">byte_remainder_r[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/final_strb">
+         <obj_property name="ElementShortName">final_strb[63:0]</obj_property>
+         <obj_property name="ObjectShortName">final_strb[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/start">
+         <obj_property name="ElementShortName">start</obj_property>
+         <obj_property name="ObjectShortName">start</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/start_d1">
+         <obj_property name="ElementShortName">start_d1</obj_property>
+         <obj_property name="ObjectShortName">start_d1</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/num_transactions">
+         <obj_property name="ElementShortName">num_transactions[19:0]</obj_property>
+         <obj_property name="ObjectShortName">num_transactions[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/final_burst_len">
+         <obj_property name="ElementShortName">final_burst_len[5:0]</obj_property>
+         <obj_property name="ObjectShortName">final_burst_len[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/single_transaction">
+         <obj_property name="ElementShortName">single_transaction</obj_property>
+         <obj_property name="ObjectShortName">single_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/s_axis_tready_n">
+         <obj_property name="ElementShortName">s_axis_tready_n</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tready_n</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/m_axi_wvalid_i">
+         <obj_property name="ElementShortName">m_axi_wvalid_i</obj_property>
+         <obj_property name="ObjectShortName">m_axi_wvalid_i</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wxfer">
+         <obj_property name="ElementShortName">wxfer</obj_property>
+         <obj_property name="ObjectShortName">wxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst">
+         <obj_property name="ElementShortName">wfirst</obj_property>
+         <obj_property name="ObjectShortName">wfirst</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/load_burst_cntr">
+         <obj_property name="ElementShortName">load_burst_cntr</obj_property>
+         <obj_property name="ObjectShortName">load_burst_cntr</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wxfers_to_go">
+         <obj_property name="ElementShortName">wxfers_to_go[5:0]</obj_property>
+         <obj_property name="ObjectShortName">wxfers_to_go[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_transactions_to_go">
+         <obj_property name="ElementShortName">w_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">w_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_final_transaction">
+         <obj_property name="ElementShortName">w_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">w_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_final_transfer">
+         <obj_property name="ElementShortName">w_final_transfer</obj_property>
+         <obj_property name="ObjectShortName">w_final_transfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_almost_final_transaction">
+         <obj_property name="ElementShortName">w_almost_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">w_almost_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/w_running">
+         <obj_property name="ElementShortName">w_running</obj_property>
+         <obj_property name="ObjectShortName">w_running</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/awxfer">
+         <obj_property name="ElementShortName">awxfer</obj_property>
+         <obj_property name="ObjectShortName">awxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/awvalid_r">
+         <obj_property name="ElementShortName">awvalid_r</obj_property>
+         <obj_property name="ObjectShortName">awvalid_r</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/addr">
+         <obj_property name="ElementShortName">addr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">addr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst_d1">
+         <obj_property name="ElementShortName">wfirst_d1</obj_property>
+         <obj_property name="ObjectShortName">wfirst_d1</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/wfirst_pulse">
+         <obj_property name="ElementShortName">wfirst_pulse</obj_property>
+         <obj_property name="ObjectShortName">wfirst_pulse</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/dbg_w_to_aw_outstanding">
+         <obj_property name="ElementShortName">dbg_w_to_aw_outstanding[7:0]</obj_property>
+         <obj_property name="ObjectShortName">dbg_w_to_aw_outstanding[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/idle_aw">
+         <obj_property name="ElementShortName">idle_aw</obj_property>
+         <obj_property name="ObjectShortName">idle_aw</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aw_transactions_to_go">
+         <obj_property name="ElementShortName">aw_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">aw_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/aw_final_transaction">
+         <obj_property name="ElementShortName">aw_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">aw_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/bxfer">
+         <obj_property name="ElementShortName">bxfer</obj_property>
+         <obj_property name="ObjectShortName">bxfer</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/b_transactions_to_go">
+         <obj_property name="ElementShortName">b_transactions_to_go[19:0]</obj_property>
+         <obj_property name="ObjectShortName">b_transactions_to_go[19:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/b_final_transaction">
+         <obj_property name="ElementShortName">b_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">b_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/stall_aw">
+         <obj_property name="ElementShortName">stall_aw</obj_property>
+         <obj_property name="ObjectShortName">stall_aw</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/awsize">
+         <obj_property name="ElementShortName">awsize[2:0]</obj_property>
+         <obj_property name="ObjectShortName">awsize[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/outstanding_vacancy_count">
+         <obj_property name="ElementShortName">outstanding_vacancy_count[5:0]</obj_property>
+         <obj_property name="ObjectShortName">outstanding_vacancy_count[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/C_M_AXI_ADDR_WIDTH">
+         <obj_property name="ElementShortName">C_M_AXI_ADDR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_M_AXI_ADDR_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/C_M_AXI_DATA_WIDTH">
+         <obj_property name="ElementShortName">C_M_AXI_DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_M_AXI_DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/C_XFER_SIZE_WIDTH">
+         <obj_property name="ElementShortName">C_XFER_SIZE_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_XFER_SIZE_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/C_MAX_OUTSTANDING">
+         <obj_property name="ElementShortName">C_MAX_OUTSTANDING[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_MAX_OUTSTANDING[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/C_INCLUDE_DATA_FIFO">
+         <obj_property name="ElementShortName">C_INCLUDE_DATA_FIFO[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_INCLUDE_DATA_FIFO[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_DW_BYTES">
+         <obj_property name="ElementShortName">LP_DW_BYTES[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_DW_BYTES[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_LOG_DW_BYTES">
+         <obj_property name="ElementShortName">LP_LOG_DW_BYTES[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_LOG_DW_BYTES[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_MAX_BURST_LENGTH">
+         <obj_property name="ElementShortName">LP_MAX_BURST_LENGTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_MAX_BURST_LENGTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_MAX_BURST_BYTES">
+         <obj_property name="ElementShortName">LP_MAX_BURST_BYTES[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_MAX_BURST_BYTES[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_AXI_BURST_LEN">
+         <obj_property name="ElementShortName">LP_AXI_BURST_LEN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_AXI_BURST_LEN[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_LOG_BURST_LEN">
+         <obj_property name="ElementShortName">LP_LOG_BURST_LEN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_LOG_BURST_LEN[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_LOG_MAX_W_TO_AW">
+         <obj_property name="ElementShortName">LP_LOG_MAX_W_TO_AW[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_LOG_MAX_W_TO_AW[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_TOTAL_LEN_WIDTH">
+         <obj_property name="ElementShortName">LP_TOTAL_LEN_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_TOTAL_LEN_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_TRANSACTION_CNTR_WIDTH">
+         <obj_property name="ElementShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_ADDR_MASK">
+         <obj_property name="ElementShortName">LP_ADDR_MASK[63:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_ADDR_MASK[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_FIFO_DEPTH">
+         <obj_property name="ElementShortName">LP_FIFO_DEPTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_FIFO_DEPTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_FIFO_READ_LATENCY">
+         <obj_property name="ElementShortName">LP_FIFO_READ_LATENCY[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_FIFO_READ_LATENCY[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_FIFO_COUNT_WIDTH">
+         <obj_property name="ElementShortName">LP_FIFO_COUNT_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_FIFO_COUNT_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_write_master/LP_OUTSTANDING_CNTR_WIDTH">
+         <obj_property name="ElementShortName">LP_OUTSTANDING_CNTR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_OUTSTANDING_CNTR_WIDTH[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group445">
+      <obj_property name="label">multi_core_axi_io_helper</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tvalid">
+         <obj_property name="ElementShortName">s_axis_tvalid</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tready">
+         <obj_property name="ElementShortName">s_axis_tready</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tdata">
+         <obj_property name="ElementShortName">s_axis_tdata[511:0]</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tdata[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/m_axis_tvalid">
+         <obj_property name="ElementShortName">m_axis_tvalid</obj_property>
+         <obj_property name="ObjectShortName">m_axis_tvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/m_axis_tready">
+         <obj_property name="ElementShortName">m_axis_tready</obj_property>
+         <obj_property name="ObjectShortName">m_axis_tready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/m_axis_tdata">
+         <obj_property name="ElementShortName">m_axis_tdata[511:0]</obj_property>
+         <obj_property name="ObjectShortName">m_axis_tdata[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/clause">
+         <obj_property name="ElementShortName">clause[2:0]</obj_property>
+         <obj_property name="ObjectShortName">clause[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/variable">
+         <obj_property name="ElementShortName">variable[3:0]</obj_property>
+         <obj_property name="ObjectShortName">variable[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/threshold_kind">
+         <obj_property name="ElementShortName">threshold_kind</obj_property>
+         <obj_property name="ObjectShortName">threshold_kind</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/mode">
+         <obj_property name="ElementShortName">mode[1:0][2:0]</obj_property>
+         <obj_property name="ObjectShortName">mode[1:0][2:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/core_s_axis_ready">
+         <obj_property name="ElementShortName">core_s_axis_ready</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/input_vars">
+         <obj_property name="ElementShortName">input_vars[14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">input_vars[14:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/ml_valid">
+         <obj_property name="ElementShortName">ml_valid</obj_property>
+         <obj_property name="ObjectShortName">ml_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/ml_ready">
+         <obj_property name="ElementShortName">ml_ready</obj_property>
+         <obj_property name="ObjectShortName">ml_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/match_lines">
+         <obj_property name="ElementShortName">match_lines[7:0]</obj_property>
+         <obj_property name="ObjectShortName">match_lines[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/leaf_value">
+         <obj_property name="ElementShortName">leaf_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">leaf_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/tree_id">
+         <obj_property name="ElementShortName">tree_id[21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_id[21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/class_id">
+         <obj_property name="ElementShortName">class_id[9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_id[9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/match_leaves">
+         <obj_property name="ElementShortName">match_leaves[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">match_leaves[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/match_tree_ids">
+         <obj_property name="ElementShortName">match_tree_ids[0:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">match_tree_ids[0:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/match_class_ids">
+         <obj_property name="ElementShortName">match_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">match_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_out_tx">
+         <obj_property name="ElementShortName">num_out_tx[31:0]</obj_property>
+         <obj_property name="ObjectShortName">num_out_tx[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/out_pulse">
+         <obj_property name="ElementShortName">out_pulse</obj_property>
+         <obj_property name="ObjectShortName">out_pulse</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/finished">
+         <obj_property name="ElementShortName">finished</obj_property>
+         <obj_property name="ObjectShortName">finished</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/trig_out">
+         <obj_property name="ElementShortName">trig_out</obj_property>
+         <obj_property name="ObjectShortName">trig_out</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/trig_out_ack">
+         <obj_property name="ElementShortName">trig_out_ack</obj_property>
+         <obj_property name="ObjectShortName">trig_out_ack</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_vars_per_core">
+         <obj_property name="ElementShortName">num_vars_per_core[3:0]</obj_property>
+         <obj_property name="ObjectShortName">num_vars_per_core[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_clauses_per_core">
+         <obj_property name="ElementShortName">num_clauses_per_core[3:0]</obj_property>
+         <obj_property name="ObjectShortName">num_clauses_per_core[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_dc_per_core">
+         <obj_property name="ElementShortName">num_dc_per_core[3:0]</obj_property>
+         <obj_property name="ObjectShortName">num_dc_per_core[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_queries_per_core">
+         <obj_property name="ElementShortName">num_queries_per_core[31:0]</obj_property>
+         <obj_property name="ObjectShortName">num_queries_per_core[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/current_clause">
+         <obj_property name="ElementShortName">current_clause[3:0]</obj_property>
+         <obj_property name="ObjectShortName">current_clause[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/current_dont_care">
+         <obj_property name="ElementShortName">current_dont_care[3:0]</obj_property>
+         <obj_property name="ObjectShortName">current_dont_care[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/current_query">
+         <obj_property name="ElementShortName">current_query[31:0]</obj_property>
+         <obj_property name="ObjectShortName">current_query[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/current_tkind">
+         <obj_property name="ElementShortName">current_tkind</obj_property>
+         <obj_property name="ObjectShortName">current_tkind</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/current_core">
+         <obj_property name="ElementShortName">current_core[0:0]</obj_property>
+         <obj_property name="ObjectShortName">current_core[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/max_core_id">
+         <obj_property name="ElementShortName">max_core_id[0:0]</obj_property>
+         <obj_property name="ObjectShortName">max_core_id[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/num_out_tx_r">
+         <obj_property name="ElementShortName">num_out_tx_r[31:0]</obj_property>
+         <obj_property name="ObjectShortName">num_out_tx_r[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/debug_num_completed_inputs">
+         <obj_property name="ElementShortName">debug_num_completed_inputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_inputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/debug_num_completed_inputs_through_reg">
+         <obj_property name="ElementShortName">debug_num_completed_inputs_through_reg[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_inputs_through_reg[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/debug_num_completed_ml_txs">
+         <obj_property name="ElementShortName">debug_num_completed_ml_txs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_ml_txs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/state">
+         <obj_property name="ElementShortName">state[31:0]</obj_property>
+         <obj_property name="ObjectShortName">state[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/core_s_axis_valid">
+         <obj_property name="ElementShortName">core_s_axis_valid</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/m_axis_tvalid_c">
+         <obj_property name="ElementShortName">m_axis_tvalid_c</obj_property>
+         <obj_property name="ObjectShortName">m_axis_tvalid_c</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/m_axis_tvalid_r">
+         <obj_property name="ElementShortName">m_axis_tvalid_r</obj_property>
+         <obj_property name="ObjectShortName">m_axis_tvalid_r</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/active_leaf_values">
+         <obj_property name="ElementShortName">active_leaf_values</obj_property>
+         <obj_property name="ObjectShortName">active_leaf_values</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/final_match_data">
+         <obj_property name="ElementShortName">final_match_data[511:0]</obj_property>
+         <obj_property name="ObjectShortName">final_match_data[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tvalid_aux">
+         <obj_property name="ElementShortName">s_axis_tvalid_aux</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tvalid_aux</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tready_aux">
+         <obj_property name="ElementShortName">s_axis_tready_aux</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tready_aux</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/s_axis_tdata_aux">
+         <obj_property name="ElementShortName">s_axis_tdata_aux[511:0]</obj_property>
+         <obj_property name="ObjectShortName">s_axis_tdata_aux[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/NUM_MODE_CHANNELS">
+         <obj_property name="ElementShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/NUM_ROUTER_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/NUM_CORES_ID_WIDTH">
+         <obj_property name="ElementShortName">NUM_CORES_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_CORES_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/CLAUSE_ID_WIDTH">
+         <obj_property name="ElementShortName">CLAUSE_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">CLAUSE_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/TIGHT_CLAUSE_ID_WIDTH">
+         <obj_property name="ElementShortName">TIGHT_CLAUSE_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TIGHT_CLAUSE_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/EXPANDED_VAR_ID_WIDTH">
+         <obj_property name="ElementShortName">EXPANDED_VAR_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">EXPANDED_VAR_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/TIGHT_VAR_ID_WIDTH">
+         <obj_property name="ElementShortName">TIGHT_VAR_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TIGHT_VAR_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/MAX_MULT">
+         <obj_property name="ElementShortName">MAX_MULT[31:0]</obj_property>
+         <obj_property name="ObjectShortName">MAX_MULT[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/SINGLE_MATCH_BITS">
+         <obj_property name="ElementShortName">SINGLE_MATCH_BITS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">SINGLE_MATCH_BITS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_axi_io_helper_inst/TOTAL_MATCH_BITS">
+         <obj_property name="ElementShortName">TOTAL_MATCH_BITS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TOTAL_MATCH_BITS[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group348">
+      <obj_property name="label">top_level_router</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /mode">
+         <obj_property name="ElementShortName">mode</obj_property>
+         <obj_property name="ObjectShortName">mode</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /s_leaf_values">
+         <obj_property name="ElementShortName">s_leaf_values[1:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">s_leaf_values[1:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /s_class_ids">
+         <obj_property name="ElementShortName">s_class_ids[1:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">s_class_ids[1:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /s_tree_ids">
+         <obj_property name="ElementShortName">s_tree_ids[1:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">s_tree_ids[1:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /s_ready">
+         <obj_property name="ElementShortName">s_ready</obj_property>
+         <obj_property name="ObjectShortName">s_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /m_valid">
+         <obj_property name="ElementShortName">m_valid</obj_property>
+         <obj_property name="ObjectShortName">m_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /m_ready">
+         <obj_property name="ElementShortName">m_ready</obj_property>
+         <obj_property name="ObjectShortName">m_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /m_leaf_values">
+         <obj_property name="ElementShortName">m_leaf_values[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">m_leaf_values[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /m_class_ids">
+         <obj_property name="ElementShortName">m_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">m_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /partial_accumulation">
+         <obj_property name="ElementShortName">partial_accumulation[1:0][0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">partial_accumulation[1:0][0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /debug_num_completed_inputs">
+         <obj_property name="ElementShortName">debug_num_completed_inputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_inputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /debug_num_completed_outputs">
+         <obj_property name="ElementShortName">debug_num_completed_outputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_outputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /NUM_ROUTER_INPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_INPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_INPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.router_inst /NUM_ROUTER_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group392">
+      <obj_property name="label">cam_solver_0</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /clause">
+         <obj_property name="ElementShortName">clause[2:0]</obj_property>
+         <obj_property name="ObjectShortName">clause[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /variable">
+         <obj_property name="ElementShortName">variable[3:0]</obj_property>
+         <obj_property name="ObjectShortName">variable[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /threshold_kind">
+         <obj_property name="ElementShortName">threshold_kind</obj_property>
+         <obj_property name="ObjectShortName">threshold_kind</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /mode">
+         <obj_property name="ElementShortName">mode[0:0][2:0]</obj_property>
+         <obj_property name="ObjectShortName">mode[0:0][2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /input_vars">
+         <obj_property name="ElementShortName">input_vars[14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">input_vars[14:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /input_leaf_value">
+         <obj_property name="ElementShortName">input_leaf_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">input_leaf_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /tree_id">
+         <obj_property name="ElementShortName">tree_id[21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_id[21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /class_id">
+         <obj_property name="ElementShortName">class_id[9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_id[9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /core_s_axis_ready">
+         <obj_property name="ElementShortName">core_s_axis_ready</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /match_lines">
+         <obj_property name="ElementShortName">match_lines[7:0]</obj_property>
+         <obj_property name="ObjectShortName">match_lines[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /match_leaves">
+         <obj_property name="ElementShortName">match_leaves[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">match_leaves[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /match_tree_ids">
+         <obj_property name="ElementShortName">match_tree_ids[0:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">match_tree_ids[0:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /match_class_ids">
+         <obj_property name="ElementShortName">match_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">match_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /ml_ready">
+         <obj_property name="ElementShortName">ml_ready</obj_property>
+         <obj_property name="ObjectShortName">ml_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /ml_valid">
+         <obj_property name="ElementShortName">ml_valid</obj_property>
+         <obj_property name="ObjectShortName">ml_valid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /TREE_HEIGHT">
+         <obj_property name="ElementShortName">TREE_HEIGHT[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TREE_HEIGHT[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /NUM_ROUTER_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /NUM_MODE_CHANNELS">
+         <obj_property name="ElementShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /HIGHEST_LOW_MODE_CHANNEL">
+         <obj_property name="ElementShortName">HIGHEST_LOW_MODE_CHANNEL[31:0]</obj_property>
+         <obj_property name="ObjectShortName">HIGHEST_LOW_MODE_CHANNEL[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group414">
+      <obj_property name="label">cam_solver_1</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /clause">
+         <obj_property name="ElementShortName">clause[2:0]</obj_property>
+         <obj_property name="ObjectShortName">clause[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /variable">
+         <obj_property name="ElementShortName">variable[3:0]</obj_property>
+         <obj_property name="ObjectShortName">variable[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /threshold_kind">
+         <obj_property name="ElementShortName">threshold_kind</obj_property>
+         <obj_property name="ObjectShortName">threshold_kind</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /mode">
+         <obj_property name="ElementShortName">mode[0:0][2:0]</obj_property>
+         <obj_property name="ObjectShortName">mode[0:0][2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /input_vars">
+         <obj_property name="ElementShortName">input_vars[14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">input_vars[14:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /input_leaf_value">
+         <obj_property name="ElementShortName">input_leaf_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">input_leaf_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /tree_id">
+         <obj_property name="ElementShortName">tree_id[21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_id[21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /class_id">
+         <obj_property name="ElementShortName">class_id[9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_id[9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /core_s_axis_ready">
+         <obj_property name="ElementShortName">core_s_axis_ready</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /match_lines">
+         <obj_property name="ElementShortName">match_lines[7:0]</obj_property>
+         <obj_property name="ObjectShortName">match_lines[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /match_leaves">
+         <obj_property name="ElementShortName">match_leaves[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">match_leaves[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /match_tree_ids">
+         <obj_property name="ElementShortName">match_tree_ids[0:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">match_tree_ids[0:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /match_class_ids">
+         <obj_property name="ElementShortName">match_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">match_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /ml_ready">
+         <obj_property name="ElementShortName">ml_ready</obj_property>
+         <obj_property name="ObjectShortName">ml_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /ml_valid">
+         <obj_property name="ElementShortName">ml_valid</obj_property>
+         <obj_property name="ObjectShortName">ml_valid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /TREE_HEIGHT">
+         <obj_property name="ElementShortName">TREE_HEIGHT[31:0]</obj_property>
+         <obj_property name="ObjectShortName">TREE_HEIGHT[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /NUM_ROUTER_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /NUM_MODE_CHANNELS">
+         <obj_property name="ElementShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_MODE_CHANNELS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_1 /HIGHEST_LOW_MODE_CHANNEL">
+         <obj_property name="ElementShortName">HIGHEST_LOW_MODE_CHANNEL[31:0]</obj_property>
+         <obj_property name="ObjectShortName">HIGHEST_LOW_MODE_CHANNEL[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group443">
+      <obj_property name="label">cam_core_0_0</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <obj_property name="isExpanded"></obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /clause">
+         <obj_property name="ElementShortName">clause[2:0]</obj_property>
+         <obj_property name="ObjectShortName">clause[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /variable">
+         <obj_property name="ElementShortName">variable[3:0]</obj_property>
+         <obj_property name="ObjectShortName">variable[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /threshold_kind">
+         <obj_property name="ElementShortName">threshold_kind</obj_property>
+         <obj_property name="ObjectShortName">threshold_kind</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /mode">
+         <obj_property name="ElementShortName">mode[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mode[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /input_vars">
+         <obj_property name="ElementShortName">input_vars[14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">input_vars[14:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /input_leaf_value">
+         <obj_property name="ElementShortName">input_leaf_value[31:0]</obj_property>
+         <obj_property name="ObjectShortName">input_leaf_value[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /tree_id">
+         <obj_property name="ElementShortName">tree_id[21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_id[21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /class_id">
+         <obj_property name="ElementShortName">class_id[9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_id[9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /core_s_axis_ready">
+         <obj_property name="ElementShortName">core_s_axis_ready</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_lines">
+         <obj_property name="ElementShortName">match_lines[7:0]</obj_property>
+         <obj_property name="ObjectShortName">match_lines[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_leaves">
+         <obj_property name="ElementShortName">match_leaves[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">match_leaves[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_tree_ids">
+         <obj_property name="ElementShortName">match_tree_ids[0:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">match_tree_ids[0:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_class_ids">
+         <obj_property name="ElementShortName">match_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">match_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /ml_ready">
+         <obj_property name="ElementShortName">ml_ready</obj_property>
+         <obj_property name="ObjectShortName">ml_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /ml_valid">
+         <obj_property name="ElementShortName">ml_valid</obj_property>
+         <obj_property name="ObjectShortName">ml_valid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /lower_thresholds">
+         <obj_property name="ElementShortName">lower_thresholds[7:0][14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">lower_thresholds[7:0][14:0][3:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /higher_thresholds">
+         <obj_property name="ElementShortName">higher_thresholds[7:0][14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">higher_thresholds[7:0][14:0][3:0]</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /leaf_values">
+         <obj_property name="ElementShortName">leaf_values[7:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">leaf_values[7:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /tree_ids">
+         <obj_property name="ElementShortName">tree_ids[7:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_ids[7:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /class_ids">
+         <obj_property name="ElementShortName">class_ids[7:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_ids[7:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /rst_1">
+         <obj_property name="ElementShortName">rst_1</obj_property>
+         <obj_property name="ObjectShortName">rst_1</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /rst_2">
+         <obj_property name="ElementShortName">rst_2</obj_property>
+         <obj_property name="ObjectShortName">rst_2</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /rst_3">
+         <obj_property name="ElementShortName">rst_3</obj_property>
+         <obj_property name="ObjectShortName">rst_3</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_bits">
+         <obj_property name="ElementShortName">match_bits[7:0][14:0]</obj_property>
+         <obj_property name="ObjectShortName">match_bits[7:0][14:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_bits_low">
+         <obj_property name="ElementShortName">match_bits_low[7:0][14:0]</obj_property>
+         <obj_property name="ObjectShortName">match_bits_low[7:0][14:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_bits_high">
+         <obj_property name="ElementShortName">match_bits_high[7:0][14:0]</obj_property>
+         <obj_property name="ObjectShortName">match_bits_high[7:0][14:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /match_lines_aux">
+         <obj_property name="ElementShortName">match_lines_aux[7:0]</obj_property>
+         <obj_property name="ObjectShortName">match_lines_aux[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /mode_aux">
+         <obj_property name="ElementShortName">mode_aux[2:0]</obj_property>
+         <obj_property name="ObjectShortName">mode_aux[2:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /mode_valid_aux">
+         <obj_property name="ElementShortName">mode_valid_aux</obj_property>
+         <obj_property name="ObjectShortName">mode_valid_aux</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /clause_aux">
+         <obj_property name="ElementShortName">clause_aux[2:0]</obj_property>
+         <obj_property name="ObjectShortName">clause_aux[2:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /core_s_axis_ready_aux">
+         <obj_property name="ElementShortName">core_s_axis_ready_aux</obj_property>
+         <obj_property name="ObjectShortName">core_s_axis_ready_aux</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /passthrough">
+         <obj_property name="ElementShortName">passthrough</obj_property>
+         <obj_property name="ObjectShortName">passthrough</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /input_vars_aux">
+         <obj_property name="ElementShortName">input_vars_aux[14:0][3:0]</obj_property>
+         <obj_property name="ObjectShortName">input_vars_aux[14:0][3:0]</obj_property>
+         <obj_property name="CustomSignalColor">#FFFF00</obj_property>
+         <obj_property name="UseCustomSignalColor">true</obj_property>
+         <obj_property name="isExpanded"></obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /flattened_input_vars">
+         <obj_property name="ElementShortName">flattened_input_vars[59:0]</obj_property>
+         <obj_property name="ObjectShortName">flattened_input_vars[59:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /flattened_input_vars_aux">
+         <obj_property name="ElementShortName">flattened_input_vars_aux[59:0]</obj_property>
+         <obj_property name="ObjectShortName">flattened_input_vars_aux[59:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /variable_aux">
+         <obj_property name="ElementShortName">variable_aux[3:0]</obj_property>
+         <obj_property name="ObjectShortName">variable_aux[3:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /threshold_kind_aux">
+         <obj_property name="ElementShortName">threshold_kind_aux</obj_property>
+         <obj_property name="ObjectShortName">threshold_kind_aux</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /input_leaf_value_aux">
+         <obj_property name="ElementShortName">input_leaf_value_aux[31:0]</obj_property>
+         <obj_property name="ObjectShortName">input_leaf_value_aux[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /tree_id_aux">
+         <obj_property name="ElementShortName">tree_id_aux[21:0]</obj_property>
+         <obj_property name="ObjectShortName">tree_id_aux[21:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /class_id_aux">
+         <obj_property name="ElementShortName">class_id_aux[9:0]</obj_property>
+         <obj_property name="ObjectShortName">class_id_aux[9:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p0_ready">
+         <obj_property name="ElementShortName">p0_ready</obj_property>
+         <obj_property name="ObjectShortName">p0_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p0_valid">
+         <obj_property name="ElementShortName">p0_valid</obj_property>
+         <obj_property name="ObjectShortName">p0_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p1_ready">
+         <obj_property name="ElementShortName">p1_ready</obj_property>
+         <obj_property name="ObjectShortName">p1_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p1_valid">
+         <obj_property name="ElementShortName">p1_valid</obj_property>
+         <obj_property name="ObjectShortName">p1_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p2_ready">
+         <obj_property name="ElementShortName">p2_ready</obj_property>
+         <obj_property name="ObjectShortName">p2_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p2_valid">
+         <obj_property name="ElementShortName">p2_valid</obj_property>
+         <obj_property name="ObjectShortName">p2_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p3_ready">
+         <obj_property name="ElementShortName">p3_ready</obj_property>
+         <obj_property name="ObjectShortName">p3_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p3_valid">
+         <obj_property name="ElementShortName">p3_valid</obj_property>
+         <obj_property name="ObjectShortName">p3_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p4_ready">
+         <obj_property name="ElementShortName">p4_ready</obj_property>
+         <obj_property name="ObjectShortName">p4_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /p4_valid">
+         <obj_property name="ElementShortName">p4_valid</obj_property>
+         <obj_property name="ObjectShortName">p4_valid</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /debug_num_completed_inputs">
+         <obj_property name="ElementShortName">debug_num_completed_inputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_inputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /debug_num_completed_outputs">
+         <obj_property name="ElementShortName">debug_num_completed_outputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_outputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /NUM_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.cam_core_inst /MAX_FLATTENED_WIDTH">
+         <obj_property name="ElementShortName">MAX_FLATTENED_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">MAX_FLATTENED_WIDTH[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group458">
+      <obj_property name="label">router_0_0</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /clk">
+         <obj_property name="ElementShortName">clk</obj_property>
+         <obj_property name="ObjectShortName">clk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /rst">
+         <obj_property name="ElementShortName">rst</obj_property>
+         <obj_property name="ObjectShortName">rst</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /mode">
+         <obj_property name="ElementShortName">mode</obj_property>
+         <obj_property name="ObjectShortName">mode</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /s_leaf_values">
+         <obj_property name="ElementShortName">s_leaf_values[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">s_leaf_values[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /s_class_ids">
+         <obj_property name="ElementShortName">s_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">s_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /s_tree_ids">
+         <obj_property name="ElementShortName">s_tree_ids[0:0][21:0]</obj_property>
+         <obj_property name="ObjectShortName">s_tree_ids[0:0][21:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /s_ready">
+         <obj_property name="ElementShortName">s_ready</obj_property>
+         <obj_property name="ObjectShortName">s_ready</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /m_valid">
+         <obj_property name="ElementShortName">m_valid</obj_property>
+         <obj_property name="ObjectShortName">m_valid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /m_ready">
+         <obj_property name="ElementShortName">m_ready</obj_property>
+         <obj_property name="ObjectShortName">m_ready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /m_leaf_values">
+         <obj_property name="ElementShortName">m_leaf_values[0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">m_leaf_values[0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /m_class_ids">
+         <obj_property name="ElementShortName">m_class_ids[0:0][9:0]</obj_property>
+         <obj_property name="ObjectShortName">m_class_ids[0:0][9:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /partial_accumulation">
+         <obj_property name="ElementShortName">partial_accumulation[0:0][0:0][31:0]</obj_property>
+         <obj_property name="ObjectShortName">partial_accumulation[0:0][0:0][31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /debug_num_completed_inputs">
+         <obj_property name="ElementShortName">debug_num_completed_inputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_inputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /debug_num_completed_outputs">
+         <obj_property name="ElementShortName">debug_num_completed_outputs[31:0]</obj_property>
+         <obj_property name="ObjectShortName">debug_num_completed_outputs[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /NUM_ROUTER_INPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_INPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_INPUTS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_multi_core_axi_enabled_cam/multi_core_cam_solver_inst/\genblk1.multic_core_cam_solver_inst_0 /\genblk1.cam_solver_inst /\genblk1.router_inst /NUM_ROUTER_OUTPUTS">
+         <obj_property name="ElementShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">NUM_ROUTER_OUTPUTS[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+   <wvobject type="group" fp_name="group454">
+      <obj_property name="label">read_master</obj_property>
+      <obj_property name="DisplayName">label</obj_property>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/aclk">
+         <obj_property name="ElementShortName">aclk</obj_property>
+         <obj_property name="ObjectShortName">aclk</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/areset">
+         <obj_property name="ElementShortName">areset</obj_property>
+         <obj_property name="ObjectShortName">areset</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ctrl_start">
+         <obj_property name="ElementShortName">ctrl_start</obj_property>
+         <obj_property name="ObjectShortName">ctrl_start</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ctrl_done">
+         <obj_property name="ElementShortName">ctrl_done</obj_property>
+         <obj_property name="ObjectShortName">ctrl_done</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ctrl_offset">
+         <obj_property name="ElementShortName">ctrl_offset[0:0][63:0]</obj_property>
+         <obj_property name="ObjectShortName">ctrl_offset[0:0][63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ctrl_length">
+         <obj_property name="ElementShortName">ctrl_length[31:0]</obj_property>
+         <obj_property name="ObjectShortName">ctrl_length[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ctrl_prog_full">
+         <obj_property name="ElementShortName">ctrl_prog_full[0:0]</obj_property>
+         <obj_property name="ObjectShortName">ctrl_prog_full[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arvalid">
+         <obj_property name="ElementShortName">arvalid</obj_property>
+         <obj_property name="ObjectShortName">arvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arready">
+         <obj_property name="ElementShortName">arready</obj_property>
+         <obj_property name="ObjectShortName">arready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/araddr">
+         <obj_property name="ElementShortName">araddr[63:0]</obj_property>
+         <obj_property name="ObjectShortName">araddr[63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arid">
+         <obj_property name="ElementShortName">arid[0:0]</obj_property>
+         <obj_property name="ObjectShortName">arid[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arlen">
+         <obj_property name="ElementShortName">arlen[7:0]</obj_property>
+         <obj_property name="ObjectShortName">arlen[7:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arsize">
+         <obj_property name="ElementShortName">arsize[2:0]</obj_property>
+         <obj_property name="ObjectShortName">arsize[2:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rvalid">
+         <obj_property name="ElementShortName">rvalid</obj_property>
+         <obj_property name="ObjectShortName">rvalid</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rready">
+         <obj_property name="ElementShortName">rready</obj_property>
+         <obj_property name="ObjectShortName">rready</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rdata">
+         <obj_property name="ElementShortName">rdata[511:0]</obj_property>
+         <obj_property name="ObjectShortName">rdata[511:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rlast">
+         <obj_property name="ElementShortName">rlast</obj_property>
+         <obj_property name="ObjectShortName">rlast</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rid">
+         <obj_property name="ElementShortName">rid[0:0]</obj_property>
+         <obj_property name="ObjectShortName">rid[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rresp">
+         <obj_property name="ElementShortName">rresp[1:0]</obj_property>
+         <obj_property name="ObjectShortName">rresp[1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/m_tvalid">
+         <obj_property name="ElementShortName">m_tvalid[0:0]</obj_property>
+         <obj_property name="ObjectShortName">m_tvalid[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/m_tready">
+         <obj_property name="ElementShortName">m_tready[0:0]</obj_property>
+         <obj_property name="ObjectShortName">m_tready[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/m_tdata">
+         <obj_property name="ElementShortName">m_tdata[0:0][511:0]</obj_property>
+         <obj_property name="ObjectShortName">m_tdata[0:0][511:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/done">
+         <obj_property name="ElementShortName">done[0:0]</obj_property>
+         <obj_property name="ObjectShortName">done[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/num_full_bursts">
+         <obj_property name="ElementShortName">num_full_bursts[25:0]</obj_property>
+         <obj_property name="ObjectShortName">num_full_bursts[25:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/num_partial_bursts">
+         <obj_property name="ElementShortName">num_partial_bursts</obj_property>
+         <obj_property name="ObjectShortName">num_partial_bursts</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/start">
+         <obj_property name="ElementShortName">start</obj_property>
+         <obj_property name="ObjectShortName">start</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/num_transactions">
+         <obj_property name="ElementShortName">num_transactions[25:0]</obj_property>
+         <obj_property name="ObjectShortName">num_transactions[25:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/has_partial_burst">
+         <obj_property name="ElementShortName">has_partial_burst</obj_property>
+         <obj_property name="ObjectShortName">has_partial_burst</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/final_burst_len">
+         <obj_property name="ElementShortName">final_burst_len[5:0]</obj_property>
+         <obj_property name="ObjectShortName">final_burst_len[5:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/single_transaction">
+         <obj_property name="ElementShortName">single_transaction</obj_property>
+         <obj_property name="ObjectShortName">single_transaction</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ar_idle">
+         <obj_property name="ElementShortName">ar_idle</obj_property>
+         <obj_property name="ObjectShortName">ar_idle</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ar_done">
+         <obj_property name="ElementShortName">ar_done</obj_property>
+         <obj_property name="ObjectShortName">ar_done</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/fifo_stall">
+         <obj_property name="ElementShortName">fifo_stall</obj_property>
+         <obj_property name="ObjectShortName">fifo_stall</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arxfer">
+         <obj_property name="ElementShortName">arxfer</obj_property>
+         <obj_property name="ObjectShortName">arxfer</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/arvalid_r">
+         <obj_property name="ElementShortName">arvalid_r</obj_property>
+         <obj_property name="ObjectShortName">arvalid_r</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/addr">
+         <obj_property name="ElementShortName">addr[0:0][63:0]</obj_property>
+         <obj_property name="ObjectShortName">addr[0:0][63:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/id">
+         <obj_property name="ElementShortName">id[0:0]</obj_property>
+         <obj_property name="ObjectShortName">id[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ar_transactions_to_go">
+         <obj_property name="ElementShortName">ar_transactions_to_go[25:0]</obj_property>
+         <obj_property name="ObjectShortName">ar_transactions_to_go[25:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/ar_final_transaction">
+         <obj_property name="ElementShortName">ar_final_transaction</obj_property>
+         <obj_property name="ObjectShortName">ar_final_transaction</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/incr_ar_to_r_cnt">
+         <obj_property name="ElementShortName">incr_ar_to_r_cnt[0:0]</obj_property>
+         <obj_property name="ObjectShortName">incr_ar_to_r_cnt[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/decr_ar_to_r_cnt">
+         <obj_property name="ElementShortName">decr_ar_to_r_cnt[0:0]</obj_property>
+         <obj_property name="ObjectShortName">decr_ar_to_r_cnt[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/stall_ar">
+         <obj_property name="ElementShortName">stall_ar[0:0]</obj_property>
+         <obj_property name="ObjectShortName">stall_ar[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/outstanding_vacancy_count">
+         <obj_property name="ElementShortName">outstanding_vacancy_count[0:0][1:0]</obj_property>
+         <obj_property name="ObjectShortName">outstanding_vacancy_count[0:0][1:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/tvalid">
+         <obj_property name="ElementShortName">tvalid[0:0]</obj_property>
+         <obj_property name="ObjectShortName">tvalid[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/tdata">
+         <obj_property name="ElementShortName">tdata[0:0][511:0]</obj_property>
+         <obj_property name="ObjectShortName">tdata[0:0][511:0]</obj_property>
+      </wvobject>
+      <wvobject type="logic" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/rxfer">
+         <obj_property name="ElementShortName">rxfer</obj_property>
+         <obj_property name="ObjectShortName">rxfer</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/decr_r_transaction_cntr">
+         <obj_property name="ElementShortName">decr_r_transaction_cntr[0:0]</obj_property>
+         <obj_property name="ObjectShortName">decr_r_transaction_cntr[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/r_transactions_to_go">
+         <obj_property name="ElementShortName">r_transactions_to_go[0:0][25:0]</obj_property>
+         <obj_property name="ObjectShortName">r_transactions_to_go[0:0][25:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/r_final_transaction">
+         <obj_property name="ElementShortName">r_final_transaction[0:0]</obj_property>
+         <obj_property name="ObjectShortName">r_final_transaction[0:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_ID_WIDTH">
+         <obj_property name="ElementShortName">C_ID_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_ID_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_ADDR_WIDTH">
+         <obj_property name="ElementShortName">C_ADDR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_ADDR_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_DATA_WIDTH">
+         <obj_property name="ElementShortName">C_DATA_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_DATA_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_NUM_CHANNELS">
+         <obj_property name="ElementShortName">C_NUM_CHANNELS[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_NUM_CHANNELS[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_LENGTH_WIDTH">
+         <obj_property name="ElementShortName">C_LENGTH_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_LENGTH_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_BURST_LEN">
+         <obj_property name="ElementShortName">C_BURST_LEN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_BURST_LEN[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_LOG_BURST_LEN">
+         <obj_property name="ElementShortName">C_LOG_BURST_LEN[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_LOG_BURST_LEN[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/C_MAX_OUTSTANDING">
+         <obj_property name="ElementShortName">C_MAX_OUTSTANDING[31:0]</obj_property>
+         <obj_property name="ObjectShortName">C_MAX_OUTSTANDING[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/LP_MAX_OUTSTANDING_CNTR_WIDTH">
+         <obj_property name="ElementShortName">LP_MAX_OUTSTANDING_CNTR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_MAX_OUTSTANDING_CNTR_WIDTH[31:0]</obj_property>
+      </wvobject>
+      <wvobject type="array" fp_name="/pfm_top_wrapper/pfm_top_i/pfm_dynamic_inst/krnl_vadd_rtl_1/inst/inst_krnl_vadd_rtl_int/inst_axi_read_master/LP_TRANSACTION_CNTR_WIDTH">
+         <obj_property name="ElementShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+         <obj_property name="ObjectShortName">LP_TRANSACTION_CNTR_WIDTH[31:0]</obj_property>
+      </wvobject>
+   </wvobject>
+</wave_config>
