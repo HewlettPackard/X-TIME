@@ -1,0 +1,36 @@
+[package]
+name = "xtimec"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+rayon = "1.7.0"
+
+serde = { version = "1.0.185", features = ["derive"] }
+serde_json = "1.0.105"
+
+numpy = { version = "0.20.0", optional = true }
+pyo3 = { version = "0.20.0", optional = true, features = ["extension-module"] }
+
+byteorder = { version = "1.4.3", optional = true }
+clap = { version = "4.4.0", optional = true, features = [
+    "std",
+    "cargo",
+    "help",
+    "usage",
+    "error-context",
+], default-features = false }
+
+[features]
+python = ["dep:pyo3", "dep:numpy"]
+cli = ["dep:byteorder", "dep:clap"]
+default = ["cli"]
+
+[lib]
+name = "xtimec"
+path = "src/bindings.rs"
+crate-type = ["cdylib"]
+
+[[bin]]
+name = "xtimec"
+path = "src/cli.rs"

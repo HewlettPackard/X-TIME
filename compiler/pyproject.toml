@@ -1,0 +1,13 @@
+[project]
+name = "xtimec"
+dependencies = ["numpy>=1.2", "treelite>=3.9", "treelite-runtime>=3.9"]
+
+[build-system]
+requires = ["maturin>=1.2"]
+build-backend = "maturin"
+
+[tool.maturin]
+python-source = "python"
+module-name = "xtimec._xtimec"
+features = ["python"]
+no-default-features = true
