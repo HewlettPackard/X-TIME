@@ -1,18 +1,120 @@
-# X-TIME compiler
+# X-TIME Compiler
 
-Receives as input tree based ML models from sklearn, xgboost and catboost and compile that into threshold mappable to X-TIME architecture. X-TIME accepts thresholds and inputs in ubyte format, thus the thresholds should be converted to ubyte as well. The compiler folder contains three subfolders
+The compiler is exposed both as a command line interface and a Python library that binds to its native core written in Rust.
+It implements the conversion of tree-based machine learning models trained using various Python libraries to the Analog CAM mapping of the X-TIME architecture.
+Supported libraries are **Scikit-Learn**, **XGBoost**, **CatBoost** and **LightGBM**.
 
-### docker
+- [Building the CLI](#building-the-cli)
+- [Building the Python Library](#building-the-python-library)
+- [Usage in Python](#usage-in-python)
 
-The `docker` folder contains the container files. We strongly suggest to use Docker for running our code in order to avoid path, dependencies and version issues. Follow the instruction in the `docker` folder for building and running the container.
+## Building the CLI
 
-### src
+Install Rust:
 
-The `src` folder contains the source code for the compiler. The compiler accepts models from xgboost, sklearn random forest and catboost in the format of classifiers or regressors. `src/compiler.py` contains two main funtions:
-1. `extract_thresholds` which receives a model as input and returns the threshold maps in X-TIME compatible shape
-2. `map_to_ubyte` which receives the threshold maps from the previous functions and the test inputs, and returns a unsigned byte version of them. Note that threshold maps and inputs have to be converted together in order to assure correct binning.
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  # select "default" (just press enter)
+source ~/.cargo/env
+```
 
-### notebooks
+Build the binary:
 
-The `notebooks` folder contains a jupyter notebook with some example of X-TIME compiler usage, starting from skratch, train and compile a model, and loading a pre-trained model before compiling it.
+```sh
+cargo build --release
+```
 
+This will place the `xtimec` binary inside the `target/release` folder
+
+To automatically place it in your `$PATH`, you can alternatively use `cargo install`:
+
+```sh
+cargo install --path .
+```
+
+Usage of the command is as follows:
+
+```
+Usage: xtimec [OPTIONS] <INPUT_FILE> <OUTPUT_FILE>
+
+Arguments:
+  <INPUT_FILE>   Path to the model JSON dump
+  <OUTPUT_FILE>  Path to the resulting NumPy file
+
+Options:
+  -t, --type <MODEL_TYPE>  The type of model that is passed [default: treelite] [possible values: treelite, catboost]
+  -h, --help               Print help
+  -V, --version            Print version
+```
+
+## Building the Python Library
+
+Install Rust:
+
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh  # select "default" (just press enter)
+source ~/.cargo/env
+```
+
+You should now have the `cargo` command available.
+
+Create and activate a virtual environment:
+
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+Install Maturin:
+
+```sh
+pip install maturin
+```
+
+Build the project:
+
+```sh
+maturin build --release
+```
+
+This will place a `.whl` file that you can `pip install` inside of the `target/wheels` folder.
+
+Alternatively, you can use:
+
+```sh
+maturin develop
+```
+
+to enter a development shell with the library and all its dependencies available.
+
+> **Note:**
+> The resulting Python wheel files include a native library that is linked against the Python version available on the system at build time.
+> This means that the compiler library won't work with e.g. Python 3.10 if it was built against Python 3.9.
+
+## Usage in Python
+
+Example:
+
+```python
+from sklearn.datasets import make_classification
+from sklearn.ensemble import RandomForestClassifier
+
+from xtimec import XTimeModel
+
+# create a random dataset
+X, y = make_classification(n_samples=100, n_informative=5, n_classes=2)
+
+# train a model
+model = RandomForestClassifier()
+model.fit(X, y)
+
+# represent the model encoded for an analog CAM
+# alternatively `from_xgboost`, `from_catboost` etc.
+xmodel = XTimeModel.from_sklearn(model)
+
+# >>> xmodel.cam
+#   np.array([[...]])
+# >>> xmodel.leaves
+#   np.array([[...]])
+```
+
+See [`python/xtimec/model.py`](./python/xtimec/model.py) for the entire Python API.

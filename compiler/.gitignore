@@ -1,0 +1,14 @@
+target
+
+venv
+.venv
+__pycache__
+*.so
+*.dll
+*.dylib
+
+*.npy
+*.json
+*.bin
+
+catboost_info
