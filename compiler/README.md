@@ -1,6 +1,8 @@
 # X-TIME Compiler
 
-The compiler is exposed both as a command line interface and a Python library that binds to its native core written in Rust. Supported libraries are Scikit-Learn, XGBoost, CatBoost and LightGBM.
+The compiler is exposed both as a command line interface and a Python library that binds to its native core written in Rust.
+It implements the conversion of tree-based machine learning models trained using various Python libraries to the Analog CAM mapping of the X-TIME architecture.
+Supported libraries are **Scikit-Learn**, **XGBoost**, **CatBoost** and **LightGBM**.
 
 - [Building the CLI](#building-the-cli)
 - [Building the Python Library](#building-the-python-library)
@@ -83,6 +85,10 @@ maturin develop
 ```
 
 to enter a development shell with the library and all its dependencies available.
+
+> **Note:**
+> The resulting Python wheel files include a native library that is linked against the Python version available on the system at build time.
+> This means that the compiler library won't work with e.g. Python 3.10 if it was built against Python 3.9.
 
 ## Usage in Python
 
