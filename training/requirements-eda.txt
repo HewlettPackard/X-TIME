@@ -1,4 +1,0 @@
-# Exploratory data analysis (EDA)
-
-jupyter     # eda
-pandasgui   # eda
