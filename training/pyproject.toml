@@ -1,17 +1,59 @@
+[tool.poetry]
+name = "extime-training"
+version = "0.1.0"
+description = ""
+authors = ["Hewlett Packard Labs"]
+readme = "README.md"
+packages = [{include = "xtime"}]
+
+[tool.poetry.dependencies]
+python = "^3.9"
+llvmlite = ">0.34.0"        # Without this, in Windows OS poetry selects 0.34 that does not have pre-built packages.
+scikit-learn = "1.2.2"      # core dependency
+openml = "0.13.1"           # core dependency
+mlflow = "2.2.2"            # core dependency
+ray = { version = "2.3.1", extras = ["tune", "default"] }   # core dependency
+numpy = "1.23.5"            # core dependency
+pandas = "1.5.3"            # core dependency (need to fix the code to work with pandas 2.0.0)
+pydantic = "<2"             # indirect dependency (why here: https://github.com/aws/aws-sdk-pandas/issues/2379)
+pyaml = "21.10.1"           # core dependency
+requests = "2.28.2"         # core dependency
+tinydb = "4.7.1"            # core dependency
+prettytable = "3.6.0"       # command line interface
+
+[tool.poetry.group.catboost.dependencies]
+catboost = "1.1.1"
+
+[tool.poetry.group.lightgbm.dependencies]
+lightgbm = "3.3.5"
+
+[tool.poetry.group.xgboost.dependencies]
+xgboost = "1.7.5"
+
+[tool.poetry.group.dev.dependencies]
+black = "24.1.1"
+isort = "5.13.2"
+flake8 = "7.0.0"
+Flake8-pyproject = "1.2.3"     # This enables flake8 to load its config from pyproject file.
+pytest = "8.0.0"               # Running unit tests (`pytest ./tests` instead of `python -m unittest`)
+pytest-xdist = "3.5.0"         # Parallel `pytest` (`python -m pytest -n auto ./tests`)
+
+[tool.poetry.group.eda.dependencies]
+jupyter = "1.0.0"
+pandasgui = "0.2.14"
+PyQt5 = "5.15.2"               # Fixes "inable to find installation candidates for pyqt5-qt5 (x.x.x)" in Ubuntu
+
 [tool.black]
 # python -m black --config pyproject.toml ./xtime ./tests
 line-length = 120
 skip-magic-trailing-comma = true
 
-
 [tool.isort]
 # python -m isort ./xtime ./tests
 profile = "black"
 
-
 [tool.flake8]
 max-line-length = 120
-
 
 [tool.pytest.ini_options]
 markers = [
@@ -19,3 +61,7 @@ markers = [
     "estimators: marks tests as ML models unit tests (deselect with '-m \"not models\"')",
     "cli: marks tests as Command Line Interface (CLI) unit tests (deselect with '-m \"not cli\"')"
 ]
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

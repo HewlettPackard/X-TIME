@@ -1,18 +1,10 @@
 # Prerequisites
-This project was tested with several versions of python including `3.8.16`. Some or all of the available features
+This project was tested with several versions of python including `3.9.18`. Some or all of the available features
 have been tested in Windows and Linux (Ubuntu) environments.
 ```shell
-# Using `virtualenv`
-virtualenv -p python3.9 venv
-source venv/bin/activate
-pip install -r requirements.txt
-
-# Using conda
-conda env create --name xtime-training --file environment.yml
+conda env create --file ./environment.yml
 conda activate xtime-training
-
-# Optionally, install EDA and DEV dependencies
-pip install -r ./requirements-eda.txt -r ./requirements-dev.txt
+poetry install
 ```
 
 I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
