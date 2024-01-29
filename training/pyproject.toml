@@ -28,7 +28,7 @@ catboost = "1.1.1"
 lightgbm = "3.3.5"
 
 [tool.poetry.group.xgboost.dependencies]
-xgboost = "1.7.5"
+xgboost = "2.0.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "24.1.1"
