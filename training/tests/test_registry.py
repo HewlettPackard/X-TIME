@@ -40,9 +40,6 @@ class TestRegistry(TestCase):
         dataset_registry = get_dataset_builder_registry()
         names = dataset_registry.keys()
 
-        self.assertIsInstance(names, list)
-        self.assertEqual(8, len(names), msg=f"names={names}")
-
         expected = [
             "churn_modelling",
             "eye_movements",
@@ -52,7 +49,12 @@ class TestRegistry(TestCase):
             "telco_customer_churn",
             "year_prediction_msd",
             "rossmann_store_sales",
+            "wisdm",
         ]
+
+        self.assertIsInstance(names, list)
+        self.assertEqual(len(expected), len(names), msg=f"names={names}")
+
         self.assertListEqual(
             sorted(expected), sorted(names), msg=f"expected={sorted(expected)}\nactual={sorted(names)}"
         )

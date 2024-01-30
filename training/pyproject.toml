@@ -30,6 +30,9 @@ lightgbm = "3.3.5"
 [tool.poetry.group.xgboost.dependencies]
 xgboost = "2.0.3"
 
+[tool.poetry.group.timeseries.dependencies]
+tsfresh = "0.20.2"
+
 [tool.poetry.group.dev.dependencies]
 black = "24.1.1"
 isort = "5.13.2"
