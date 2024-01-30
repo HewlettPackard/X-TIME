@@ -24,6 +24,13 @@ _WISDM_DATASET_FILE = "WISDM_ar_v1.1_raw.txt"
 
 
 class WISDMBuilder(DatasetBuilder):
+    """WISDM: WIreless Sensor Data Mining.
+
+    Activity classification using 3-axis on-body accelerometer. This implementation is partially based on
+    Towards Data Science blog by Venelin Valkov (Time Series Classification for Human Activity Recognition with LSTMs
+    using TensorFlow 2 and Keras):
+        https://towardsdatascience.com/time-series-classification-for-human-activity-recognition-with-lstms-using-tensorflow-2-and-keras-b816431afdff
+    """
     NAME = "wisdm"
 
     def __init__(self) -> None:
