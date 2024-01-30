@@ -58,8 +58,14 @@ class WISDMBuilder(DatasetBuilder):
             self._ts_features = ts_features
         except ImportError:
             raise RuntimeError(
-                f"The WISDM dataset requires `tsfresh` library to compute ML features. Please install it with "
-                "`pip install tsfresh==0.20.2`."
+                f"The WISDM dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
+                "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
+                "CUDA runtime found (see if the cause for the import error is "
+                "`numba.cuda.cudadrv.error.NvvmSupportError` exception) - this may occur because `tsfresh` depends on "
+                "`stumpy` that depends on `numba` that detects CUDA runtime and tries to use it if available. Try "
+                "disabling CUDA for numba by exporting NUMBA_DISABLE_CUDA environment variable "
+                "(https://numba.pydata.org/numba-doc/dev/reference/envvars.html#envvar-NUMBA_DISABLE_CUDA): "
+                "`export NUMBA_DISABLE_CUDA=1`."
             )
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
