@@ -285,6 +285,11 @@ def parse_dataset_name(name: str) -> t.Tuple[str, t.Optional[str]]:
 def build_dataset(name: str, **kwargs) -> Dataset:
     name, version = parse_dataset_name(name)
     version = version or "default"
+    if _registry.contains(name) is False:
+        _available_datasets = sorted(_registry.keys())
+        raise ValueError(
+            f"Dataset (name=`{name}`) not found in the registry of datasets. Available datasets: {_available_datasets}."
+        )
     return _registry.get(name)().build(version, **kwargs)
 
 
