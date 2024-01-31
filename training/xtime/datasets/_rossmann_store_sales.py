@@ -35,20 +35,23 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
     def __init__(self) -> None:
         super().__init__()
         self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self._data_dir = Path("~/.cache/kaggle/datasets/rossmann_store_sales").expanduser()
+        self._train_file = "train.csv.gz"
+        self._store_file = "store.csv.gz"
 
-    def _build_default_dataset(self) -> Dataset:
-        data_dir = Path("~/.cache/kaggle/datasets/rossmann_store_sales").expanduser()
-        train_file, store_file = "train.csv.gz", "store.csv.gz"
-        if not ((data_dir / train_file).is_file() and (data_dir / store_file).is_file()):
+    def _check_pre_requisites(self) -> None:
+        if not ((self._data_dir / self._train_file).is_file() and (self._data_dir / self._store_file).is_file()):
             raise RuntimeError(
                 f"Rossmann store sales dataset not found. Please download it from "
                 f"`https://www.kaggle.com/competitions/rossmann-store-sales` and extract to "
-                f"{data_dir.as_posix()}. Then, uncompress the archive and compress individual files with gzip tool. "
-                f"To proceed, these files must exist: {(data_dir / train_file).as_posix()} and "
-                f"{(data_dir / store_file).as_posix()}."
+                f"{self._data_dir.as_posix()}. Then, uncompress the archive and compress individual files with gzip "
+                f"tool. To proceed, these files must exist: {(self._data_dir / self._train_file).as_posix()} and "
+                f"{(self._data_dir / self._store_file).as_posix()}."
             )
-        train: pd.DataFrame = pd.read_csv((data_dir / train_file).as_posix())
-        store: pd.DataFrame = pd.read_csv((data_dir / store_file).as_posix())
+
+    def _build_default_dataset(self) -> Dataset:
+        train: pd.DataFrame = pd.read_csv((self._data_dir / self._train_file).as_posix())
+        store: pd.DataFrame = pd.read_csv((self._data_dir / self._store_file).as_posix())
 
         # https://docs.python.org/3/library/calendar.html#calendar.month_abbr
         month_abbrs = list(calendar.month_abbr[1:])
@@ -146,7 +149,7 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
                 version="default",
                 task=RegressionTask(),
                 features=features,
-                properties={"source": data_dir.as_uri()},
+                properties={"source": self._data_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(
