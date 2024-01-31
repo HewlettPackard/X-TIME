@@ -15,11 +15,13 @@
 ###
 
 import json
+import logging
 import sys
 import typing as t
 from multiprocessing import Process
 
 import click
+import coloredlogs
 from ray import tune
 
 from xtime.datasets import (
@@ -33,6 +35,9 @@ from xtime.datasets import (
 from xtime.estimators import get_estimator_registry
 from xtime.ml import ClassificationTask, TaskType
 from xtime.run import Context, Metadata, RunType
+
+logger = logging.getLogger(__name__)
+
 
 dataset_arg = click.argument("dataset", type=str, metavar="DATASET")
 dataset_arg_help = (
@@ -59,6 +64,17 @@ params_option = click.option(
 )
 
 
+def print_err_and_exit(err: Exception, exit_code: int = 1) -> None:
+    """Print brief information about exception and exit."""
+    print(str(err))
+    if not logger.root.isEnabledFor(logging.DEBUG):
+        print("Rerun with --log-level=debug to get detailed information.")
+    logger.debug(
+        "Error encountered while executing `dataset describe` command.", exc_info=err, stack_info=True, stacklevel=-1
+    )
+    exit(exit_code)
+
+
 def _run_search_hp_pipeline(
     dataset: str,
     model: str,
@@ -75,16 +91,29 @@ def _run_search_hp_pipeline(
     if num_validate_trials > 0:
         validate_hparams = [
             mlflow_uri,  # Take the best hyperparameters from this MLFlow run.
-            {
-                "random_state": tune.randint(0, int(2**32 - 1))
-            },  # And vary random seed to validate these HPs are stable.
+            {"random_state": tune.randint(0, int(2**32 - 1))},  # And vary random seed to validate these HPs are stable.
         ]
         search_hp(dataset, model, "random", validate_hparams, num_validate_trials, gpu)
 
 
 @click.group(name="xtime", help="Machine Learning benchmarks for tabular data for XTIME project.")
-def cli():
-    ...
+@click.option(
+    "--log-level",
+    "--log_level",
+    required=False,
+    default="warning",
+    type=click.Choice(["critical", "error", "warning", "info", "debug"]),
+    help="Logging level is a lower-case string value for Python's logging library (see "
+    "[Logging Levels]({log_level}) for more details). Only messages with this logging level or higher are "
+    "logged.".format(log_level="https://docs.python.org/3/library/logging.html#logging-levels"),
+)
+def cli(log_level: t.Optional[str]):
+    if log_level:
+        log_level = log_level.upper()
+        logging.basicConfig(level=log_level)
+        coloredlogs.install(level=log_level)
+        logging.info("cli setting log Level from CLI argument to '%s'.", log_level)
+    logger.debug("cli command=%s", sys.argv)
 
 
 @cli.group(
@@ -93,8 +122,7 @@ def cli():
     "The XTIME project uses MLflow for experiment tracking, so make sure to configure MLflow URI should a "
     "non-default MLflow server be used.",
 )
-def experiments() -> None:
-    ...
+def experiments() -> None: ...
 
 
 @experiments.command(
@@ -106,7 +134,10 @@ def experiments() -> None:
 def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
     from xtime.stages.train import train
 
-    train(dataset, model, params)
+    try:
+        train(dataset, model, params)
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @experiments.command(
@@ -142,21 +173,24 @@ def experiment_search_hp(
     num_validate_trials: int = 0,
     gpu: bool = False,
 ) -> None:
-    known_problems, unknown_problems = get_known_unknown_datasets(dataset.split(sep=","))
-    if unknown_problems:
-        print(f"Unknown datasets: {unknown_problems}.")
-        print(f"Use one of these: {get_dataset_builder_registry().keys()}.")
-        exit(1)
-    for _problem in known_problems:
-        try:
-            process = Process(
-                target=_run_search_hp_pipeline,
-                args=(_problem, model, algorithm, params, num_search_trials, num_validate_trials, gpu),
-            )
-            process.start()
-            process.join()
-        except Exception as err:
-            print(f"Error executing the `optimize` task for {dataset}. Error = {err}.")
+    try:
+        known_problems, unknown_problems = get_known_unknown_datasets(dataset.split(sep=","))
+        if unknown_problems:
+            print(f"Unknown datasets: {unknown_problems}.")
+            print(f"Use one of these: {get_dataset_builder_registry().keys()}.")
+            exit(1)
+        for _problem in known_problems:
+            try:
+                process = Process(
+                    target=_run_search_hp_pipeline,
+                    args=(_problem, model, algorithm, params, num_search_trials, num_validate_trials, gpu),
+                )
+                process.start()
+                process.join()
+            except Exception as err:
+                print(f"Error executing the `optimize` task for {dataset}. Error = {err}.")
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @experiments.command(
@@ -189,19 +223,24 @@ def experiment_search_hp(
 def experiment_describe(report_type: str, run: t.Optional[str] = None, file: t.Optional[str] = None) -> None:
     from xtime.stages.describe import describe
 
-    describe(report_type, run, file)
+    try:
+        describe(report_type, run, file)
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @cli.group("dataset", help="Dataset-related commands (explore available datasets with these commands).")
-def datasets() -> None:
-    ...
+def datasets() -> None: ...
 
 
 @datasets.command("describe", help=f"Provide a brief DATASET dataset description. {dataset_arg_help}")
 @dataset_arg
 def dataset_describe(dataset: str) -> None:
-    ds: Dataset = build_dataset(dataset).validate()
-    json.dump(ds.summary(), sys.stdout, indent=4)
+    try:
+        ds: Dataset = build_dataset(dataset).validate()
+        json.dump(ds.summary(), sys.stdout, indent=4)
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @datasets.command("save", help=f"Save a DATASET dataset version on disk. {dataset_arg_help}")
@@ -216,41 +255,48 @@ def dataset_describe(dataset: str) -> None:
     help="Output directory where DATASET dataset is to be saved.",
 )
 def dataset_save(dataset: str, directory: t.Optional[str] = None) -> None:
-    ds: Dataset = build_dataset(dataset).validate()
-    ds.save(directory)
+    try:
+        ds: Dataset = build_dataset(dataset).validate()
+        ds.save(directory)
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @datasets.command("list", help="List all available datasets.")
 def dataset_list() -> None:
     from prettytable import PrettyTable
 
-    table = PrettyTable(field_names=["Dataset", "Versions"])
-    for name in get_dataset_builder_registry().keys():
-        dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
-        table.add_row([name, ", ".join(dataset_builder.builders.keys())])
-    print("Available datasets:")
-    print(table)
-    print(dataset_arg_help)
-    print("Examples:")
-    print("\t- `python -m xtime.main dataset describe churn_modelling:default`")
-    print("\t- `python -m xtime.main dataset describe eye_movements:numerical`")
+    try:
+        table = PrettyTable(field_names=["Dataset", "Versions"])
+        for name in get_dataset_builder_registry().keys():
+            dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
+            table.add_row([name, ", ".join(dataset_builder.builders.keys())])
+        print("Available datasets:")
+        print(table)
+        print(dataset_arg_help)
+        print("Examples:")
+        print("\t- `python -m xtime.main dataset describe churn_modelling:default`")
+        print("\t- `python -m xtime.main dataset describe eye_movements:numerical`")
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @cli.group("models", help="Machine Learning models-related commands.")
-def models() -> None:
-    ...
+def models() -> None: ...
 
 
 @models.command("list", help="List all available models.")
 def model_list() -> None:
-    print("Available models:")
-    for name in get_estimator_registry().keys():
-        print(f"- {name}")
+    try:
+        print("Available models:")
+        for name in get_estimator_registry().keys():
+            print(f"- {name}")
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 @cli.group("hparams", help="Hyperparameters-related commands.")
-def hparams() -> None:
-    ...
+def hparams() -> None: ...
 
 
 @hparams.command("query", help="Query hyperparameters for a given set of input URIs.")
@@ -267,33 +313,39 @@ def hparams() -> None:
     "present - model. For example: `--ctx dataset=model=xgboost`",
 )
 def hparams_query(params: t.Tuple[str], ctx: t.Optional[str] = None) -> None:
-    import xtime.hparams as hp
+    try:
+        import xtime.hparams as hp
 
-    if len(params) == 0:
-        print("No hyperparameters provided.")
-        exit(1)
+        if len(params) == 0:
+            print("No hyperparameters provided.")
+            exit(1)
 
-    ctx_obj: t.Optional[Context] = None
-    if ctx:
-        parsed_ctx = hp.get_hparams(f"params:{ctx}")
-        if "model" not in parsed_ctx:
-            raise ValueError("Context must contain a model field.")
-        if "task" not in parsed_ctx:
-            raise ValueError("Context must contain a task field.")
-        parsed_ctx["task"] = TaskType(parsed_ctx["task"])
-        ctx_obj = Context(
-            metadata=Metadata(dataset=parsed_ctx.get("dataset", "na"), model=parsed_ctx["model"], run_type=RunType.HPO),
-            dataset=Dataset(
-                metadata=DatasetMetadata(
-                    name=parsed_ctx.get("dataset", "na"),
-                    version="NA",
-                    task=ClassificationTask(type_=parsed_ctx["task"], num_classes=parsed_ctx.get("num_classes", 2)),
-                )
-            ),
-        )
+        ctx_obj: t.Optional[Context] = None
+        if ctx:
+            parsed_ctx = hp.get_hparams(f"params:{ctx}")
+            if "model" not in parsed_ctx:
+                raise ValueError("Context must contain a model field.")
+            if "task" not in parsed_ctx:
+                raise ValueError("Context must contain a task field.")
+            parsed_ctx["task"] = TaskType(parsed_ctx["task"])
+            ctx_obj = Context(
+                metadata=Metadata(
+                    dataset=parsed_ctx.get("dataset", "na"), model=parsed_ctx["model"], run_type=RunType.HPO
+                ),
+                dataset=Dataset(
+                    metadata=DatasetMetadata(
+                        name=parsed_ctx.get("dataset", "na"),
+                        version="NA",
+                        task=ClassificationTask(type_=parsed_ctx["task"], num_classes=parsed_ctx.get("num_classes", 2)),
+                    )
+                ),
+            )
 
-    hparams_: t.Dict = hp.get_hparams(params, ctx_obj)
-    json.dump(hparams_, sys.stdout, indent=4, cls=hp.JsonEncoder)
+        hparams_: t.Dict = hp.get_hparams(params, ctx_obj)
+        json.dump(hparams_, sys.stdout, indent=4, cls=hp.JsonEncoder)
+        print("")
+    except Exception as err:
+        print_err_and_exit(err)
 
 
 if __name__ == "__main__":

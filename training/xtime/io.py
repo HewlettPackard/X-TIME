@@ -15,6 +15,7 @@
 ###
 
 import json
+import logging
 import typing as t
 from pathlib import Path, WindowsPath
 
@@ -26,6 +27,8 @@ import yaml
 from mlflow.utils.file_utils import local_file_uri_to_path
 
 __all__ = ["encode", "PathLike", "to_path", "IO"]
+
+logger = logging.getLogger(__name__)
 
 
 PathLike = t.Union[str, Path]
@@ -125,7 +128,7 @@ class IO(object):
             with open(file_path, "w") as stream:
                 yaml.dump(data, stream, Dumper=yaml.SafeDumper)
         except yaml.representer.RepresenterError:
-            print(file_path, data)
+            logger.warning("file path = %s, data  = %s", file_path, data)
             raise
 
     @staticmethod

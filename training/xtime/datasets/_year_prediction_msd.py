@@ -14,6 +14,7 @@
 # limitations under the License.
 ###
 
+import logging
 from pathlib import Path
 
 import pandas as pd
@@ -24,6 +25,8 @@ from xtime.ml import Feature, FeatureType, RegressionTask
 from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
 
 __all__ = ["YearPredictionMSDBuilder"]
+
+logger = logging.getLogger(__name__)
 
 
 class YearPredictionMSDBuilder(DatasetBuilder):
@@ -47,7 +50,7 @@ class YearPredictionMSDBuilder(DatasetBuilder):
         data_dir = Path("~/.cache/uci/datasets/00203").expanduser()
         file_name = "YearPredictionMSD.txt.zip"
         if not (data_dir / file_name).is_file():
-            print(f"Downloading Year Prediction dataset to {data_dir / file_name}.")
+            logger.debug("Downloading Year Prediction dataset to: %s.", (data_dir / file_name).as_posix())
             IO.download(
                 "https://archive.ics.uci.edu/ml/machine-learning-databases/00203/YearPredictionMSD.txt.zip",
                 data_dir,
