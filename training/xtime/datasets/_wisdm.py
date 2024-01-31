@@ -37,6 +37,8 @@ class WISDMBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
 
+    def _check_pre_requisites(self) -> None:
+        # Check raw dataset exists.
         if _XTIME_DATASETS_WISDM not in os.environ:
             raise RuntimeError(
                 f"No environment variable found ({_XTIME_DATASETS_WISDM}) that should point to a directory with "
@@ -52,10 +54,10 @@ class WISDMBuilder(DatasetBuilder):
                 f"dataset from its home page `{_WISDM_HOME_PAGE}`."
             )
 
+        # Check `tsfresh` library can be imported.
         try:
             import tsfresh.feature_extraction.feature_calculators as ts_features
 
-            self._ts_features = ts_features
         except ImportError:
             raise RuntimeError(
                 f"The WISDM dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
@@ -216,6 +218,8 @@ class WISDMBuilder(DatasetBuilder):
         train_windows, train_labels = _slide(df_train[["x", "y", "z"]], df_train.activity, window_size, stride)
         test_windows, test_labels = _slide(df_test[["x", "y", "z"]], df_test.activity, window_size, stride)
 
+        import tsfresh.feature_extraction.feature_calculators as ts_features
+
         def _features(_ts: np.ndarray, _name: str) -> t.Dict:
             """Compute features for the given uni-variate time series segment.
             Args:
@@ -225,25 +229,25 @@ class WISDMBuilder(DatasetBuilder):
                  Dictionary mapping feature names for feature values.
             """
             features = {
-                "abs_energy": self._ts_features.abs_energy(_ts),  # float
-                "absolute_sum_of_changes": self._ts_features.absolute_sum_of_changes(_ts),  # float
-                "count_above_mean": self._ts_features.count_above_mean(_ts),  # float
-                "kurtosis": self._ts_features.kurtosis(_ts),  # float
-                "longest_strike_above_mean": self._ts_features.longest_strike_above_mean(_ts),  # float
-                "longest_strike_below_mean": self._ts_features.longest_strike_below_mean(_ts),  # float
-                "maximum": self._ts_features.maximum(_ts),  # float
-                "mean": self._ts_features.mean(_ts),  # float
-                "mean_abs_change": self._ts_features.mean_abs_change(_ts),  # float
-                "mean_change": self._ts_features.mean_change(_ts),  # float
-                "median": self._ts_features.median(_ts),  # float
-                "minimum": self._ts_features.minimum(_ts),  # float
-                "number_crossing_0": self._ts_features.number_crossing_m(_ts, 0),  # float
-                "quantile_25": self._ts_features.quantile(_ts, 0.25),  # float
-                "quantile_75": self._ts_features.quantile(_ts, 0.75),  # float
-                "rms": self._ts_features.root_mean_square(_ts),  # float
-                "skewness": self._ts_features.skewness(_ts),  # float
-                "sum_values": self._ts_features.sum_values(_ts),  # float
-                "variance": self._ts_features.variance(_ts),  # float
+                "abs_energy": ts_features.abs_energy(_ts),  # float
+                "absolute_sum_of_changes": ts_features.absolute_sum_of_changes(_ts),  # float
+                "count_above_mean": ts_features.count_above_mean(_ts),  # float
+                "kurtosis": ts_features.kurtosis(_ts),  # float
+                "longest_strike_above_mean": ts_features.longest_strike_above_mean(_ts),  # float
+                "longest_strike_below_mean": ts_features.longest_strike_below_mean(_ts),  # float
+                "maximum": ts_features.maximum(_ts),  # float
+                "mean": ts_features.mean(_ts),  # float
+                "mean_abs_change": ts_features.mean_abs_change(_ts),  # float
+                "mean_change": ts_features.mean_change(_ts),  # float
+                "median": ts_features.median(_ts),  # float
+                "minimum": ts_features.minimum(_ts),  # float
+                "number_crossing_0": ts_features.number_crossing_m(_ts, 0),  # float
+                "quantile_25": ts_features.quantile(_ts, 0.25),  # float
+                "quantile_75": ts_features.quantile(_ts, 0.75),  # float
+                "rms": ts_features.root_mean_square(_ts),  # float
+                "skewness": ts_features.skewness(_ts),  # float
+                "sum_values": ts_features.sum_values(_ts),  # float
+                "variance": ts_features.variance(_ts),  # float
             }
             return {f"{_name}_{k}": v for k, v in features.items()}
 
@@ -302,11 +306,11 @@ def _slide(
     for i in range(0, len(raw_vals) - window_size, stride):
         windows.append(
             # Take `window_size` rows (time steps)
-            raw_vals.iloc[i : (i + window_size)].values
+            raw_vals.iloc[i: (i + window_size)].values
         )
         labels.append(
             # Identify the most common label in this window (1 most common element returning list of (element, count))
-            Counter(y.iloc[i : i + window_size]).most_common(1)[0][0]
+            Counter(y.iloc[i: i + window_size]).most_common(1)[0][0]
         )
     _windows, _labels = np.array(windows), np.array(labels).reshape(-1, 1)
     assert _windows.ndim == 3, "Invalid train windows shape"

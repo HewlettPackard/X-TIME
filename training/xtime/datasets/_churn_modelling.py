@@ -45,6 +45,7 @@ class ChurnModellingBuilder(DatasetBuilder):
         self.path: Path = IO.get_path(path, "~/.cache/kaggle/datasets/shrutime")
         self.file_name = kwargs.get("file_name", "Churn_Modelling.csv")
 
+    def _check_pre_requisites(self) -> None:
         if not (self.path / self.file_name).is_file():
             raise RuntimeError(
                 f"Shrutime (Telco Modelling) not found. Please download it from "

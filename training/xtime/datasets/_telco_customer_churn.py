@@ -35,6 +35,17 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
     def __init__(self) -> None:
         super().__init__()
         self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self._data_dir = Path("~/.cache/kaggle/datasets/blastchar").expanduser()
+        self._data_file = "WA_Fn-UseC_-Telco-Customer-Churn.csv"
+
+    def _check_pre_requisites(self) -> None:
+        if not (self._data_dir / self._data_file).is_file():
+            raise RuntimeError(
+                f"Blastchar (Telco Customer Churn) not found. Please download it from "
+                f"`https://www.kaggle.com/datasets/blastchar/telco-customer-churn` and extract to "
+                f"{self._data_dir.as_posix()}. To proceed, this file "
+                f"must exist: {(self._data_dir / self._data_file).as_posix()}."
+            )
 
     def _build_default_dataset(self) -> Dataset:
         """Create `blastchar (Telco Customer Churn)` train/valid/test datasets.
@@ -48,18 +59,8 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
             Input: 19 features
             Task: binary classification
         """
-
-        data_dir = Path("~/.cache/kaggle/datasets/blastchar").expanduser()
-        file_name = "WA_Fn-UseC_-Telco-Customer-Churn.csv"
-        if not (data_dir / file_name).is_file():
-            raise RuntimeError(
-                f"Blastchar (Telco Customer Churn) not found. Please download it from "
-                f"`https://www.kaggle.com/datasets/blastchar/telco-customer-churn` and extract to "
-                f"{data_dir.as_posix()}. To proceed, this file must exist: {(data_dir / file_name).as_posix()}"
-            )
-
         # Load data
-        data: pd.DataFrame = pd.read_csv((data_dir / file_name).as_posix())
+        data: pd.DataFrame = pd.read_csv((self._data_dir / self._data_file).as_posix())
 
         # Pretty much all fields are categorical, except `customerID`. This one needs to be removed.
         data.drop("customerID", axis=1, inplace=True)
@@ -135,7 +136,7 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.BINARY_CLASSIFICATION, num_classes=2),
                 features=features,
-                properties={"source": (data_dir / file_name).as_uri()},
+                properties={"source": (self._data_dir / self._data_file).as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train.drop(label, axis=1, inplace=False), y=train[label]),

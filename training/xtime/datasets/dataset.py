@@ -246,7 +246,12 @@ class DatasetBuilder(object):
                 f"Unrecognized dataset version: name={self.NAME}, version={version}. "
                 f"Available versions: {list(self.builders.keys())}."
             )
+        self._check_pre_requisites()
         return self.builders[version](**kwargs)
+
+    def _check_pre_requisites(self) -> None:
+        """Check if source (raw) dataset resources exist or check that all necessary libraries are available."""
+        ...
 
     @abc.abstractmethod
     def _build_default_dataset(self, **kwargs) -> Dataset:
