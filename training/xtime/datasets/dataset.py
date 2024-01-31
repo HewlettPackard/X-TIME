@@ -16,6 +16,7 @@
 
 import abc
 import copy
+import logging
 import os
 import typing as t
 from dataclasses import dataclass, field
@@ -40,6 +41,8 @@ __all__ = [
     "DatasetBuilder",
     "DatasetTestCase",
 ]
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -162,11 +165,11 @@ class Dataset:
         def _save_split(_ds: DatasetSplit, _split_name: str) -> None:
             _file_path = directory / f"{_split_name}.pickle"
             if not _file_path.exists():
-                print(f"Saving {self.metadata.name}'s {_split_name} split.")
+                logger.debug("Saving %s's %s split.", self.metadata.name, _split_name)
                 with open(_file_path, "wb") as _file:
                     pickle.dump({"x": _ds.x, "y": _ds.y}, _file)
             else:
-                print(f"The {self.metadata.name}'s {_split_name} split file exists, skipping.")
+                logger.debug("The %s's %s split file exists, skipping.", self.metadata.name, _split_name)
 
         for name, split in self.splits.items():
             _save_split(split, name)
@@ -199,7 +202,7 @@ class DatasetBuilder(object):
     @staticmethod
     def _patch_minio() -> None:
         if os.environ.get("XTIME_DISABLE_PATCH_MINIO", "0") == "1":
-            print("[patch_minio] patch not performed: XTIME_DISABLE_PATCH_MINIO == 1")
+            logger.debug("[patch_minio] patch not performed: XTIME_DISABLE_PATCH_MINIO == 1.")
             return
 
         proxy_url: t.Optional[str] = None
@@ -208,14 +211,14 @@ class DatasetBuilder(object):
                 proxy_url = os.environ[proxy_url_param]
                 break
         if not proxy_url:
-            print("[patch_minio] patch not performed: no [https_proxy, HTTPS_PROXY, http_proxy, HTTP_PROXY]")
+            logger.debug("[patch_minio] patch not performed: no [https_proxy, HTTPS_PROXY, http_proxy, HTTP_PROXY]")
             return
 
         import minio
         import urllib3
 
         if getattr(minio.Minio.__init__, "__timex_patched", None) is True:
-            print("[patch_minio] patch not performed: already patched")
+            logger.debug("[patch_minio] patch not performed: already patched")
             return
 
         def _decorate(fn: t.Callable) -> t.Callable:
@@ -254,8 +257,7 @@ class DatasetBuilder(object):
         ...
 
     @abc.abstractmethod
-    def _build_default_dataset(self, **kwargs) -> Dataset:
-        ...
+    def _build_default_dataset(self, **kwargs) -> Dataset: ...
 
     def _build_numerical_dataset(self, **kwargs) -> Dataset:
         if kwargs:

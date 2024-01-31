@@ -1,3 +1,4 @@
+import logging
 import os
 import typing as t
 from collections import Counter
@@ -11,6 +12,8 @@ from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSpli
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["WISDMBuilder"]
+
+logger = logging.getLogger(__name__)
 
 
 _XTIME_DATASETS_WISDM = "XTIME_DATASETS_WISDM"
@@ -31,6 +34,7 @@ class WISDMBuilder(DatasetBuilder):
     using TensorFlow 2 and Keras):
         https://towardsdatascience.com/time-series-classification-for-human-activity-recognition-with-lstms-using-tensorflow-2-and-keras-b816431afdff
     """
+
     NAME = "wisdm"
 
     def __init__(self) -> None:
@@ -154,7 +158,7 @@ class WISDMBuilder(DatasetBuilder):
                     line = line.strip(" ;\n")
                     if not line:
                         # Skip all empty lines.
-                        print(f"Empty line (line_no={idx + 1})")
+                        logger.debug("Empty line (line_no=%s).", idx + 1)
                         continue
                     for instance in line.split(";"):
                         # Raw dataset contains `;` at the end of each line.
@@ -165,17 +169,15 @@ class WISDMBuilder(DatasetBuilder):
                         activity = columns[1].strip()
                         if len(columns) != 6:
                             # Some lines contains missing values (one of x,y,z accelerometer value).
-                            print(
-                                "Line contains an instance with wrong number of columns:",
-                                "line_no:",
+                            logger.debug(
+                                "Line contains an instance with wrong number of columns: line_no: %d, "
+                                "line: %s, instance: %s.",
                                 idx + 1,
-                                "line:",
                                 line,
-                                "instance:",
                                 instance,
                             )
                         elif activity not in class_names:
-                            print("Invalid class name:", "line_no:", idx + 1, "class_name:", activity)
+                            logger.debug("Invalid class name: line_no: %d, class_name: %s.", idx + 1, activity)
                         else:
                             output_stream.write(instance + "\n")
 
@@ -306,11 +308,11 @@ def _slide(
     for i in range(0, len(raw_vals) - window_size, stride):
         windows.append(
             # Take `window_size` rows (time steps)
-            raw_vals.iloc[i: (i + window_size)].values
+            raw_vals.iloc[i : (i + window_size)].values
         )
         labels.append(
             # Identify the most common label in this window (1 most common element returning list of (element, count))
-            Counter(y.iloc[i: i + window_size]).most_common(1)[0][0]
+            Counter(y.iloc[i : i + window_size]).most_common(1)[0][0]
         )
     _windows, _labels = np.array(windows), np.array(labels).reshape(-1, 1)
     assert _windows.ndim == 3, "Invalid train windows shape"
