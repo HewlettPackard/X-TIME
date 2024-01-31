@@ -158,3 +158,30 @@ python -m xtime.main hparams query --params=mlflow:///8037062a660847edabfede3ee3
 python -m xtime.main experiment describe summary --run=mlflow:///8037062a660847edabfede3ee3f6f4dc
 python -m xtime.main experiment describe best_trial --run=mlflow:///8037062a660847edabfede3ee3f6f4dc
 ```
+
+# Environment variables
+The following list contains some of the environment variables common across all experiments and runs that may be useful
+for users:
+- `MLFLOW_EXPERIMENT_NAME` Set MLflow experiment name for `xtime` runs. If this experiment does not exist, it will be
+  created. Usage example: `export MLFLOW_EXPERIMENT_NAME=xgboost`.
+- `MLFLOW_TAGS` Provide additional tags for MLflow runs. These tags can later be used to search for specific runs. A
+  common usage is to tag experiment rounds (e.g., round 1, round 2, round 3, etc.). The format for tags is the same as
+  format for hyperparameters with `params:` protocol (but without `params:`). 
+  Usage example: `export MLFLOW_TAGS='round=9'`.
+
+Other variables specific to some datasets:
+- `XTIME_DATASETS_WISDM` Specify directory location of the `wisdm` timeseries dataset. Dataset can be downloaded from 
+  here: https://www.cis.fordham.edu/wisdm/dataset.php. 
+  Usage example: `export XTIME_DATASETS_WISDM=/data/datasets/WISDM_ar_v1.1`.
+- `NUMBA_DISABLE_CUDA` Some of timeseries datasets builders use `tsfresh` library to compute timeseries features. This
+  library depends on `stumpy` library that depends on `numba` that detects CUDA runtime and tries to use it if 
+  available. When there's a mismatch between numba version and CUDA runtime, an exception is raised. To instruct `numba`
+  [not to use](https://numba.pydata.org/numba-doc/dev/reference/envvars.html#envvar-NUMBA_DISABLE_CUDA) CUDA, export 
+  this environment variable. Usage example: `export NUMBA_DISABLE_CUDA=1`.
+- `XTIME_DISABLE_PATCH_MINIO` At the time of development, we could not automatically download datasets hosted by OpenML
+  in a corporate environment (behind a firewall) because the underlying python library `minio` did not (still does 
+  not?) support setting proxy URLs. The dataset builders automatically patch `minio` whenever dataset is from OpenML. 
+  By setting this variable to 1 it is possible to disable this patching (see `xtime.datasets.DatasetBuilder` class for 
+  more details). Usage example: `export XTIME_DISABLE_PATCH_MINIO=1`. When this patching is not disabled, the `xtime`
+  looks for proxy server using the following ordered list of environment variables: `https_proxy`, `HTTPS_PROXY`, 
+  `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used. 
