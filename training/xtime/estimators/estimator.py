@@ -45,14 +45,11 @@ __all__ = ["Estimator", "get_estimator_registry", "get_estimator", "unit_test_tr
 
 
 class Callback(object):
-    def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
-        ...
+    def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None: ...
 
-    def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
-        ...
+    def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None: ...
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
-        ...
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None: ...
 
 
 class ContainerCallback(Callback):
@@ -104,13 +101,14 @@ class TrainCallback(Callback):
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         IO.save_yaml(dataset.metadata.to_json(), (self.work_dir / self.data_info_file).as_posix())
         IO.save_yaml(
-            {
+            data={
                 "estimator": {"cls": estimator.__class__.__name__, "params": encode(estimator.params)},
                 "hparams": self.hparams,
                 "context": self.context,
                 "env": {"cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES", None)},
             },
-            (self.work_dir / self.run_info_file).as_posix(),
+            file_path=self.work_dir / self.run_info_file,
+            raise_on_error=False,
         )
 
     def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
@@ -126,12 +124,10 @@ class Estimator(object):
         self.model = None
 
     @abc.abstractmethod
-    def save_model(self, save_dir: Path) -> None:
-        ...
+    def save_model(self, save_dir: Path) -> None: ...
 
     @abc.abstractmethod
-    def fit_model(self, dataset: Dataset, **kwargs) -> None:
-        ...
+    def fit_model(self, dataset: Dataset, **kwargs) -> None: ...
 
     @classmethod
     def fit(cls, hparams: t.Dict, ctx: Context) -> t.Dict:

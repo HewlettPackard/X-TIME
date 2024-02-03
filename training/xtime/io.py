@@ -48,7 +48,7 @@ def to_path(path: t.Union[str, Path], check_is_file: bool = False) -> Path:
 
 
 def encode(obj: t.Any) -> t.Any:
-    """General purpose encoder to encode object recursively to JSON serializable format."""
+    """General purpose encoder to encode object recursively to JSON / YAML serializable format."""
     if isinstance(obj, (list, tuple)):
         return [encode(item) for item in obj]
     if isinstance(obj, t.Dict):
@@ -123,18 +123,24 @@ class IO(object):
         return _dict
 
     @staticmethod
-    def save_yaml(data: t.Any, file_path: t.Union[str, Path]) -> None:
+    def save_yaml(data: t.Any, file_path: t.Union[str, Path], raise_on_error: bool = True) -> None:
         try:
             with open(file_path, "w") as stream:
                 yaml.dump(data, stream, Dumper=yaml.SafeDumper)
         except yaml.representer.RepresenterError:
-            logger.warning("file path = %s, data  = %s", file_path, data)
-            raise
+            logger.warning("YAML representation error (file_path=%s, data=%s).", file_path, data)
+            if raise_on_error:
+                raise
 
     @staticmethod
-    def save_json(data: t.Any, file_path: t.Union[str, Path]) -> None:
-        with open(file_path, "w") as stream:
-            json.dump(data, stream)
+    def save_json(data: t.Any, file_path: t.Union[str, Path], raise_on_error: bool = True) -> None:
+        try:
+            with open(file_path, "w") as stream:
+                json.dump(data, stream)
+        except TypeError:
+            logger.warning("JSON representation error (file_path=%s, data=%s).", file_path, data)
+            if raise_on_error:
+                raise
 
     @staticmethod
     def save_data_frame(df: pd.DataFrame, file_path: t.Union[str, Path]) -> None:

@@ -15,6 +15,7 @@
 ###
 
 import copy
+import logging
 import os
 import sys
 import typing as t
@@ -29,6 +30,7 @@ from ray.tune import ResultGrid, TuneConfig
 from ray.tune.search import BasicVariantGenerator, ConcurrencyLimiter
 from ray.tune.search.hyperopt import HyperOptSearch
 
+import xtime.contrib.tune_ext as ray_tune_extensions
 import xtime.hparams as hp
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.contrib.tune_ext import Analysis, RayTuneDriverToMLflowLoggerCallback
@@ -39,19 +41,22 @@ from xtime.io import IO, encode
 from xtime.ml import METRICS
 from xtime.run import Context, Metadata, RunType
 
+logger = logging.getLogger(__name__)
+
 
 def search_hp(
-    dataset: str, model: str, algorithm: str, hparams: HParamsSource, num_trials: int, gpu: bool = False
+    dataset: str, model: str, algorithm: str, hparams: t.Optional[HParamsSource], num_trials: int, gpu: bool = False
 ) -> str:
     estimator: t.Type[Estimator] = get_estimator(model)
 
     ray.init()
+    ray_tune_extensions.add_representers()
     MLflow.create_experiment()
     with mlflow.start_run(description=" ".join(sys.argv)) as active_run:
         # This MLflow run tracks Ray Tune hyperparameter search. Individual trials won't have their own MLflow runs.
         MLflow.init_run(active_run)
         IO.save_yaml(
-            {
+            data={
                 "dataset": dataset,
                 "model": model,
                 "algorithm": algorithm,
@@ -59,13 +64,14 @@ def search_hp(
                 "num_trials": num_trials,
                 "gpu": gpu,
             },
-            MLflow.get_artifact_path(active_run) / "run_inputs.yaml",
+            file_path=MLflow.get_artifact_path(active_run) / "run_inputs.yaml",
+            raise_on_error=False,
         )
         artifact_path: Path = MLflow.get_artifact_path(active_run)
         run_id: str = active_run.info.run_id
 
         ctx = Context(Metadata(dataset=dataset, model=model, run_type=RunType.HPO), dataset=build_dataset(dataset))
-        IO.save_yaml(ctx.dataset.metadata.to_json(), artifact_path / "dataset_info.yaml")
+        IO.save_yaml(ctx.dataset.metadata.to_json(), artifact_path / "dataset_info.yaml", raise_on_error=False)
         _set_tags(
             dataset=dataset,
             model=model,
@@ -76,7 +82,12 @@ def search_hp(
         )
         mlflow.log_params({"dataset": dataset, "model": model, "algorithm": algorithm, "num_trials": num_trials})
 
-        param_space: t.Dict = get_hparams(hparams, ctx)
+        if hparams is None:
+            hparams = f"auto:default:model={model};task={ctx.dataset.metadata.task.type.value};run_type=hpo"
+            logger.info(f"Hyperparameters are not provided, using default ones: '%s'.", hparams)
+        param_space: t.Dict = get_hparams(hparams)
+        logger.info("Hyperparameter search space resolved to: '%s'", param_space)
+
         tune_config = _init_search_algorithm(
             TuneConfig(
                 metric=METRICS.get_primary_metric(ctx.dataset.metadata.task), mode="min", num_samples=num_trials

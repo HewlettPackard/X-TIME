@@ -16,29 +16,16 @@
 import typing as t
 from unittest import TestCase
 
-from xtime.datasets import Dataset, DatasetMetadata
 from xtime.hparams import get_hparams
-from xtime.ml import ClassificationTask, RegressionTask, Task, TaskType
-from xtime.run import Context, Metadata, RunType
+from xtime.ml import Task
 
 TaskLike = t.TypeVar("TaskLike", bound=Task)
 
 
 class TestRecommender(TestCase):
-    @staticmethod
-    def _get_context(model: str, task: TaskLike) -> Context:
-        return Context(
-            metadata=Metadata(dataset="iris", model=model, run_type=RunType.TRAIN),
-            dataset=Dataset(metadata=DatasetMetadata(name="iris", version="0.0.1", task=task)),
-        )
 
     def test_default_lightgbm(self):
-        params: t.Dict = get_hparams(
-            source="default",
-            ctx=self._get_context(
-                "lightgbm", ClassificationTask(type_=TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=3)
-            ),
-        )
+        params: t.Dict = get_hparams("auto:default:model=lightgbm;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,
@@ -54,35 +41,22 @@ class TestRecommender(TestCase):
         )
 
     def test_default_dummy_classifier(self):
-        params: t.Dict = get_hparams(
-            source="default",
-            ctx=self._get_context(
-                "dummy", ClassificationTask(type_=TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=3)
-            ),
-        )
+        params: t.Dict = get_hparams("auto:default:model=dummy;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"strategy": "prior", "random_state": 1})
 
     def test_default_dummy_regressor(self):
-        params: t.Dict = get_hparams(source="default", ctx=self._get_context("dummy", RegressionTask()))
+        params: t.Dict = get_hparams("auto:default:model=dummy;task=regression")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"strategy": "mean"})
 
     def test_default_rf(self):
-        params: t.Dict = get_hparams(
-            source="default",
-            ctx=self._get_context("rf", ClassificationTask(type_=TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=3)),
-        )
+        params: t.Dict = get_hparams("auto:default:model=rf;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"n_estimators": 100, "max_depth": 6, "random_state": 1})
 
     def test_default_catboost(self):
-        params: t.Dict = get_hparams(
-            source="default",
-            ctx=self._get_context(
-                "catboost", ClassificationTask(type_=TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=3)
-            ),
-        )
+        params: t.Dict = get_hparams("auto:default:model=catboost;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,
@@ -98,12 +72,7 @@ class TestRecommender(TestCase):
         )
 
     def test_default_xgboost(self):
-        params: t.Dict = get_hparams(
-            source="default",
-            ctx=self._get_context(
-                "xgboost", ClassificationTask(type_=TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=3)
-            ),
-        )
+        params: t.Dict = get_hparams("auto:default:model=xgboost;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,

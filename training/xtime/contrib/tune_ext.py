@@ -21,11 +21,13 @@ from pathlib import Path
 
 import mlflow
 import pandas as pd
+import yaml
 from mlflow.entities import Run
 from mlflow.utils.file_utils import local_file_uri_to_path
 from ray import tune
 from ray.tune import Callback
 from ray.tune.experiment import Trial
+from ray.tune.search import sample
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import DatasetMetadata
@@ -33,7 +35,7 @@ from xtime.io import IO
 from xtime.ml import METRICS
 from xtime.run import RunType
 
-__all__ = ["gpu_available", "RayTuneDriverToMLflowLoggerCallback", "Analysis"]
+__all__ = ["gpu_available", "RayTuneDriverToMLflowLoggerCallback", "Analysis", "RandomVarDomain", "add_representers"]
 
 
 def gpu_available() -> bool:
@@ -260,3 +262,136 @@ def _check_mode(mode: str) -> str:
     if mode not in ("min", "max"):
         raise ValueError(f"Invalid mode ({mode}). Expecting one of (`min`, `max`).")
     return mode
+
+
+RandomVarDomain = t.TypeVar("RandomVarDomain", bound=sample.Domain)
+"""Domain types for random variables (children of `Domain` class) such as `Float`, `Integer` and `Categorical`."""
+
+
+class YamlEncoder:
+    @staticmethod
+    def represent(dumper: yaml.representer.BaseRepresenter, rv: RandomVarDomain) -> yaml.nodes.MappingNode:
+        """Represent given random variable for yaml dumper."""
+        sampler: t.Dict = YamlEncoder.sampler_to_dict(rv.sampler)
+        if isinstance(rv, sample.Integer):
+            return dumper.represent_mapping(
+                "ray.tune.search.sample.Integer", [("lower", rv.lower), ("upper", rv.upper), ("sampler", sampler)]
+            )
+        if isinstance(rv, sample.Float):
+            return dumper.represent_mapping(
+                "ray.tune.search.sample.Float", [("lower", rv.lower), ("upper", rv.upper), ("sampler", sampler)]
+            )
+        if isinstance(rv, sample.Categorical):
+            return dumper.represent_mapping(
+                "ray.tune.search.sample.Categorical", [("categories", rv.categories), ("sampler", sampler)]
+            )
+        raise ValueError(f"Unsupported domain ({rv}).")
+
+    @staticmethod
+    def construct_float(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+        """Reconstruct floating point domain."""
+        assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
+        values: t.Dict = loader.construct_mapping(node, deep=True)
+        return YamlEncoder._with_sampler(sample.Float(values["lower"], values["upper"]), values["sampler"])
+
+    @staticmethod
+    def construct_integer(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+        """Reconstruct integer domain."""
+        assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
+        values: t.Dict = loader.construct_mapping(node, deep=True)
+        return YamlEncoder._with_sampler(sample.Integer(values["lower"], values["upper"]), values["sampler"])
+
+    @staticmethod
+    def construct_category(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+        """Reconstruct categorical domain."""
+        assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
+        values: t.Dict = loader.construct_mapping(node, deep=True)
+        return YamlEncoder._with_sampler(sample.Categorical(values["categories"]), values["sampler"])
+
+    @staticmethod
+    def _with_sampler(rv: RandomVarDomain, sampler: t.Dict, q: t.Optional[int] = None) -> RandomVarDomain:
+        """Add to random variable appropriate sampler based on its dictionary representation.
+
+        Args:
+            rv: Random variable.
+            sampler: Sampler for this random variable.
+            q: If not None, sampler needs to be wrapped with a quantized sampler.
+
+        Returns:
+            Input variable (that is modified in-place) with properly set sampler.
+        """
+
+        def _quantized(_rv: t.Union[sample.Integer, sample.Float]) -> sample.Domain:
+            assert q is None or (
+                q is not None and not isinstance(_rv, sample.Categorical)
+            ), f"Samplers for categorical variables cannot be quantized (var={_rv})."
+            return _rv if q is None else _rv.quantized(q)
+
+        sampler_t = sampler["_sampler"]
+        if sampler_t == "none":
+            return rv
+        if sampler_t == "grid":
+            assert isinstance(rv, sample.Categorical), "Only categorical variables can have grid sampler."
+            return rv.grid()
+        if sampler_t == "uniform":
+            return _quantized(rv.uniform())
+
+        assert isinstance(
+            rv, (sample.Integer, sample.Float)
+        ), f"Only numerical variables can have loguniform and normal samplers (var={rv}, sampler={sampler}, q={q})."
+        if sampler_t == "loguniform":
+            return _quantized(rv.loguniform(sampler["base"]))
+        if sampler_t == "quantized":
+            return YamlEncoder._with_sampler(rv, sampler["sampler"], sampler["q"])
+
+        assert isinstance(
+            rv, sample.Float
+        ), f"Only float variables can have normal samplers (var={rv}, sampler={sampler}, q={q})."
+        if sampler_t == "normal":
+            return _quantized(rv.normal(sampler["mean"], sampler["sd"]))
+
+        raise ValueError(f"Unexpected sampler ({sampler}).")
+
+    @staticmethod
+    def sampler_to_dict(sampler: sample.Sampler) -> t.Dict:
+        """Represent a sampler using python dictionary.
+
+        Args:
+            sampler: Ray tune sampler.
+        Returns:
+            Dictionary with keys describing this sampler and that later can be used to uniquely recreate this sampler.
+        """
+        names = [
+            (sample.Grid, "grid"),
+            (sample.Quantized, "quantized"),
+            (sample.Normal, "normal"),
+            (sample.Uniform, "uniform"),
+            (sample.LogUniform, "loguniform"),
+        ]
+        sdict = {"_sampler": "none"}
+        for stype, sname in names:
+            if isinstance(sampler, stype):
+                sdict["_sampler"] = sname
+                break
+        if sampler is not None and sdict["_sampler"] == "none":
+            raise ValueError(f"Unsupported sampler: {sampler}.")
+
+        if isinstance(sampler, sample.LogUniform):
+            sdict.update(base=sampler.base)
+        elif isinstance(sampler, sample.Normal):
+            sdict.update(mean=sampler.mean, sd=sampler.sd)
+        elif isinstance(sampler, sample.Quantized):
+            sdict.update(q=sampler.q, sampler=YamlEncoder.sampler_to_dict(sampler.sampler))
+
+        return sdict
+
+
+def add_representers() -> None:
+    if sample.Integer not in yaml.SafeDumper.yaml_representers:
+        for var_type in (sample.Categorical, sample.Integer, sample.Float):
+            yaml.add_representer(var_type, YamlEncoder.represent, Dumper=yaml.SafeDumper)
+
+        loader = yaml.SafeLoader
+        yaml.add_constructor("ray.tune.search.sample.Categorical", YamlEncoder.construct_category, Loader=loader)
+        yaml.add_constructor("ray.tune.search.sample.Integer", YamlEncoder.construct_integer, Loader=loader)
+        yaml.add_constructor("ray.tune.search.sample.Float", YamlEncoder.construct_float, Loader=loader)

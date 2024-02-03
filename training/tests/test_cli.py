@@ -96,7 +96,7 @@ class TestMain(TestCase):
                 "--params",
                 "params:n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))",
             ],
-            ["--params", "default", "--ctx", 'model="xgboost";task="multi_class_classification";num_classes=5'],
+            ["--params", "auto:default:model=xgboost;task='multi_class_classification'"],
         ]
         for cmd_args in args:
             result: Result = CliRunner().invoke(hparams_query, cmd_args)

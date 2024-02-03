@@ -27,14 +27,11 @@ from ray import tune
 from xtime.datasets import (
     Dataset,
     DatasetBuilder,
-    DatasetMetadata,
     build_dataset,
     get_dataset_builder_registry,
     get_known_unknown_datasets,
 )
 from xtime.estimators import get_estimator_registry
-from xtime.ml import ClassificationTask, TaskType
-from xtime.run import Context, Metadata, RunType
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +76,7 @@ def _run_search_hp_pipeline(
     dataset: str,
     model: str,
     algorithm: str,
-    hparams: t.Tuple[str],
+    hparams: t.Optional[t.Tuple[str]],
     num_search_trials: int,
     num_validate_trials: int = 0,
     gpu: bool = False,
@@ -135,7 +132,9 @@ def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
     from xtime.stages.train import train
 
     try:
-        train(dataset, model, params)
+        # When no --params are provided, the `params` will be empty. Setting no None here
+        # will enable the train function to retrieve default parameters in this case.
+        train(dataset, model, params if len(params) > 0 else None)
     except Exception as err:
         print_err_and_exit(err)
 
@@ -173,6 +172,9 @@ def experiment_search_hp(
     num_validate_trials: int = 0,
     gpu: bool = False,
 ) -> None:
+    # When no --params are provided, the `params` will be empty. Setting no None here
+    # will enable the search_hp function to retrieve default parameters in this case.
+    params = params if len(params) > 0 else None
     try:
         known_problems, unknown_problems = get_known_unknown_datasets(dataset.split(sep=","))
         if unknown_problems:
@@ -299,50 +301,14 @@ def model_list() -> None:
 def hparams() -> None: ...
 
 
-@hparams.command("query", help="Query hyperparameters for a given set of input URIs.")
+@hparams.command("query", help="Query hyperparameters for a given set of input specifications.")
 @params_option
-@click.option(
-    "--ctx",
-    "-c",
-    metavar="CONTEXT",
-    required=False,
-    type=str,
-    default=None,
-    help="Optional context for hyperparameters when one of hyperparameter source is a HP recommender. It is specified "
-    "using the same format as hyperparameters - a semicolon-separated list of key-value pairs. One field must be "
-    "present - model. For example: `--ctx dataset=model=xgboost`",
-)
-def hparams_query(params: t.Tuple[str], ctx: t.Optional[str] = None) -> None:
+def hparams_query(params: t.Tuple[str]) -> None:
     try:
         import xtime.hparams as hp
 
-        if len(params) == 0:
-            print("No hyperparameters provided.")
-            exit(1)
-
-        ctx_obj: t.Optional[Context] = None
-        if ctx:
-            parsed_ctx = hp.get_hparams(f"params:{ctx}")
-            if "model" not in parsed_ctx:
-                raise ValueError("Context must contain a model field.")
-            if "task" not in parsed_ctx:
-                raise ValueError("Context must contain a task field.")
-            parsed_ctx["task"] = TaskType(parsed_ctx["task"])
-            ctx_obj = Context(
-                metadata=Metadata(
-                    dataset=parsed_ctx.get("dataset", "na"), model=parsed_ctx["model"], run_type=RunType.HPO
-                ),
-                dataset=Dataset(
-                    metadata=DatasetMetadata(
-                        name=parsed_ctx.get("dataset", "na"),
-                        version="NA",
-                        task=ClassificationTask(type_=parsed_ctx["task"], num_classes=parsed_ctx.get("num_classes", 2)),
-                    )
-                ),
-            )
-
-        hparams_: t.Dict = hp.get_hparams(params, ctx_obj)
-        json.dump(hparams_, sys.stdout, indent=4, cls=hp.JsonEncoder)
+        hp_dict: t.Dict = hp.get_hparams(params)
+        json.dump(hp_dict, sys.stdout, indent=4, cls=hp.JsonEncoder)
         print("")
     except Exception as err:
         print_err_and_exit(err)
