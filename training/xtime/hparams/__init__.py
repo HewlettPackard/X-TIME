@@ -21,8 +21,8 @@ from ._hparams import (
     HParamsSpec,
     JsonEncoder,
     ValueSpec,
+    from_auto,
     from_file,
-    from_list,
     from_mlflow,
     from_string,
     get_hparams,
@@ -37,7 +37,7 @@ __all__ = [
     "HParamsSpec",
     "get_hparams",
     "from_mlflow",
-    "from_list",
+    "from_auto",
     "from_string",
     "from_file",
 ]

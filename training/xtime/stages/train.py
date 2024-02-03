@@ -14,36 +14,48 @@
 # limitations under the License.
 ###
 
+import logging
 import sys
 import typing as t
 
 import mlflow
 
+import xtime.contrib.tune_ext as ray_tune_extensions
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import build_dataset
 from xtime.estimators import Estimator, get_estimator
-from xtime.hparams import get_hparams
+from xtime.hparams import HParamsSource, get_hparams
 from xtime.io import IO
 from xtime.run import Context, Metadata, RunType
 
+logger = logging.getLogger(__name__)
 
-def train(dataset: str, model: str, hparams: t.Union[t.Dict, str, t.Tuple[str], t.List[str]]) -> None:
+
+def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
     """Train a model for a given problem using default, HP-optimized or pre-defined parameters.
 
     Enable GPUs by setting CUDA_VISIBLE_DEVICES variable (e.g., CUDA_VISIBLE_DEVICES=0 python -m xtime ...).
     """
+    ray_tune_extensions.add_representers()
     MLflow.create_experiment()
     with mlflow.start_run(description=" ".join(sys.argv)) as active_run:
         # This MLflow run tracks model training.
         MLflow.init_run(active_run)
         IO.save_yaml(
-            {"dataset": dataset, "model": model, "hparams": hparams},
-            MLflow.get_artifact_path(active_run) / "run_inputs.yaml",
+            data={"dataset": dataset, "model": model, "hparams": hparams},
+            file_path=MLflow.get_artifact_path(active_run) / "run_inputs.yaml",
+            raise_on_error=False,
         )
         context = Context(
             metadata=Metadata(dataset=dataset, model=model, run_type=RunType.TRAIN), dataset=build_dataset(dataset)
         )
-        hparams: t.Dict = get_hparams(hparams, context)
+        if hparams is None:
+            hparams = f"auto:default:model={model};task={context.dataset.metadata.task.type.value};run_type=train"
+            logger.info(f"Hyperparameters are not provided, using default ones: '%s'.", hparams)
+
+        hp_dict: t.Dict = get_hparams(hparams)
+        logger.info("Hyperparameters resolved to: '%s'", hp_dict)
+
         estimator: t.Type[Estimator] = get_estimator(model)
-        _ = estimator.fit(hparams, context)
+        _ = estimator.fit(hp_dict, context)
         print(f"MLflowRun uri=mlflow:///{active_run.info.run_id}")

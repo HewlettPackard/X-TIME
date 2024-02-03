@@ -25,6 +25,7 @@ from ray.tune.search.sample import Domain
 from ray.tune.search.variant_generator import generate_variants
 
 from xtime.io import IO, PathLike
+from xtime.run import RunType
 
 __all__ = [
     "HParamsSource",
@@ -34,15 +35,26 @@ __all__ = [
     "ValueSpec",
     "HParamsSpec",
     "get_hparams",
+    "from_auto",
     "from_mlflow",
-    "from_list",
     "from_string",
     "from_file",
 ]
 
-from xtime.run import Context, RunType
 
-HParamsSource = t.Union[t.Dict, str, t.Tuple[str], t.List[str]]
+HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict]]]
+"""Specification options for hyperparameters (HP).
+
+    - dict: Ready-to-use dictionary of HPs mapping HP names to values. 
+    - tuple, list: Sequence of specifications (e.g., multiple sources). Merging is done left to right, e.g.,
+        sequence [hparams1, hparams2, hparams3] results in 
+        `hps = hparams1.copy(); hps.update(hparams2); hps.update(hparams3)`.
+    - str: string representation of HPs or URI of where HPs should be retrieved from. Options are:
+        - `mlflow:///MLFLOW_RUN_ID` retrieve HPs from MLflow run (train or HP search).
+        - `params:lr=0.3;batch=128` in-place specification.
+        - `file:params.yaml` Load HPs from one of supported file formats.
+        - ''
+"""
 
 HParams = t.Dict
 """Dictionary of hyperparameters. It should map from a parameter name to a parameter (primitive) value."""
@@ -81,9 +93,15 @@ class ValueSpec(object):
 
 
 class HParamsSpec(object):
-    """Helper class to define hyperparameters that provide default value, search space and random sample."""
+    """Helper class to define hyperparameters that provide default value, search space and random sample.
+
+    Args:
+        kwargs: dictionary mapping HP name to its value specification (ValueSpec).
+    """
 
     def __init__(self, **kwargs) -> None:
+        for name, value in kwargs.items():
+            assert isinstance(value, ValueSpec), f"Invalid HP value spec ({value}) for HP `{name}`."
         self.params: t.Dict[str, ValueSpec] = copy.deepcopy(kwargs)
 
     def default(self) -> HParams:
@@ -109,52 +127,105 @@ class HParamsSpec(object):
         return _params
 
 
-def get_hparams(source: t.Optional[HParamsSource] = None, ctx: t.Optional[Context] = None) -> t.Dict:
-    hp: t.Optional[t.Dict] = None
+def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
+    """Retrieve/convert hyperparameters from/in source to standard representation - dictionary.
+    Args:
+        source: Source or sources of hyperparameters. For possible values and how they are processed see the source
+            code of this function.
+    """
+
+    hp_dict: t.Optional[t.Dict] = None
     if source is None:
-        hp = {}
+        # Just empty dict of hyperparameters.
+        hp_dict = {}
     elif isinstance(source, t.Dict):
-        hp = copy.deepcopy(source)
+        # It is assumed that source is already a valid hyperparameter dictionary.
+        hp_dict = copy.deepcopy(source)
     elif isinstance(source, (t.List, t.Tuple)):
-        hp: t.Dict = {}
+        # This is a list of multiple sources.
+        hp_dict: t.Dict = {}
         for one_source in source:
-            hp.update(get_hparams(one_source, ctx))
+            hp_dict.update(get_hparams(one_source))
     elif isinstance(source, str):
         source = source.strip()
-        if source == "default":
-            if ctx is None:
-                hp = {}
-            else:
-                from tinydb import Query
-                from xtime.hparams.recommender import DefaultRecommender
-
-                query = Query()
-                query = (query.tags.model == ctx.metadata.model)
-                if ctx.dataset and ctx.dataset.metadata.task:
-                    query = query & Query().tags.tasks.any([ctx.dataset.metadata.task.type.value])
-                recommender = DefaultRecommender()
-
-                if ctx.metadata.run_type == RunType.TRAIN:
-                    recommendations: t.List[t.Dict] = recommender.recommend_default_values(query)
-                elif ctx.metadata.run_type == RunType.HPO:
-                    recommendations: t.List[t.Dict] = recommender.recommend_search_space(query)
-                else:
-                    raise ValueError(f"Unknown run_type={ctx.metadata.run_type}")
-
-                hp = recommendations[0] if recommendations else {}
+        if source.startswith("auto:"):
+            hp_dict = from_auto(source)
         elif source.startswith("mlflow:///"):
-            hp = from_mlflow(source)
-        elif source.startswith("params:"):
-            hp = from_string(source)
+            # Retrieve hyperparameters from an MLflow run.
+            hp_dict = from_mlflow(source)
         elif source.startswith("file:") or os.path.isfile(source):
-            hp = from_file(source)
+            # Retrieve hyperparameters from a file.
+            hp_dict = from_file(source)
+        else:
+            # Try to parse string that contains hyperparameters.
+            hp_dict = from_string(source)
 
-    if not isinstance(hp, dict):
+    if not isinstance(hp_dict, dict):
         raise ValueError(
             f"Unsupported source of hparams (source=(value={source}, type={type(source)}). Extracted hyperparameters "
-            f"expected to be a dictionary but hp=(value={hp}, type={type(hp)})."
+            f"expected to be a dictionary but hp_dict=(value={hp_dict}, type={type(hp_dict)})."
         )
-    return hp
+    return hp_dict
+
+
+def from_auto(params: t.Optional[str] = None) -> t.Dict:
+    """Request hyperparameters from an external entity such as hyperparameter recommender.
+
+    Args:
+        params: A string containing entity name and query parameters. It must have the following format:
+            [auto:]NAME:QUERY. The `auto:` is an optional scheme specification that differentiates this HP specification
+            from others such MLflow runs, files, etc. The NAME (string) is the name of the entity to retrieve
+            hyperparameters from. The QUERY is generally an optional key-value semicolon-separated string that defines
+            context for the problem for which hyperparameters should be retrieved. It's the same format used for
+            hyperparameters (e.g., `lr=0.1;batch=128`). Example specifications:
+                - `auto:default:model=xgboost;task=binary_classification` Retrieve hyperparameters from a hyperparameter
+                    recommender model identified with the `default` name for XGBoost model and binary classification
+                    problems.
+    Returns:
+         Dictionary with hyperparameter values or hyperparameters search spaces.
+
+    Supported entities:
+        - `default` Default recommender that's part of this project. Defines common hyperparameters and their search
+            spaces for multiple models (XGBoost, LightGBM, CatBoost and others) amd multiple tasks (regression, binary
+            and multi-class classification).
+
+    """
+    params = _str_content(params, "auto:")
+    if not params:
+        return {}
+
+    source_and_query: t.List[str] = params.split(":", maxsplit=1)
+    source, query_str = (source_and_query[0], None) if len(source_and_query) == 1 else source_and_query
+    query_params: t.Dict = from_string(query_str)
+
+    if source == "default":
+        from tinydb import Query
+
+        from xtime.hparams.recommender import DefaultRecommender
+
+        query = Query()
+        model = query_params.pop("model", None)
+        if model:
+            query = query.tags.model == model
+        task = query_params.pop("task", None)
+        if task:
+            query = query & Query().tags.tasks.any([task])
+        run_type = query_params.pop("run_type", "train")
+        if query_params:
+            raise ValueError(
+                "The implementation is in its early stages, and we only support the following parameters - `model`, "
+                "`task` and `run_type`."
+            )
+
+        recommender = DefaultRecommender()
+        if run_type == RunType.TRAIN.value:
+            recommendations: t.List[t.Dict] = recommender.recommend_default_values(query)
+        elif run_type == RunType.HPO.value:
+            recommendations: t.List[t.Dict] = recommender.recommend_search_space(query)
+        else:
+            raise ValueError(f"Unknown run_type={run_type}. Must be one of 'train', 'hpo'.")
+
+        return recommendations[0] if recommendations else {}
 
 
 def from_string(params: t.Optional[str] = None) -> t.Dict:
@@ -172,14 +243,8 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
     Returns:
         Dictionary of hyperparameters.
     """
-    if not params:
-        return {}
-    if params.startswith("params:"):
-        params = params[7:]
-    return from_list(params.split(";"))
-
-
-def from_list(params: t.Optional[t.List[str]] = None) -> t.Dict:
+    # Check if input is empty
+    params = _str_content(params, "params:")
     if not params:
         return {}
 
@@ -190,14 +255,20 @@ def from_list(params: t.Optional[t.List[str]] = None) -> t.Dict:
 
     from xtime.hparams import ValueSpec  # noqa # pylint: disable=unused-import
 
-    parsed = {}
-    for idx, param in enumerate(params):
+    # Iterate over each parameter and parse it.
+    hp_dict = {}
+    for idx, param in enumerate(params.split(";")):
         try:
             name, value = param.split("=")
         except ValueError as err:
             raise ValueError(f"Invalid parameter in from_list (params={params}, idx={idx}, param={param}).") from err
-        parsed[name.strip()] = eval(value)
-    return parsed
+        try:
+            # Try to evaluate the value, if failed, use as is its string value. Maybe confusing, but simplifies
+            # providing string values, e.g., model=xgboost instead of model='xgboost'.
+            hp_dict[name.strip()] = eval(value)
+        except NameError:
+            hp_dict[name.strip()] = value
+    return hp_dict
 
 
 def from_mlflow(url: str) -> t.Dict:
@@ -230,25 +301,47 @@ def from_mlflow(url: str) -> t.Dict:
     run = mlflow.get_run(run_id=url)
     if "run_type" not in run.data.tags:
         raise RuntimeError("Can't use MLflow run as configuration source: `run_type` tag not present.")
-    run_type = RunType(run.data.tags["run_type"])
+    run_type: str = RunType(run.data.tags["run_type"])
 
     if run_type == RunType.TRAIN:
-        return copy.deepcopy(run.data.params)
-
-    if run_type == RunType.HPO:
+        # Just use parameters of this run
+        hp_dict = copy.deepcopy(run.data.params)
+    elif run_type == RunType.HPO:
+        # Find the best trial and return its parameters
         artifact_path: Path = Path(local_file_uri_to_path(run.info.artifact_uri))
         if (artifact_path / "best_trial.yaml").is_file():
-            best_trial = IO.load_yaml(artifact_path / "best_trial.yaml")
-            return IO.load_json(artifact_path / best_trial["relative_path"] / "params.json")
+            best_trial_info: t.Dict = IO.load_dict(artifact_path / "best_trial.yaml")
+            best_trial_path = artifact_path / best_trial_info["relative_path"]
         else:
             experiment = tune.ExperimentAnalysis((artifact_path / "ray_tune").as_posix())
-            dataset_info = IO.load_yaml(artifact_path / "dataset_info.yaml")
-            perf_metric = "valid_mse" if dataset_info["Dataset"]["task"] == "REGRESSION" else "valid_loss_mean"
-            best_trial: Trial = experiment.get_best_trial(perf_metric, mode="min")
-            return IO.load_json((Path(best_trial.logdir) / "params.json").as_posix())
+            dataset_info: t.Dict = IO.load_dict(artifact_path / "dataset_info.yaml")
+            best_trial: Trial = experiment.get_best_trial(
+                "valid_mse" if dataset_info["Dataset"]["task"] == "REGRESSION" else "valid_loss_mean", mode="min"
+            )
+            best_trial_path = Path(best_trial.logdir)
+        hp_dict = from_file(best_trial_path / "params.json")
+    else:
+        raise RuntimeError(f"Can't use MLflow run as configuration source: unsupported run_type={run_type}.")
 
-    raise RuntimeError(f"Can't use MLflow run as configuration source: unsupported run_type={run_type}.")
+    return hp_dict
 
 
 def from_file(url: PathLike) -> t.Dict:
-    return IO.load_dict(url)
+    """Load dictionary of hyperparameters from a file.
+
+    Args:
+        url: Path to a file that contains python dictionary. One of supported formats are JSON and YAML.
+    Returns:
+        Python dictionary.
+    """
+    hp_dict: t.Dict = IO.load_dict(url)
+    assert isinstance(hp_dict, dict), f"IO.load_dict did not return dictionary (type={type(hp_dict)})."
+    return hp_dict
+
+
+def _str_content(str_val: t.Optional[str], scheme: str) -> str:
+    assert str_val is None or isinstance(str_val, str), f"Invalid `str_val` type ({type(str_val)})."
+    str_val = str_val.strip() if isinstance(str_val, str) else ""
+    if str_val.startswith(scheme):
+        str_val = str_val[len(scheme) :]
+    return str_val
