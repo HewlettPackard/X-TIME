@@ -27,7 +27,7 @@ from mlflow import ActiveRun
 from ray import tune
 from ray.air import Result, RunConfig
 from ray.tune import ResultGrid, TuneConfig
-from ray.tune.search import BasicVariantGenerator, ConcurrencyLimiter
+from ray.tune.search import BasicVariantGenerator
 from ray.tune.search.hyperopt import HyperOptSearch
 
 import xtime.contrib.tune_ext as ray_tune_extensions
@@ -88,9 +88,16 @@ def search_hp(
         param_space: t.Dict = get_hparams(hparams)
         logger.info("Hyperparameter search space resolved to: '%s'", param_space)
 
+        # Set any `tune_config` parameters before calling  the `_init_search_algorithm` method. The reason for this is
+        # there maybe duplicate parameters in the `search_alg` instance that will not be set (e.g.,
+        # BasicVariantGenerator's max_concurrent parameter).
         tune_config = _init_search_algorithm(
+            # The `max_concurrent_trials` can be overriden in `_init_search_algorithm`
             TuneConfig(
-                metric=METRICS.get_primary_metric(ctx.dataset.metadata.task), mode="min", num_samples=num_trials
+                metric=METRICS.get_primary_metric(ctx.dataset.metadata.task),
+                mode="min",
+                num_samples=num_trials,
+                max_concurrent_trials=0,
             ),
             algorithm,
         )
@@ -119,15 +126,22 @@ def search_hp(
 
 
 def _init_search_algorithm(tune_config: TuneConfig, algorithm: str) -> TuneConfig:
+    """
+    - Setting `tune_config.max_concurrent_trials` wraps search algorithm with `ConcurrencyLimiter`.
+    """
+    # None and 0 means the same thing - no limit, so set to 0 to simplify subsequent comparison.
+    if tune_config.max_concurrent_trials is None:
+        tune_config.max_concurrent_trials = 0
+
     if algorithm == "random":
-        tune_config.search_alg = BasicVariantGenerator(random_state=1)
-        tune_config.max_concurrent_trials = 2
+        tune_config.search_alg = BasicVariantGenerator(random_state=1, max_concurrent=tune_config.max_concurrent_trials)
     elif algorithm == "hyperopt":
-        tune_config.search_alg = ConcurrencyLimiter(
-            HyperOptSearch(metric=tune_config.metric, mode=tune_config.mode, n_initial_points=20, random_state_seed=1),
-            max_concurrent=2,
+        tune_config.search_alg = HyperOptSearch(
+            metric=tune_config.metric, mode=tune_config.mode, n_initial_points=20, random_state_seed=1
         )
-        tune_config.max_concurrent_trials = None
+        if tune_config.max_concurrent_trials == 0:
+            logger.info("TuneConfig's max_concurrent_trials is unlimited - setting to 2 for HyperOptSearch algorithm.")
+            tune_config.max_concurrent_trials = 2
     else:
         raise ValueError(f"Unsupported hyperparameter optimization algorithm: {algorithm}")
     return tune_config
