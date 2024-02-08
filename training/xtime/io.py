@@ -28,6 +28,8 @@ from mlflow.utils.file_utils import local_file_uri_to_path
 
 __all__ = ["encode", "PathLike", "to_path", "IO"]
 
+from omegaconf import DictConfig, ListConfig, OmegaConf
+
 logger = logging.getLogger(__name__)
 
 
@@ -61,6 +63,8 @@ def encode(obj: t.Any) -> t.Any:
         return obj.tolist()
     if isinstance(obj, np.float64):
         return float(obj)
+    if isinstance(obj, (DictConfig, ListConfig)):
+        return OmegaConf.to_container(obj, resolve=True)
     return obj
 
 
@@ -127,8 +131,8 @@ class IO(object):
         try:
             with open(file_path, "w") as stream:
                 yaml.dump(data, stream, Dumper=yaml.SafeDumper)
-        except yaml.representer.RepresenterError:
-            logger.warning("YAML representation error (file_path=%s, data=%s).", file_path, data)
+        except yaml.representer.RepresenterError as err:
+            logger.warning("YAML representation error (file_path='%s', data='%s', err='%s').", file_path, data, err)
             if raise_on_error:
                 raise
 

@@ -19,10 +19,11 @@ import logging
 import sys
 import typing as t
 from multiprocessing import Process
+from pathlib import Path
 
 import click
 import coloredlogs
-from ray import tune
+from omegaconf import DictConfig, OmegaConf
 
 from xtime.datasets import (
     Dataset,
@@ -81,16 +82,34 @@ def _run_search_hp_pipeline(
     num_validate_trials: int = 0,
     gpu: bool = False,
 ) -> None:
-    from xtime.stages.search_hp import search_hp
+    from xtime.stages import search_hp
 
     """Run an ML pipeline that includes (1) hyperparameter search and (2) analysis how stable hyperparameters are."""
-    mlflow_uri: str = search_hp(dataset, model, algorithm, hparams, num_search_trials, gpu)
-    if num_validate_trials > 0:
-        validate_hparams = [
-            mlflow_uri,  # Take the best hyperparameters from this MLFlow run.
-            {"random_state": tune.randint(0, int(2**32 - 1))},  # And vary random seed to validate these HPs are stable.
-        ]
-        search_hp(dataset, model, "random", validate_hparams, num_validate_trials, gpu)
+
+    # fmt: off
+    config = OmegaConf.create({
+        "stage": "search_hp",
+
+        "dataset": dataset,
+        "model": model,
+        "hparams": hparams if len(hparams) > 0 else None,
+
+        "tune": {
+            "tune_config": {
+                "search_alg": {"_type": algorithm},
+                "num_samples": num_search_trials
+            },
+            "trial_resources": {
+                "gpu": 0 if not gpu else 1
+            }
+        },
+        "validation": {
+            "max_concurrent_trials": 0,
+            "num_samples": num_validate_trials
+        }
+    })
+    # fmt: on
+    search_hp.run(config)
 
 
 @click.group(name="xtime", help="Machine Learning benchmarks for tabular data for XTIME project.")
@@ -129,12 +148,15 @@ def experiments() -> None: ...
 @model_arg
 @params_option
 def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
-    from xtime.stages.train import train
+    from xtime.stages import train
 
     try:
-        # When no --params are provided, the `params` will be empty. Setting no None here
-        # will enable the train function to retrieve default parameters in this case.
-        train(dataset, model, params if len(params) > 0 else None)
+        logger.warning("This command is deprecated and will be removed soon. Use `experiment run` instead.")
+        train.run(
+            OmegaConf.create(
+                {"stage": "train", "dataset": dataset, "model": model, "hparams": params if len(params) > 0 else None}
+            )
+        )
     except Exception as err:
         print_err_and_exit(err)
 
@@ -229,6 +251,57 @@ def experiment_describe(report_type: str, run: t.Optional[str] = None, file: t.O
         describe(report_type, run, file)
     except Exception as err:
         print_err_and_exit(err)
+
+
+@experiments.command(
+    name="run",
+    help="Run one of supported ML experiments (train, search_hp, etc.) by providing experiment configuration file.",
+)
+@click.argument(
+    "config_file", required=False, metavar="CONFIG_FILE", type=str, default=(Path.cwd() / "experiment.yaml").as_posix()
+)
+def experiment_run(config_file: str) -> None:
+    from xtime.stages import search_hp, train
+
+    config: DictConfig = OmegaConf.load(config_file)
+    stages = {"train": train, "search_hp": search_hp}
+    if config.stage not in stages:
+        print(f"Unsupported stage (stage = {config.stage})")
+        exit(1)
+    stages[config.stage].run(config)
+
+
+@experiments.command(name="create", help="Create a configuration experiment file for the given type of experiment.")
+@click.argument(
+    "experiment_type",
+    required=False,
+    metavar="EXPERIMENT_ID",
+    type=click.Choice(["train", "search_hp"]),
+    default="train",
+)
+@click.option(
+    "--file",
+    "-f",
+    metavar="FILE",
+    required=False,
+    type=str,
+    default="experiment.yaml",
+    help="Configuration file for an experiment",
+)
+def experiment_create(experiment_type: str, file: str) -> None:
+    file_path = Path(file).absolute()
+    if file_path.exists():
+        print(f"Experiment file already exists ({file_path}).")
+        exit(1)
+
+    from xtime.stages import search_hp, train
+
+    stages = {"train": train, "search_hp": search_hp}
+    if experiment_type not in stages:
+        print(f"Unsupported stage (stage = {experiment_type})")
+        exit(1)
+
+    OmegaConf.save(stages[experiment_type].create_example_config(), file, resolve=False)
 
 
 @cli.group("dataset", help="Dataset-related commands (explore available datasets with these commands).")

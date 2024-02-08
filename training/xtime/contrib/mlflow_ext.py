@@ -20,40 +20,17 @@ from pathlib import Path
 
 import mlflow
 from mlflow import MlflowClient
-from mlflow.entities import Experiment, Run
+from mlflow.entities import Experiment, LifecycleStage, Run
 from mlflow.store.entities import PagedList
 from mlflow.utils.file_utils import local_file_uri_to_path
+from omegaconf import DictConfig, OmegaConf
 
 from xtime import hparams
-from xtime.datasets import parse_dataset_name
-from xtime.ml import Task
-from xtime.run import RunType
 
 __all__ = ["MLflow"]
 
 
 class MLflow(object):
-    @staticmethod
-    def set_tags(
-        dataset: t.Optional[str] = None, run_type: t.Optional[RunType] = None, task: t.Optional[Task] = None, **kwargs
-    ) -> None:
-        """Helper method that sets tags for active MLflow run.
-
-        Args:
-            dataset: Dataset name and version in format "name[:version]".
-            run_type: Type of this MLflow run (`train`, `hpo` etc.).
-            task: Task being solved in this run.
-            kwargs: dictionary of additional tags to set.
-        """
-        if dataset:
-            dataset_name, dataset_version = parse_dataset_name(dataset)
-            mlflow.set_tags({"dataset_name": dataset_name, "dataset_version": dataset_version})
-        if run_type:
-            mlflow.set_tag("run_type", run_type.value)
-        if task:
-            mlflow.set_tag("task", task.type.value)
-        mlflow.set_tags(kwargs)
-
     @staticmethod
     def get_experiment_ids(client: t.Optional[MlflowClient] = None) -> t.List[str]:
         """Return all MLflow experiment IDs.
@@ -112,20 +89,36 @@ class MLflow(object):
         return runs
 
     @staticmethod
-    def create_experiment(client: t.Optional[MlflowClient] = None) -> None:
+    def create_experiment(client: t.Optional[MlflowClient] = None, name: t.Optional[str] = None) -> t.Optional[str]:
         """Create a new MLflow experiment with name specified in `MLFLOW_EXPERIMENT_NAME` environment variable.
 
         Args:
             client: MLflow client to use. If not provided, a default client will be used.
+            name: Name of the experiment
+        Returns:
+            Experiment ID or None if name is none or empty, and MLFLOW_EXPERIMENT_NAME is also not set.
         """
         if client is None:
             client = MlflowClient()
 
-        from mlflow.tracking import _EXPERIMENT_NAME_ENV_VAR
+        # First, try got use the name possible provided to this function, if not available, try standard MLflow
+        # environment variable
+        name = (name or "").strip()
+        if not name:
+            from mlflow.tracking import _EXPERIMENT_NAME_ENV_VAR
 
-        name = os.environ.get(_EXPERIMENT_NAME_ENV_VAR, None)
-        if name and client.get_experiment_by_name(name) is None:
-            mlflow.create_experiment(name)
+            name = (os.environ.get(_EXPERIMENT_NAME_ENV_VAR, None) or "").strip()
+
+        if not name:
+            return None
+
+        experiment: t.Optional[Experiment] = client.get_experiment_by_name(name)
+        if experiment is not None:
+            if experiment.lifecycle_stage == LifecycleStage.DELETED:
+                mlflow.MlflowClient().set_experiment_tag()
+            return experiment.experiment_id
+
+        return mlflow.create_experiment(name)
 
     @staticmethod
     def get_tags_from_env() -> t.Dict:
@@ -162,7 +155,9 @@ class MLflow(object):
         return local_dir
 
     @staticmethod
-    def init_run(run: t.Optional[Run]) -> None:
+    def init_run(
+        run: t.Optional[Run], set_tags_from_env: bool = False, user_tags: t.Optional[DictConfig] = None
+    ) -> None:
         """Initialize MLflow run.
 
         For now, it does not do a lot of things, mainly ensuring that the artifact directory exists. So, it's a wrapper
@@ -170,8 +165,18 @@ class MLflow(object):
 
         Args:
             run: MLflow run to initialize. If none, currently active run will be used.
+            set_tags_from_env: If true, read tags from user environment and set them.
+            user_tags: Additional run tags from a configuration file, command line, etc.
         """
         _ = MLflow.get_artifact_path(run, ensure_exists=True)
+        if run is not None:
+            # TODO sergey: think if we need to check for `run` - need to make sure active run is present or
+            #       refactor this implementation to set tags for this particular run using client API.
+            if set_tags_from_env:
+                mlflow.set_tags(MLflow.get_tags_from_env())
+            if user_tags:
+                assert isinstance(user_tags, DictConfig), f"Invalid `user_tags` type ({type(user_tags)})."
+                mlflow.set_tags(OmegaConf.to_container(user_tags, resolve=True))
 
     @staticmethod
     def log_metrics(metrics: t.Dict[str, t.Any]) -> None:
@@ -186,9 +191,18 @@ class MLflow(object):
         """
         # Some metrics produced by Ray Tune we are not interested in.
         _metrics_to_ignore = {
-            "timesteps_total", "time_this_iter_s", "timesteps_total", "episodes_total", "training_iteration",
-            "timestamp", "time_total_s", "pid", "time_since_restore", "timesteps_since_restore",
-            "iterations_since_restore", "warmup_time"
+            "timesteps_total",
+            "time_this_iter_s",
+            "timesteps_total",
+            "episodes_total",
+            "training_iteration",
+            "timestamp",
+            "time_total_s",
+            "pid",
+            "time_since_restore",
+            "timesteps_since_restore",
+            "iterations_since_restore",
+            "warmup_time",
         }
         for name, value in metrics.items():
             try:
@@ -196,3 +210,18 @@ class MLflow(object):
                     mlflow.log_metric(name, value)
             except mlflow.MlflowException:
                 continue
+
+    @staticmethod
+    def set_status_tag_from_trial_counts(num_trials: int, num_failed_trials: int) -> None:
+        """Set `status` tag given number of trials(sub-experiments) and their fail/success status.
+
+        Args:
+            num_trials: Total number of trials within current MLflow run.
+            num_failed_trials: Number of failed trials for current mlflow run.
+        """
+        if num_failed_trials == 0:
+            mlflow.set_tag("status", "COMPLETED")
+        elif num_failed_trials == num_trials:
+            mlflow.set_tag("status", "FAILED")
+        else:
+            mlflow.set_tag("status", "PARTIALLY_COMPLETED")
