@@ -1,7 +1,6 @@
 import logging
 import os
-import typing as t
-from collections import Counter
+from itertools import product
 from pathlib import Path
 
 import numpy as np
@@ -9,6 +8,7 @@ import pandas as pd
 from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
+from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["WISDMBuilder"]
@@ -40,6 +40,7 @@ class WISDMBuilder(DatasetBuilder):
     def __init__(self) -> None:
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
+        self.encoder = TimeSeriesEncoderV1()
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -85,39 +86,19 @@ class WISDMBuilder(DatasetBuilder):
 
         # These are the base feature names (will have prefixes such as `x_`, `y_` and `z_`). This check needs to be
         # consistent with feature generation in `_create_default_dataset` method.
-        base_names = [
-            "abs_energy",
-            "absolute_sum_of_changes",
-            "count_above_mean",
-            "kurtosis",
-            "longest_strike_above_mean",
-            "longest_strike_below_mean",
-            "maximum",
-            "mean",
-            "mean_abs_change",
-            "mean_change",
-            "median",
-            "minimum",
-            "number_crossing_0",
-            "quantile_25",
-            "quantile_75",
-            "rms",
-            "skewness",
-            "sum_values",
-            "variance",
+        feature_names = self.encoder.features()
+        features = [
+            Feature(f"{axis}_{name}", FeatureType.CONTINUOUS) for axis, name in product(("x", "y", "z"), feature_names)
         ]
 
-        features = []
-        for axis in ("x", "y", "z"):
-            for base_name in base_names:
-                features.append(Feature(f"{axis}_{base_name}", FeatureType.CONTINUOUS))
-
         # Check that data frames contains expected columns (3 is for three axes, 1 is for label).
-        assert train_df.shape[1] == 3 * len(base_names) + 1, "Train data frame contains unexpected number of columns."
-        assert test_df.shape[1] == 3 * len(base_names) + 1, "Test data frame contains unexpected number of columns."
+        assert train_df.shape[1] == 3 * len(feature_names) + 1, "Train data frame contains wrong number of columns."
+        assert test_df.shape[1] == 3 * len(feature_names) + 1, "Test data frame contains wrong number of columns."
         for feature in features:
-            assert feature.name in train_df.columns, f"Missing column `{feature}` in train dataframe."
-            assert feature.name in test_df.columns, f"Missing column `{feature}` in test dataframe."
+            assert feature.name in train_df.columns, \
+                f"Missing column `{feature}` in train dataframe (columns={list(train_df.columns)})."
+            assert feature.name in test_df.columns, \
+                f"Missing column `{feature}` in test dataframe (columns={list(train_df.columns)})."
 
         label: str = "activity"
 
@@ -217,61 +198,11 @@ class WISDMBuilder(DatasetBuilder):
 
         # Apply sliding window transformation.
         window_size, stride = 200, 40
-        train_windows, train_labels = _slide(df_train[["x", "y", "z"]], df_train.activity, window_size, stride)
-        test_windows, test_labels = _slide(df_test[["x", "y", "z"]], df_test.activity, window_size, stride)
 
-        import tsfresh.feature_extraction.feature_calculators as ts_features
-
-        def _features(_ts: np.ndarray, _name: str) -> t.Dict:
-            """Compute features for the given uni-variate time series segment.
-            Args:
-                _ts: Uni-variate time series that `tsfresh` can process.
-                _name: Axis name (one of `x`, `y` or `z`).
-            Returns:
-                 Dictionary mapping feature names for feature values.
-            """
-            features = {
-                "abs_energy": ts_features.abs_energy(_ts),  # float
-                "absolute_sum_of_changes": ts_features.absolute_sum_of_changes(_ts),  # float
-                "count_above_mean": ts_features.count_above_mean(_ts),  # float
-                "kurtosis": ts_features.kurtosis(_ts),  # float
-                "longest_strike_above_mean": ts_features.longest_strike_above_mean(_ts),  # float
-                "longest_strike_below_mean": ts_features.longest_strike_below_mean(_ts),  # float
-                "maximum": ts_features.maximum(_ts),  # float
-                "mean": ts_features.mean(_ts),  # float
-                "mean_abs_change": ts_features.mean_abs_change(_ts),  # float
-                "mean_change": ts_features.mean_change(_ts),  # float
-                "median": ts_features.median(_ts),  # float
-                "minimum": ts_features.minimum(_ts),  # float
-                "number_crossing_0": ts_features.number_crossing_m(_ts, 0),  # float
-                "quantile_25": ts_features.quantile(_ts, 0.25),  # float
-                "quantile_75": ts_features.quantile(_ts, 0.75),  # float
-                "rms": ts_features.root_mean_square(_ts),  # float
-                "skewness": ts_features.skewness(_ts),  # float
-                "sum_values": ts_features.sum_values(_ts),  # float
-                "variance": ts_features.variance(_ts),  # float
-            }
-            return {f"{_name}_{k}": v for k, v in features.items()}
-
-        def _windows_to_features(_windows: np.ndarray) -> t.List[t.Dict]:
-            """Convert list fo raw window data into list of corresponding features.
-            Args:
-                _windows: Rank-3 tensor of shape [NumExamples, WindowSize, NumAxis].
-            Returns:
-                List of _windows.shape[0] size with each element being a dictionary mapping feature names to feature
-                    values for rank-2 [WindowSize, NumAxis] tensors.
-            """
-            assert _windows.ndim == 3 and _windows.shape[1] == window_size and _windows.shape[2] == 3, "error!"
-            _features_list: t.List[t.Dict] = []
-            for i in range(_windows.shape[0]):
-                _features_list.append(
-                    {
-                        **_features(_windows[i, :, 0], "x"),
-                        **_features(_windows[i, :, 1], "y"),
-                        **_features(_windows[i, :, 2], "z"),
-                    }
-                )
-            return _features_list
+        train_windows = TimeSeries.slide(df_train[["x", "y", "z"]], None, window_size, stride)
+        train_labels = TimeSeries.slide(df_train.activity, TimeSeries.mode, window_size, stride)
+        test_windows = TimeSeries.slide(df_test[["x", "y", "z"]], None, window_size, stride)
+        test_labels = TimeSeries.slide(df_test.activity, TimeSeries.mode, window_size, stride)
 
         def _create_dataset(_windows: np.ndarray, _labels: np.ndarray, _file_path: Path) -> None:
             """Convert windows with raw accelerometer values into machine learning features and save to file.
@@ -280,7 +211,7 @@ class WISDMBuilder(DatasetBuilder):
                 _labels: Array of labels, number of labels = NumExamples.
                 _file_path: File name to write the generated dataset.
             """
-            _dataset = pd.DataFrame(_windows_to_features(_windows))
+            _dataset = pd.DataFrame(self.encoder.encode_many(_windows, prefixes=["x_", "y_", "z_"]))
             _dataset["activity"] = _labels.flatten()
             assert _dataset.shape[0] == _windows.shape[0], "error!"
             assert _dataset.shape[1] == 19 * 3 + 1, "error!"
@@ -288,34 +219,3 @@ class WISDMBuilder(DatasetBuilder):
 
         _create_dataset(train_windows, train_labels, default_train_dataset_file)
         _create_dataset(test_windows, test_labels, default_test_dataset_file)
-
-
-def _slide(
-    raw_vals: pd.DataFrame, y: pd.Series, window_size: int = 1, stride: int = 1
-) -> t.Tuple[np.ndarray, np.ndarray]:
-    """Apply sliding window transformation and return windows with raw accelerometer values and corresponding labels.
-    Args:
-        raw_vals: Data frame with raw accelerometer values (3 columns - `x`, `y` and `z`).
-        y: Labels for each row in `raw_vals`.
-        window_size: Size of the sliding window.
-        stride: Window step size.
-    Returns:
-        A tuple containing two numpy arrays (windows, labels). The window tensor is a rank-3 tensor of shape
-        [NumWindows, WindowSize, NumAxis] where NumAxis is 3.
-    """
-    assert raw_vals.shape[1] == 3, "Expecting accelerometer values for 3 axes."
-    windows, labels = [], []
-    for i in range(0, len(raw_vals) - window_size, stride):
-        windows.append(
-            # Take `window_size` rows (time steps)
-            raw_vals.iloc[i : (i + window_size)].values
-        )
-        labels.append(
-            # Identify the most common label in this window (1 most common element returning list of (element, count))
-            Counter(y.iloc[i : i + window_size]).most_common(1)[0][0]
-        )
-    _windows, _labels = np.array(windows), np.array(labels).reshape(-1, 1)
-    assert _windows.ndim == 3, "Invalid train windows shape"
-    assert _windows.shape[1] == window_size, "Invalid train windows shape"
-    assert _windows.shape[2] == 3, "Invalid train windows shape"
-    return _windows, _labels

@@ -74,7 +74,7 @@ class TestMain(TestCase):
             dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
             for version in dataset_builder.builders.keys():
                 result: Result = CliRunner().invoke(dataset_describe, [f"{name}:{version}"])
-                self.assertEqual(result.exit_code, 0)
+                self.assertEqual(result.exit_code, 0, f"name={name}, version={version}, output={result.output}.")
 
     def test_dataset_list(self) -> None:
         """python -m unittest tests.test_cli.TestMain.test_dataset_list"""
