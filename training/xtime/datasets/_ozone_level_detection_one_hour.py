@@ -1,17 +1,17 @@
 import logging
 import os
-from itertools import product
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split  # archit
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split # archit
+
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
-from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
+from xtime.datasets.preprocessing import TimeSeriesEncoderV1
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
-__all__ = ["OLD1HRMBuilder"]
+__all__ = ["OLD1HRBuilder"]
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +30,7 @@ class OLD1HRBuilder(DatasetBuilder):
     """OLD1HR: Ozone Level Detection.
 
     Two ground ozone level data sets are included in this collection.
-    One is the eight hour peak set (eighthr.data), the other is the one hour peak set (onehr.data). 
+    One is the eight hour peak set (eighthr.data), the other is the one hour peak set (onehr.data).
     Those data were collected from 1998 to 2004 at the Houston, Galveston and Brazoria area.
     For a list of attributes, please refer to those two .names files.
         https://archive.ics.uci.edu/dataset/172/ozone+level+detection
@@ -85,10 +85,12 @@ class OLD1HRBuilder(DatasetBuilder):
         train_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv"))
         test_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv"))
 
-        feature_names = self.encoder.features()
+        # feature_names = self.encoder.features()
         # All features in this dataset are continuous (float64) except first column (Date) which we are dropping
-        features = [Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique())) for col in train_df.columns]
-            
+        features = [
+            Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique())) for col in train_df.columns
+        ]
+
         label: str = "label"
 
         # Encode labels (that are strings here) into numerical representation (0, num_classes-1).
@@ -120,7 +122,7 @@ class OLD1HRBuilder(DatasetBuilder):
 
         with open(self._dataset_dir / _OLD1HR_DATASET_FILE, "rt") as input_stream:
             with open(_clean_dataset_file, "wt") as output_stream:
-                #output_stream.write("user_id,activity,timestamp,x,y,z\n")
+                # output_stream.write("user_id,activity,timestamp,x,y,z\n")
                 for idx, line in enumerate(input_stream):
                     line = line.strip("\t\n")
                     if not line:
@@ -147,26 +149,26 @@ class OLD1HRBuilder(DatasetBuilder):
         clean_dataset_file = (self._dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
         assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
 
-        df: pd.DataFrame = pd.read_csv(clean_dataset_file, delimiter=',', header = None)
+        df: pd.DataFrame = pd.read_csv(clean_dataset_file, delimiter=",", header=None)
 
-        # dataset doesn't have feature_names but the information is provided 
-        feature_names_df = pd.read_csv(self._dataset_dir / ('feature_names.csv'), header=None)      
-        
+        # dataset doesn't have feature_names but the information is provided
+        feature_names_df = pd.read_csv(self._dataset_dir / "feature_names.csv", header=None)
+
         df.columns = feature_names_df[0].tolist()
-        
+
         df_with_feature_names = self._dataset_dir / (_OLD1HR_DATASET_FILE + "_with_feature_names.csv")
         df.to_csv(df_with_feature_names, index=False)
-       
+
         # Following some of the examples from: https://www.kaggle.com/datasets/prashant111/ozone-level-detection/code
         # and https://github.com/aaakashkumar/Ozone-Level-Detection/blob/master/DSDA_Project_%E2%80%94_Ozone_Level_Detection.ipynb
         df = df.drop(df.columns[0], axis=1)
-        
-        df.replace(to_replace='?', value=np.nan, inplace=True)
+
+        df.replace(to_replace="?", value=np.nan, inplace=True)
         df.dropna(axis=0, how="any", inplace=True)
         assert df.shape[1] == 73, f"Clean dataset expected to have 73 columns (shape={df.shape})."
 
         # Split into train/test subsets
         df_train, df_test = train_test_split(df, test_size=0.2, random_state=0)
-        
+
         df_train.to_csv(default_train_dataset_file, index=False)
         df_test.to_csv(default_test_dataset_file, index=False)
