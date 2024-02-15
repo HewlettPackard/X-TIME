@@ -4,7 +4,7 @@ from pathlib import Path
 
 import numpy as np
 import pandas as pd
-from sklearn.model_selection import train_test_split  # archit
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
@@ -30,7 +30,7 @@ class OLD1HRBuilder(DatasetBuilder):
     """OLD1HR: Ozone Level Detection.
 
     Two ground ozone level data sets are included in this collection.
-    One is the eight hour peak set (eighthr.data), the other is the one hour peak set (onehr.data).
+    One is the eight-hour peak set (eighthr.data), the other is the one-hour peak set (onehr.data).
     Those data were collected from 1998 to 2004 at the Houston, Galveston and Brazoria area.
     For a list of attributes, please refer to those two .names files.
         https://archive.ics.uci.edu/dataset/172/ozone+level+detection
@@ -48,7 +48,8 @@ class OLD1HRBuilder(DatasetBuilder):
         if _XTIME_DATASETS_OLD1HR not in os.environ:
             raise RuntimeError(
                 f"No environment variable found (`{_XTIME_DATASETS_OLD1HR}`) that should point to a directory with "
-                f"OLD1HR (Ozone Level Detection) dataset (`{_OLD1HR_DATASET_FILE}`) that can be downloaded from `{_OLD1HR_HOME_PAGE}`."
+                f"OLD1HR (Ozone Level Detection) dataset (`{_OLD1HR_DATASET_FILE}`) that can be downloaded "
+                f"from `{_OLD1HR_HOME_PAGE}`."
             )
         self._dataset_dir = Path(os.environ[_XTIME_DATASETS_OLD1HR]).absolute()
         if self._dataset_dir.is_file():
@@ -56,7 +57,8 @@ class OLD1HRBuilder(DatasetBuilder):
         if not (self._dataset_dir / _OLD1HR_DATASET_FILE).is_file():
             raise RuntimeError(
                 f"OLD1HR dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
-                f"or dataset file (`{_OLD1HR_DATASET_FILE}`) not found in this location. Please, download (`{_OLD1HR_DATASET_FILE}`) of this "
+                f"or dataset file (`{_OLD1HR_DATASET_FILE}`) not found in this location. Please, "
+                f"download (`{_OLD1HR_DATASET_FILE}`) of this "
                 f"dataset from its home page `{_OLD1HR_HOME_PAGE}`."
             )
 
@@ -145,7 +147,8 @@ class OLD1HRBuilder(DatasetBuilder):
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
-        # Load clean dataset into a data frame (Date, 72 continuous features, labels (two classes 1: ozone day, 0: normal day))
+        # Load clean dataset into a data frame (Date, 72 continuous features,
+        # labels (two classes 1: ozone day, 0: normal day))
         clean_dataset_file = (self._dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
         assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
 
@@ -160,7 +163,7 @@ class OLD1HRBuilder(DatasetBuilder):
         df.to_csv(df_with_feature_names, index=False)
 
         # Following some of the examples from: https://www.kaggle.com/datasets/prashant111/ozone-level-detection/code
-        # and https://github.com/aaakashkumar/Ozone-Level-Detection/blob/master/DSDA_Project_%E2%80%94_Ozone_Level_Detection.ipynb
+        # and https://github.com/aaakashkumar/Ozone-Level-Detection/blob/master/DSDA_Project_%E2%80%94_Ozone_Level_Detection.ipynb # noqa
         df = df.drop(df.columns[0], axis=1)
 
         df.replace(to_replace="?", value=np.nan, inplace=True)
