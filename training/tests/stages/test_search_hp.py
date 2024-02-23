@@ -15,11 +15,12 @@
 ###
 
 from xtime.stages.search_hp import (
+    _DEFAULT_CONFIGURATION,
     _get_metrics_for_best_trial,
-    _init_search_algorithm,
+    _init_tune_config,
+    _run,
     _save_best_trial_info,
     _save_summary,
-    _set_run_status,
-    _set_tags,
-    search_hp,
+    create_example_config,
+    run,
 )

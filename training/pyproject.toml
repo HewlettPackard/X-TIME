@@ -21,6 +21,7 @@ requests = "2.28.2"         # core dependency
 tinydb = "4.7.1"            # core dependency
 prettytable = "3.6.0"       # command line interface
 coloredlogs = "15.0.1"      # command line interface
+omegaconf = "2.3.0"         # core dependency
 
 [tool.poetry.group.catboost.dependencies]
 catboost = "1.1.1"

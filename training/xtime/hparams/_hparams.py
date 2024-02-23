@@ -18,9 +18,11 @@ import copy
 import json
 import os
 import typing as t
+from enum import Enum
 from pathlib import Path
 
 import numpy as np
+from omegaconf import DictConfig, ListConfig, OmegaConf
 from ray.tune.search.sample import Domain
 from ray.tune.search.variant_generator import generate_variants
 
@@ -39,10 +41,11 @@ __all__ = [
     "from_mlflow",
     "from_string",
     "from_file",
+    "default_hparams",
 ]
 
 
-HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict]]]
+HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict, DictConfig]]]
 """Specification options for hyperparameters (HP).
 
     - dict: Ready-to-use dictionary of HPs mapping HP names to values. 
@@ -141,7 +144,10 @@ def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
     elif isinstance(source, t.Dict):
         # It is assumed that source is already a valid hyperparameter dictionary.
         hp_dict = copy.deepcopy(source)
-    elif isinstance(source, (t.List, t.Tuple)):
+    elif isinstance(source, DictConfig):
+        # It is assumed that source is already a valid hyperparameter dictionary.
+        hp_dict = OmegaConf.to_container(source, resolve=True)
+    elif isinstance(source, (t.List, t.Tuple, ListConfig)):
         # This is a list of multiple sources.
         hp_dict: t.Dict = {}
         for one_source in source:
@@ -248,6 +254,8 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
     if not params:
         return {}
 
+    # TODO sergey: check if params string starts with a misspelled protocol (e.g., hparams:)
+
     # These imports may be required by the `eval` call below.
     import math  # noqa # pylint: disable=unused-import
 
@@ -337,6 +345,26 @@ def from_file(url: PathLike) -> t.Dict:
     hp_dict: t.Dict = IO.load_dict(url)
     assert isinstance(hp_dict, dict), f"IO.load_dict did not return dictionary (type={type(hp_dict)})."
     return hp_dict
+
+
+def default_hparams(**query) -> str:
+    """Construct a string to retrieve hparams from a default hparams recommender.
+    Args:
+        query: search constraints, e.g., `model=xgboost,task=binary_classification`, etc.
+    Returns:
+        An hparams spec to query default hparam recommender.
+    """
+    from xtime.contrib.utils import Text
+    from xtime.ml import Task
+
+    query = copy.deepcopy(query)
+    for k, v in query.items():
+        if isinstance(v, Task):
+            query[k] = v.type.value
+        elif isinstance(v, Enum):
+            query[k] = v.value
+
+    return str(Text.from_chunks("auto", "default", ";".join(f"{k}={v}" for k, v in query.items()), sep=":"))
 
 
 def _str_content(str_val: t.Optional[str], scheme: str) -> str:

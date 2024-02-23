@@ -270,7 +270,7 @@ RandomVarDomain = t.TypeVar("RandomVarDomain", bound=sample.Domain)
 
 class YamlEncoder:
     @staticmethod
-    def represent(dumper: yaml.representer.BaseRepresenter, rv: RandomVarDomain) -> yaml.nodes.MappingNode:
+    def represent(dumper: yaml.representer.BaseRepresenter, rv: t.Union[RandomVarDomain]) -> yaml.nodes.MappingNode:
         """Represent given random variable for yaml dumper."""
         sampler: t.Dict = YamlEncoder.sampler_to_dict(rv.sampler)
         if isinstance(rv, sample.Integer):

@@ -33,7 +33,6 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
-from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.datasets.dataset import build_dataset
 from xtime.io import IO, encode
@@ -71,11 +70,22 @@ class ContainerCallback(Callback):
 
 class MLflowCallback(Callback):
     def __init__(self, hparams: t.Dict, ctx: Context) -> None:
+        from xtime.datasets.dataset import parse_dataset_name
+
         mlflow.log_params(hparams)
-        MLflow.set_tags(dataset=ctx.metadata.dataset, run_type=ctx.metadata.run_type, model=ctx.metadata.model)
+
+        dataset_name, dataset_version = parse_dataset_name(ctx.metadata.dataset)
+        mlflow.set_tags(
+            {
+                "dataset_name": dataset_name,
+                "dataset_version": dataset_version,
+                "run_type": ctx.metadata.run_type.value,
+                "model": ctx.metadata.model,
+            }
+        )
 
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
-        MLflow.set_tags(task=dataset.metadata.task)
+        mlflow.set_tag("task", dataset.metadata.task.type.value)
 
     def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
         mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task.type]})
@@ -144,7 +154,13 @@ class Estimator(object):
         else:
             callback = TrainCallback(IO.work_dir(), hparams, ctx)
             if mlflow.active_run() is not None:
+                # When running with ray tune, there will be no active run.
                 callback = ContainerCallback([callback, MLflowCallback(hparams, ctx)])
+
+        if isinstance(callback, ContainerCallback):
+            print("Estimator callbacks =", [c.__class__.__name__ for c in callback.callbacks])
+        else:
+            print("Estimator callbacks =", callback.__class__.__name__)
 
         estimator = cls(hparams, ctx.dataset.metadata)
 
