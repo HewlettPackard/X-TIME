@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
 from xtime.datasets.preprocessing import TimeSeriesEncoderV1
+from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["OLD1HRBuilder"]
@@ -46,7 +47,7 @@ class OLD1HRBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
         if _XTIME_DATASETS_OLD1HR not in os.environ:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"No environment variable found (`{_XTIME_DATASETS_OLD1HR}`) that should point to a directory with "
                 f"OLD1HR (Ozone Level Detection) dataset (`{_OLD1HR_DATASET_FILE}`) that can be downloaded "
                 f"from `{_OLD1HR_HOME_PAGE}`."
@@ -55,7 +56,7 @@ class OLD1HRBuilder(DatasetBuilder):
         if self._dataset_dir.is_file():
             self._dataset_dir = self._dataset_dir.parent
         if not (self._dataset_dir / _OLD1HR_DATASET_FILE).is_file():
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"OLD1HR dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_OLD1HR_DATASET_FILE}`) not found in this location. Please, "
                 f"download (`{_OLD1HR_DATASET_FILE}`) of this "
@@ -67,7 +68,7 @@ class OLD1HRBuilder(DatasetBuilder):
             import tsfresh.feature_extraction.feature_calculators as ts_features
 
         except ImportError:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"The OLD1HR dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
                 "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
                 "CUDA runtime found (see if the cause for the import error is "

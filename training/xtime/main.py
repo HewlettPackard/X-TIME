@@ -31,6 +31,7 @@ from xtime.datasets import (
     get_dataset_builder_registry,
     get_known_unknown_datasets,
 )
+from xtime.errors import XTimeError
 from xtime.estimators import get_estimator_registry
 
 logger = logging.getLogger(__name__)
@@ -61,7 +62,7 @@ params_option = click.option(
 )
 
 
-def print_err_and_exit(err: Exception, exit_code: int = 1) -> None:
+def print_err_and_exit(err: Exception) -> None:
     """Print brief information about exception and exit."""
     print(str(err))
     if not logger.root.isEnabledFor(logging.DEBUG):
@@ -69,7 +70,8 @@ def print_err_and_exit(err: Exception, exit_code: int = 1) -> None:
     logger.debug(
         "Error encountered while executing `dataset describe` command.", exc_info=err, stack_info=True, stacklevel=-1
     )
-    exit(exit_code)
+    error_code: int = err.error_code if isinstance(err, XTimeError) else 1
+    exit(error_code)
 
 
 def _run_search_hp_pipeline(

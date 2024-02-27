@@ -28,6 +28,8 @@ from .preprocessing import ChangeColumnsTypeToCategory, CheckColumnsOrder, DropC
 
 __all__ = ["RossmannStoreSalesBuilder"]
 
+from ..errors import DatasetError
+
 
 class RossmannStoreSalesBuilder(DatasetBuilder):
     NAME = "rossmann_store_sales"
@@ -41,7 +43,7 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
 
     def _check_pre_requisites(self) -> None:
         if not ((self._data_dir / self._train_file).is_file() and (self._data_dir / self._store_file).is_file()):
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"Rossmann store sales dataset not found. Please download it from "
                 f"`https://www.kaggle.com/competitions/rossmann-store-sales` and extract to "
                 f"{self._data_dir.as_posix()}. Then, uncompress the archive and compress individual files with gzip "
