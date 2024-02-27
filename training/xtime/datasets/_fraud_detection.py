@@ -61,7 +61,7 @@ class FDBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
         if _XTIME_DATASETS_FD not in os.environ:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"No environment variable found ({_XTIME_DATASETS_FD}) that should point to a directory with "
                 f"FD (Fraud Detection) dataset that can be downloaded from `{_FD_HOME_PAGE}`."
             )
@@ -69,7 +69,7 @@ class FDBuilder(DatasetBuilder):
         if self._dataset_dir.is_file():
             self._dataset_dir = self._dataset_dir.parent
         if not (self._dataset_dir / _FD_DATASET_FILE).is_file():
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"FD dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_FD_DATASET_FILE}`) not found in this location. Please, download v1.1 of this "
                 f"dataset from its home page `{_FD_HOME_PAGE}`."
@@ -80,7 +80,7 @@ class FDBuilder(DatasetBuilder):
             import tsfresh.feature_extraction.feature_calculators as ts_features
 
         except ImportError:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"The FD dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
                 "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
                 "CUDA runtime found (see if the cause for the import error is "
