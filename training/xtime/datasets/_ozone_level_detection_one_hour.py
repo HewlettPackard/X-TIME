@@ -88,13 +88,18 @@ class OLD1HRBuilder(DatasetBuilder):
         train_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv"))
         test_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv"))
 
+        label: str = "label"
+
         # feature_names = self.encoder.features()
         # All features in this dataset are continuous (float64) except first column (Date) which we are dropping
         features = [
-            Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique())) for col in train_df.columns
+            Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique()))
+            for col in train_df.columns
+            if col != label
         ]
-
-        label: str = "label"
+        assert (
+            len(features) == len(train_df.columns) - 1
+        ), f"Internal error - wrong number of features (actual={len(features)}, expected={len(train_df.columns) - 1})"
 
         # Encode labels (that are strings here) into numerical representation (0, num_classes-1).
         label_encoder = LabelEncoder().fit(train_df[label])
