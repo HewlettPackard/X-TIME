@@ -120,6 +120,27 @@ class Dataset:
     metadata: DatasetMetadata
     splits: t.Dict[str, DatasetSplit] = field(default_factory=lambda: {})
 
+    def __post_init__(self) -> None:
+        # This string will be empty if there are no errors.
+        error_msg: str = ""
+        # These features are expected to be present in dataset splits.
+        expected_features: t.Set[str] = set([f.name for f in self.metadata.features])
+        for split_name, split_data in self.splits.items():
+            # These are the actual features in this dataset split.
+            actual_features: t.Set[str] = set(split_data.x.columns)
+            # Features that are not present in current split.
+            missing_features = expected_features - actual_features
+            if missing_features:
+                error_msg += f" Missing features ({missing_features}) in '{split_name}'."
+            # Features in split that are not described in dataset metadata.
+            unknown_features = actual_features - expected_features
+            if unknown_features:
+                error_msg += f" Unknown features ({unknown_features}) in '{split_name}'."
+
+        error_msg = error_msg.strip()
+        if error_msg:
+            raise ValueError(f"Invalid dataset specification. {error_msg}")
+
     def num_examples(self, split_names: t.Optional[t.Union[str, t.Iterable[str]]] = None) -> int:
         if not split_names:
             split_names = self.splits.keys()
@@ -253,7 +274,11 @@ class DatasetBuilder(object):
         return self.builders[version](**kwargs)
 
     def _check_pre_requisites(self) -> None:
-        """Check if source (raw) dataset resources exist or check that all necessary libraries are available."""
+        """Check if source (raw) dataset resources exist or check that all necessary libraries are available.
+
+        Raises:
+            xtime.errors.DatasetError with error_code = xtime.errors.ErrorCode.DATASET_MISSING_PREREQUISITES_ERROR
+        """
         ...
 
     @abc.abstractmethod

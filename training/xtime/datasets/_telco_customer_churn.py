@@ -28,6 +28,8 @@ from .preprocessing import ChangeColumnsTypeToCategory, CheckColumnsOrder
 
 __all__ = ["TelcoCustomerChurnBuilder"]
 
+from ..errors import DatasetError
+
 
 class TelcoCustomerChurnBuilder(DatasetBuilder):
     NAME = "telco_customer_churn"
@@ -40,7 +42,7 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
 
     def _check_pre_requisites(self) -> None:
         if not (self._data_dir / self._data_file).is_file():
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"Blastchar (Telco Customer Churn) not found. Please download it from "
                 f"`https://www.kaggle.com/datasets/blastchar/telco-customer-churn` and extract to "
                 f"{self._data_dir.as_posix()}. To proceed, this file "
