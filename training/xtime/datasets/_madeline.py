@@ -26,6 +26,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
 from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
+from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["MADELINEBuilder"]
