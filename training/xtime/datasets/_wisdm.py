@@ -9,6 +9,7 @@ from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
 from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
+from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["WISDMBuilder"]
@@ -45,7 +46,7 @@ class WISDMBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
         if _XTIME_DATASETS_WISDM not in os.environ:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"No environment variable found ({_XTIME_DATASETS_WISDM}) that should point to a directory with "
                 f"WISDM (WIreless Sensor Data Mining) dataset v1.1 that can be downloaded from `{_WISDM_HOME_PAGE}`."
             )
@@ -53,7 +54,7 @@ class WISDMBuilder(DatasetBuilder):
         if self._dataset_dir.is_file():
             self._dataset_dir = self._dataset_dir.parent
         if not (self._dataset_dir / _WISDM_DATASET_FILE).is_file():
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"WISDM dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_WISDM_DATASET_FILE}`) not found in this location. Please, download v1.1 of this "
                 f"dataset from its home page `{_WISDM_HOME_PAGE}`."
@@ -64,7 +65,7 @@ class WISDMBuilder(DatasetBuilder):
             import tsfresh.feature_extraction.feature_calculators as ts_features
 
         except ImportError:
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"The WISDM dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
                 "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
                 "CUDA runtime found (see if the cause for the import error is "
@@ -95,10 +96,12 @@ class WISDMBuilder(DatasetBuilder):
         assert train_df.shape[1] == 3 * len(feature_names) + 1, "Train data frame contains wrong number of columns."
         assert test_df.shape[1] == 3 * len(feature_names) + 1, "Test data frame contains wrong number of columns."
         for feature in features:
-            assert feature.name in train_df.columns, \
-                f"Missing column `{feature}` in train dataframe (columns={list(train_df.columns)})."
-            assert feature.name in test_df.columns, \
-                f"Missing column `{feature}` in test dataframe (columns={list(train_df.columns)})."
+            assert (
+                feature.name in train_df.columns
+            ), f"Missing column `{feature}` in train dataframe (columns={list(train_df.columns)})."
+            assert (
+                feature.name in test_df.columns
+            ), f"Missing column `{feature}` in test dataframe (columns={list(train_df.columns)})."
 
         label: str = "activity"
 

@@ -35,6 +35,8 @@ from .preprocessing import (
 
 __all__ = ["ChurnModellingBuilder"]
 
+from ..errors import DatasetError
+
 
 class ChurnModellingBuilder(DatasetBuilder):
     NAME = "churn_modelling"
@@ -47,7 +49,7 @@ class ChurnModellingBuilder(DatasetBuilder):
 
     def _check_pre_requisites(self) -> None:
         if not (self.path / self.file_name).is_file():
-            raise RuntimeError(
+            raise DatasetError.missing_prerequisites(
                 f"Shrutime (Telco Modelling) not found. Please download it from "
                 f"`https://www.kaggle.com/datasets/shrutimechlearn/churn-modelling` and extract to "
                 f"{self.path.as_posix()}. To proceed, this file must exist: {(self.path / self.file_name).as_posix()}"

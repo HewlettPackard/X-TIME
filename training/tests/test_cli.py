@@ -14,6 +14,7 @@
 # limitations under the License.
 ###
 
+import logging
 import typing as t
 from unittest import TestCase
 
@@ -22,6 +23,7 @@ from click import BaseCommand
 from click.testing import CliRunner, Result
 
 from xtime.datasets import DatasetBuilder, get_dataset_builder_registry
+from xtime.errors import ErrorCode
 from xtime.main import (
     _run_search_hp_pipeline,
     cli,
@@ -40,6 +42,7 @@ from xtime.main import (
 )
 
 pytestmark = pytest.mark.cli
+logger = logging.getLogger(__name__)
 
 
 class TestMain(TestCase):
@@ -74,7 +77,10 @@ class TestMain(TestCase):
             dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
             for version in dataset_builder.builders.keys():
                 result: Result = CliRunner().invoke(dataset_describe, [f"{name}:{version}"])
-                self.assertEqual(result.exit_code, 0, f"name={name}, version={version}, output={result.output}.")
+                if result.exit_code == ErrorCode.DATASET_MISSING_PREREQUISITES_ERROR:
+                    logger.info("Dataset prerequisites are not met (%s:%s).", name, version)
+                else:
+                    self.assertEqual(result.exit_code, 0, f"name={name}, version={version}, output={result.output}.")
 
     def test_dataset_list(self) -> None:
         """python -m unittest tests.test_cli.TestMain.test_dataset_list"""
