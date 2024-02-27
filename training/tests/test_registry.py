@@ -46,6 +46,7 @@ class TestRegistry(TestCase):
             "forest_cover_type",
             "gas_concentrations",
             "gesture_phase_segmentation",
+            "ozone_level_detection_1hr",
             "telco_customer_churn",
             "year_prediction_msd",
             "rossmann_store_sales",
