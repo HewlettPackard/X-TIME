@@ -16,16 +16,13 @@
 
 import logging
 import os
-from itertools import product
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
-from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
+from xtime.datasets.preprocessing import TimeSeriesEncoderV1
 from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
@@ -70,9 +67,9 @@ class MADELINEBuilder(DatasetBuilder):
             self._dataset_dir = self._dataset_dir.parent
         if not (self._dataset_dir / _MADELINE_DATASET_FILE).is_file():
             raise DatasetError.missing_prerequisites(
-                f"MADELINE dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
-                f"or dataset file (`{_MADELINE_DATASET_FILE}`) not found in this location. Please, download this "
-                f"dataset from its home page `{_MADELINE_HOME_PAGE}`."
+                f"MADELINE dataset location was identified as `{self._dataset_dir}`, but this is either not a "
+                f"directory or dataset file (`{_MADELINE_DATASET_FILE}`) not found in this location. Please, "
+                f"download this dataset from its home page `{_MADELINE_HOME_PAGE}`."
             )
 
         # Check `tsfresh` library can be imported.
@@ -81,7 +78,7 @@ class MADELINEBuilder(DatasetBuilder):
 
         except ImportError:
             raise DatasetError.missing_prerequisites(
-                f"The Madeline dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
+                "The Madeline dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
                 "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
                 "CUDA runtime found (see if the cause for the import error is "
                 "`numba.cuda.cudadrv.error.NvvmSupportError` exception) - this may occur because `tsfresh` depends on "
