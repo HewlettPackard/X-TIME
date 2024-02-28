@@ -26,7 +26,7 @@ from xtime.estimators.estimator import unit_test_check_metrics, unit_test_train_
 pytestmark = pytest.mark.estimators
 
 
-class TestXGBoost(TestCase):
+class TestLightGBMEstimator(TestCase):
     @with_temp_work_dir
     def test_churn_modelling_numerical(self) -> None:
         ds: Dataset = build_dataset("churn_modelling:numerical")
