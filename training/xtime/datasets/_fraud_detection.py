@@ -16,16 +16,14 @@
 
 import logging
 import os
-from itertools import product
 from pathlib import Path
 
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import LabelEncoder
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
-from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoderV1
+from xtime.datasets.preprocessing import TimeSeriesEncoderV1
+from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 __all__ = ["FDBuilder"]
@@ -36,7 +34,7 @@ logger = logging.getLogger(__name__)
 _XTIME_DATASETS_FD = "XTIME_DATASETS_FD"
 """Environment variable that points to a directory with FD (Fraud Detection) dataset."""
 
-_FD_HOME_PAGE = "https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary?resource=download"
+_FD_HOME_PAGE = "https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary?resource=download"  # noqa
 """Dataset home page."""
 
 _FD_DATASET_FILE = "fraud_detection_bank_dataset.csv"
@@ -46,7 +44,7 @@ _FD_DATASET_FILE = "fraud_detection_bank_dataset.csv"
 class FDBuilder(DatasetBuilder):
     """FD: Fraud detection.
 
-    Fraud detectionbank dataset 20K records binary classification.
+    Fraud Detection bank dataset 20K records binary classification.
     20k records of customer transactions with 112 features:
         https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary?resource=download
     """
@@ -101,15 +99,19 @@ class FDBuilder(DatasetBuilder):
         test_df = pd.read_csv(self._dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-test.csv"))
 
         features = [
-            Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique())) 
+            Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique()))
             for col in train_df.columns
-            if col != 'targets'
+            if col != "targets"
         ]
-                    
+
         # Check that data frames contains expected columns (112 features and 1 is for label).
-        assert train_df.shape[1] == len(features) + 1,  f"Train data frame contains wrong number of columns (shape={train_df.shape})."
-        assert test_df.shape[1] == len(features) + 1, f"Test data frame contains wrong number of columns (shape={test_df.shape})."
-        
+        assert (
+            train_df.shape[1] == len(features) + 1
+        ), f"Train data frame contains wrong number of columns (shape={train_df.shape})."
+        assert (
+            test_df.shape[1] == len(features) + 1
+        ), f"Test data frame contains wrong number of columns (shape={test_df.shape})."
+
         label: str = "targets"
 
         dataset = Dataset(
@@ -150,20 +152,20 @@ class FDBuilder(DatasetBuilder):
         # Load clean dataset into a data frame (user_id,activity,timestamp,x,y,z)
         clean_dataset_file = (self._dataset_dir / _FD_DATASET_FILE).with_suffix(".csv")
         assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
-        
-        #df: pd.DataFrame = pd.read_csv(clean_dataset_file, dtype=dtypes)
+
+        # df: pd.DataFrame = pd.read_csv(clean_dataset_file, dtype=dtypes)
         df: pd.DataFrame = pd.read_csv(clean_dataset_file)
-        
+
         # Check for missing values
         assert not df.isna().any().any(), "There are missing values in the DataFrame"
-        
+
         # Raw file has 114 columns (index, 112 features, labels `targets` )
         assert df.shape[1] == 114, f"Clean dataset expected to have 114 columns (shape={df.shape})."
-    
-        # Drop the first (index) column 
-        df = df.drop(df.columns[0],axis=1)
-   
-        # Split train and test dataframes    
+
+        # Drop the first (index) column
+        df = df.drop(df.columns[0], axis=1)
+
+        # Split train and test dataframes
         df_train, df_test = train_test_split(df, test_size=0.2, random_state=0)
 
         df_train.to_csv(default_train_dataset_file, index=False)
