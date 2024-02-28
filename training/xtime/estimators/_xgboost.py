@@ -80,10 +80,12 @@ class XGBoostEstimator(Estimator):
         # clf.best_ntree_limit + early_stopping_rounds (predict will use best_ntree_limit to use the best model).
         # The `clf.best_iteration` will point to the best iteration (clf.best_ntree_limit - 1).
         kwargs = copy.deepcopy(kwargs)
-        if "early_stopping_rounds" not in kwargs:
+        if kwargs.get("early_stopping_rounds", None) is None:
             kwargs["early_stopping_rounds"] = 15
             if "n_estimators" in self.params:
                 kwargs["early_stopping_rounds"] = max(15, int(0.1 * self.params["n_estimators"]))
+        # This parameter is deprecated in `fit` method, so we set it via `set_params`.
+        self.model.set_params(early_stopping_rounds=kwargs.pop("early_stopping_rounds"))
 
         train_split = dataset.split(DatasetSplit.TRAIN)
         eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
