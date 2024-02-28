@@ -26,9 +26,9 @@ from xtime.datasets.preprocessing import TimeSeries, TimeSeriesEncoder, TimeSeri
 class TestTimeSeries(TestCase):
     def test_mode(self) -> None:
         classes = np.asarray([0, 1, 2, 3, 3, 4, 3, 2, 1, 1, 6, 7, 1, 1, 4, 4, 1])
-        self.assertEquals(1, TimeSeries.mode(classes.flatten()))
-        self.assertEquals(1, TimeSeries.mode(classes.reshape(-1, 1)))
-        self.assertEquals(1, TimeSeries.mode(classes.reshape(1, -1)))
+        self.assertEqual(1, TimeSeries.mode(classes.flatten()))
+        self.assertEqual(1, TimeSeries.mode(classes.reshape(-1, 1)))
+        self.assertEqual(1, TimeSeries.mode(classes.reshape(1, -1)))
 
     def test_slide_no_transform(self) -> None:
         #
@@ -38,23 +38,23 @@ class TestTimeSeries(TestCase):
         self.assertRaises(ValueError, partial(self._slide, df, window_size=length + 1, stride=1))
 
         windows = self._slide(df, window_size=1, stride=1)
-        self.assertEquals(length, windows.shape[0])
+        self.assertEqual(length, windows.shape[0])
 
         windows = self._slide(df, window_size=length, stride=1)
-        self.assertEquals(1, windows.shape[0])
+        self.assertEqual(1, windows.shape[0])
 
         windows = self._slide(df, window_size=2, stride=2)
-        self.assertEquals(5, windows.shape[0])
+        self.assertEqual(5, windows.shape[0])
 
         windows = self._slide(df, window_size=3, stride=2)
-        self.assertEquals(4, windows.shape[0])
+        self.assertEqual(4, windows.shape[0])
 
     def _slide(self, df: pd.DataFrame, window_size: int, stride: int = 1) -> np.ndarray:
         windows = TimeSeries.slide(df, window_size=window_size, stride=stride)
         self.assertIsInstance(windows, np.ndarray)
-        self.assertEquals(3, windows.ndim)
-        self.assertEquals(window_size, windows.shape[1])
-        self.assertEquals(df.shape[1], windows.shape[2])
+        self.assertEqual(3, windows.ndim)
+        self.assertEqual(window_size, windows.shape[1])
+        self.assertEqual(df.shape[1], windows.shape[2])
         return windows
 
 
@@ -62,8 +62,8 @@ class TestTimeSeriesEncoder(TestCase):
     def _test(self, segment: np.ndarray) -> None:
         segment = TimeSeriesEncoder.normalize_segment(segment)
         self.assertIsInstance(segment, np.ndarray)
-        self.assertEquals(1, segment.ndim)
-        self.assertEquals(6, len(segment))
+        self.assertEqual(1, segment.ndim)
+        self.assertEqual(6, len(segment))
 
     def test_normalize_segment(self) -> None:
         arr = np.asarray([0, 1, 2, 3, 4, 6])
@@ -81,13 +81,13 @@ class TestTimeSeriesEncoderV1(TestCase):
     def test_features(self) -> None:
         features: t.List[str] = TimeSeriesEncoderV1().features()
         self.assertIsInstance(features, list)
-        self.assertEquals(TestTimeSeriesEncoderV1.NUM_FEATURES, len(features))
+        self.assertEqual(TestTimeSeriesEncoderV1.NUM_FEATURES, len(features))
         for feature in features:
             self.assertIsInstance(feature, str)
 
     def _check_features(self, features: t.Dict[str, t.Union[float, int]], num_ts: int = 1) -> None:
         self.assertIsInstance(features, dict)
-        self.assertEquals(TestTimeSeriesEncoderV1.NUM_FEATURES * num_ts, len(features))
+        self.assertEqual(TestTimeSeriesEncoderV1.NUM_FEATURES * num_ts, len(features))
         for name, value in features.items():
             self.assertIsInstance(name, str)
             self.assertTrue(name.strip() == name)
