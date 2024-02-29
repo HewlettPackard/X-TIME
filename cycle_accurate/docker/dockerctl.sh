@@ -4,7 +4,7 @@ set -e
 
 function usage() {
     echo "Usage: ./dockerctl.sh [OPTION]"
-    echo "  -b, --build <TAG> <DOCKERFILE> <PORT>          Builds and tags a docker image"
+    echo "  -b, --build <TAG> <DOCKERFILE> <PORT> <PROXY>  Builds and tags a docker image"
     echo "  -r, --run <IMAGE> <CONTAINER> <PATH> <PORT>    Starts container"
     echo "  -s, --launch <IMAGE> <CONTAINER> <PATH> <PORT> Gets a shell on container"
     echo "  -rm, --remove <CONTAINER>                      Stops and removes container"
@@ -18,7 +18,6 @@ then
     exit
 fi
 
-PROXY_URL=http://web-proxy.corp.hpecorp.net:8080/
 JUPYTER_PORT=8888
 
 while test $# -gt 0
@@ -27,8 +26,8 @@ do
         -b|--build)
             docker build -t "$2" \
                    --build-arg=PORTS="$4" \
-                   --build-arg=http_proxy="${PROXY_URL}" \
-                   --build-arg=https_proxy="${PROXY_URL}" \
+                   --build-arg=http_proxy="$5" \
+                   --build-arg=https_proxy="$5" \
                    -f "$3" .
             shift
             shift
