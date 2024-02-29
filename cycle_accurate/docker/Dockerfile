@@ -19,6 +19,8 @@ RUN apt-get update --yes && apt-get upgrade --yes &&\
 
 RUN apt-get install --yes python python2 python3 python-dev
 
+RUN apt-get install --yes python-is-python3
+
 ENV SHELL=/bin/bash \
         NB_USER="${NB_USER}" \
         NB_UID=${NB_UID} \
@@ -74,7 +76,7 @@ RUN cd $HOME/scratch/src \
 ENV PATH=$SST_CORE_HOME/bin:$PATH
 
 RUN apt-get install --yes\
-        python-numpy
+        python3-numpy
 
 RUN apt update
 
