@@ -64,6 +64,21 @@ def encode(obj: t.Any) -> t.Any:
     return obj
 
 
+def _object_to_debug_str(obj: t.Any) -> str:
+    """Convert object to a string containing type information for object values.
+    Args:
+        obj: Object to return type information for.
+    Returns:
+        Value type. Lists, tuples and dictionaries are processed recursively. For other variables type is returned.
+    """
+    if isinstance(obj, (list, tuple)):
+        return str([_object_to_debug_str(item) for item in obj])
+    elif isinstance(obj, t.Dict):
+        return str({key: _object_to_debug_str(value) for key, value in obj.items()})
+    else:
+        return str(type(obj))
+
+
 class IO(object):
     @staticmethod
     def download(url: str, data_dir: Path, file_name: str) -> None:
@@ -128,7 +143,13 @@ class IO(object):
             with open(file_path, "w") as stream:
                 yaml.dump(data, stream, Dumper=yaml.SafeDumper)
         except yaml.representer.RepresenterError:
-            logger.warning("YAML representation error (file_path=%s, data=%s).", file_path, data)
+            logger.warning(
+                "YAML representation error (file_path=%s, data=%s, types=%s).",
+                file_path,
+                data,
+                _object_to_debug_str(data),
+            )
+            logger.debug("", _object_to_debug_str(data))
             if raise_on_error:
                 raise
 
@@ -138,7 +159,12 @@ class IO(object):
             with open(file_path, "w") as stream:
                 json.dump(data, stream)
         except TypeError:
-            logger.warning("JSON representation error (file_path=%s, data=%s).", file_path, data)
+            logger.warning(
+                "JSON representation error (file_path=%s, data=%s, types=%s).",
+                file_path,
+                data,
+                _object_to_debug_str(data),
+            )
             if raise_on_error:
                 raise
 
