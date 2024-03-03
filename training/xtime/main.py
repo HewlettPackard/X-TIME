@@ -24,13 +24,7 @@ import click
 import coloredlogs
 from ray import tune
 
-from xtime.datasets import (
-    Dataset,
-    DatasetBuilder,
-    build_dataset,
-    get_dataset_builder_registry,
-    get_known_unknown_datasets,
-)
+from xtime.datasets import Dataset, DatasetBuilder, DatasetFactory, RegisteredDatasetFactory
 from xtime.errors import XTimeError
 from xtime.estimators import get_estimator_registry
 
@@ -178,11 +172,12 @@ def experiment_search_hp(
     # will enable the search_hp function to retrieve default parameters in this case.
     params = params if len(params) > 0 else None
     try:
-        known_problems, unknown_problems = get_known_unknown_datasets(dataset.split(sep=","))
-        if unknown_problems:
-            print(f"Unknown datasets: {unknown_problems}.")
-            print(f"Use one of these: {get_dataset_builder_registry().keys()}.")
-            exit(1)
+        known_problems = dataset.split(sep=";")
+        for _problem in known_problems:
+            factories = DatasetFactory.resolve_factories(_problem)
+            if len(factories) != 1:
+                print(f"Cannot create dataset ({_problem}). Number of dataset factories is {len(factories)}.")
+                exit(1)
         for _problem in known_problems:
             try:
                 process = Process(
@@ -241,7 +236,7 @@ def datasets() -> None: ...
 @dataset_arg
 def dataset_describe(dataset: str) -> None:
     try:
-        ds: Dataset = build_dataset(dataset).validate()
+        ds: Dataset = Dataset.create(dataset).validate()
         json.dump(ds.summary(), sys.stdout, indent=4)
     except Exception as err:
         print_err_and_exit(err)
@@ -260,7 +255,7 @@ def dataset_describe(dataset: str) -> None:
 )
 def dataset_save(dataset: str, directory: t.Optional[str] = None) -> None:
     try:
-        ds: Dataset = build_dataset(dataset).validate()
+        ds: Dataset = Dataset.create(dataset).validate()
         ds.save(directory)
     except Exception as err:
         print_err_and_exit(err)
@@ -272,8 +267,9 @@ def dataset_list() -> None:
 
     try:
         table = PrettyTable(field_names=["Dataset", "Versions"])
-        for name in get_dataset_builder_registry().keys():
-            dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
+        registry = RegisteredDatasetFactory.registry
+        for name in registry.keys():
+            dataset_builder: DatasetBuilder = registry.get(name)()
             table.add_row([name, ", ".join(dataset_builder.builders.keys())])
         print("Available datasets:")
         print(table)

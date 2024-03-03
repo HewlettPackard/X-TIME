@@ -17,7 +17,7 @@
 import typing as t
 from unittest import TestCase
 
-from xtime.datasets import DatasetBuilder, get_dataset_builder_registry
+from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
 from xtime.estimators import Estimator, get_estimator_registry
 
 
@@ -37,7 +37,7 @@ class TestRegistry(TestCase):
         self.check_registry(model_registry, expected, Estimator)
 
     def test_dataset_registry(self):
-        dataset_registry = get_dataset_builder_registry()
+        dataset_registry = RegisteredDatasetFactory.registry
         names = dataset_registry.keys()
 
         expected = [

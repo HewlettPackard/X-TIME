@@ -17,23 +17,21 @@
 from .dataset import (
     Dataset,
     DatasetBuilder,
+    DatasetFactory,
     DatasetMetadata,
     DatasetSplit,
     DatasetTestCase,
-    build_dataset,
-    get_dataset_builder_registry,
-    get_known_unknown_datasets,
-    parse_dataset_name,
+    RegisteredDatasetFactory,
+    SerializedDatasetFactory,
 )
 
 __all__ = [
     "DatasetSplit",
     "DatasetMetadata",
     "Dataset",
-    "parse_dataset_name",
-    "build_dataset",
-    "get_known_unknown_datasets",
-    "get_dataset_builder_registry",
     "DatasetBuilder",
+    "DatasetFactory",
+    "SerializedDatasetFactory",
+    "RegisteredDatasetFactory",
     "DatasetTestCase",
 ]
