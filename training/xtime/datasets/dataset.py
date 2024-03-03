@@ -46,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DatasetSplit:
-    """A dataset for one Machine Learning step (train/eval/test etc.)."""
+    """A dataset for one Machine Learning split (train/eval/test etc.)."""
 
     TRAIN = "train"
     VALID = "valid"
@@ -76,6 +76,8 @@ class DatasetSplit:
 
 @dataclass
 class DatasetMetadata:
+    """Dataset metadata that includes dataset name and version, task, features information and user properties."""
+
     name: str
     version: str
     task: t.Optional[t.Union[ClassificationTask, RegressionTask]] = None
@@ -116,6 +118,8 @@ class DatasetMetadata:
 
 @dataclass
 class Dataset:
+    """Dataset includes its metadata and splits."""
+
     metadata: DatasetMetadata
     splits: t.Dict[str, DatasetSplit] = field(default_factory=lambda: {})
 
@@ -201,6 +205,8 @@ class Dataset:
 
         Args:
             directory: Directory where dataset is stored.
+        Returns:
+            Dataset instance.
         """
         import pickle
 
@@ -217,6 +223,16 @@ class Dataset:
 
     @staticmethod
     def create(dataset: str, **kwargs) -> "Dataset":
+        """Create a dataset.
+
+        Args:
+            dataset: Dataset specification supported by the projects. Examples include serialized datasets (dataset is
+                a file path to a directory), and standard (registered datasets) in which case the `dataset` is the name
+                and version (name:version)
+            kwargs: If this is a registered dataset, kwargs are passed to `DatasetBuilder.build` method.
+        Returns:
+            Dataset instance.
+        """
         factories: t.List[DatasetFactory] = DatasetFactory.resolve_factories(dataset)
         registered_datasets = sorted(RegisteredDatasetFactory.registry.keys())
         if not factories:
@@ -231,6 +247,7 @@ class Dataset:
 
     @staticmethod
     def parse_name(name: str) -> t.Tuple[t.Optional[str], t.Optional[str]]:
+        """Parse name and return (name, version) tuple."""
         name = name.strip()
         if not name:
             return None, None
@@ -238,6 +255,8 @@ class Dataset:
 
 
 class DatasetBuilder(object):
+    """Base class for standard datasets."""
+
     NAME: t.Optional[str] = None
 
     @staticmethod
@@ -321,6 +340,12 @@ class DatasetBuilder(object):
 
 
 class DatasetFactory(abc.ABC):
+    """Base class factories that are used to create dataset instances.
+
+    Factories are responsible for creating datasets from various sources. The example of sources are serialized datasets
+    on disks or standard datasets supported by the project. Each instance of a factory is responsible for creating an
+    instance of a particular dataset.
+    """
 
     def __init__(self) -> None: ...
 
@@ -333,6 +358,7 @@ class DatasetFactory(abc.ABC):
 
     @staticmethod
     def resolve_factories(dataset: str) -> t.List["DatasetFactory"]:
+        """Identify all factories that can create this dataset."""
         return list(
             filter(
                 lambda factory: factory is not None,
@@ -342,6 +368,12 @@ class DatasetFactory(abc.ABC):
 
 
 class SerializedDatasetFactory(DatasetFactory):
+    """Factory for creating datasets previously serialized on disk.
+
+    Args:
+        dir_path: Directory path to a serialized dataset.
+    """
+
     def __init__(self, dir_path: Path) -> None:
         super().__init__()
         self.dir_path = dir_path
@@ -371,6 +403,12 @@ class SerializedDatasetFactory(DatasetFactory):
 
 
 class RegisteredDatasetFactory(DatasetFactory):
+    """Factory for creating standard datasets.
+
+    Args:
+        name: Dataset name.
+        version: Dataset version.
+    """
 
     registry = ClassRegistry(
         base_cls="xtime.datasets.DatasetBuilder", path=Path(__file__).parent, module="xtime.datasets"
