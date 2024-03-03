@@ -35,7 +35,6 @@ from sklearn.metrics import (
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
-from xtime.datasets.dataset import build_dataset
 from xtime.io import IO, encode
 from xtime.ml import METRICS, Task
 from xtime.registry import ClassRegistry
@@ -137,7 +136,7 @@ class Estimator(object):
         no_defaults
         """
         if ctx.dataset is None:
-            ctx.dataset = build_dataset(ctx.metadata.dataset)
+            ctx.dataset = Dataset.create(ctx.metadata.dataset)
 
         if ctx.callbacks:
             callback: Callback = ContainerCallback(ctx.callbacks)

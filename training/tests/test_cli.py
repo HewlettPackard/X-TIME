@@ -22,7 +22,7 @@ import pytest
 from click import BaseCommand
 from click.testing import CliRunner, Result
 
-from xtime.datasets import DatasetBuilder, get_dataset_builder_registry
+from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
 from xtime.errors import ErrorCode
 from xtime.main import (
     _run_search_hp_pipeline,
@@ -73,8 +73,9 @@ class TestMain(TestCase):
     def test_dataset_describe(self) -> None:
         """python -m unittest tests.test_cli.TestMain.test_dataset_describe"""
         self.assertIsInstance(dataset_describe, BaseCommand)
-        for name in get_dataset_builder_registry().keys():
-            dataset_builder: DatasetBuilder = get_dataset_builder_registry().get(name)()
+        registry = RegisteredDatasetFactory.registry
+        for name in registry.keys():
+            dataset_builder: DatasetBuilder = registry.get(name)()
             for version in dataset_builder.builders.keys():
                 result: Result = CliRunner().invoke(dataset_describe, [f"{name}:{version}"])
                 if result.exit_code == ErrorCode.DATASET_MISSING_PREREQUISITES_ERROR:
