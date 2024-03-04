@@ -53,6 +53,7 @@ class TestRegistry(TestCase):
             "wisdm",
             "madeline",
             "fraud_detection",
+            "ai4i",
         ]
 
         self.assertIsInstance(names, list)
