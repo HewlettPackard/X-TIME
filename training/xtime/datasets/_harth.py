@@ -17,6 +17,7 @@
 import logging
 import os
 import re
+import typing as t
 from itertools import product
 from pathlib import Path
 
@@ -134,7 +135,6 @@ class HARTHBuilder(DatasetBuilder):
         if kwargs:
             raise ValueError(f"{self.__class__.__name__}: `default` dataset does not accept arguments.")
         self._merge_dataset()
-        self._clean_dataset()
         self._create_default_dataset()
 
         train_df = pd.read_csv(self._dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-train.csv"))
@@ -182,11 +182,14 @@ class HARTHBuilder(DatasetBuilder):
         )
         return dataset
 
-    def extract_subject_id(self, filename):
-        # Regular expression pattern to match subject ID
-        # For example: 008 from `S008.csv`, 027 from `S027.csv`
+    def extract_subject_id(self, file_name: str) -> t.Optional[str]:
+        """Extract subject ID from a file name.
+
+        Regular expression pattern to match subject ID
+        For example: 008 from `S008.csv`, 027 from `S027.csv`
+        """
         pattern = r"S(\d+)\.csv"
-        match = re.search(pattern, filename)
+        match = re.search(pattern, file_name)
         if match:
             return match.group(1)
         else:
@@ -227,16 +230,6 @@ class HARTHBuilder(DatasetBuilder):
 
         merged_data = pd.concat(subject_data, ignore_index=True)
         merged_data.to_csv(_merged_dataset_file, index=False)
-
-    def _clean_dataset(self) -> None:
-        """Clean raw HARTH dataset."""
-        # Do not clean it again if it has already been cleaned.
-        # Dataset provides multiple files each containing data for individual subjects
-        # in `.csv` format without missing values
-        # We will use the merged file containing data for all subjects created from function `_merge_dataset`
-        _clean_dataset_file = (self._dataset_dir / _HARTH_DATASET_MERGED_FILE).with_suffix(".csv")
-        if _clean_dataset_file.is_file():
-            return
 
     def _create_default_dataset(self) -> None:
         """Create default train/test splits and save them to files.
