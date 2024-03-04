@@ -22,7 +22,7 @@ import mlflow
 
 import xtime.contrib.tune_ext as ray_tune_extensions
 from xtime.contrib.mlflow_ext import MLflow
-from xtime.datasets import build_dataset
+from xtime.datasets import Dataset
 from xtime.estimators import Estimator, get_estimator
 from xtime.hparams import HParamsSource, get_hparams
 from xtime.io import IO
@@ -47,7 +47,7 @@ def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
             raise_on_error=False,
         )
         context = Context(
-            metadata=Metadata(dataset=dataset, model=model, run_type=RunType.TRAIN), dataset=build_dataset(dataset)
+            metadata=Metadata(dataset=dataset, model=model, run_type=RunType.TRAIN), dataset=Dataset.create(dataset)
         )
         if hparams is None:
             hparams = f"auto:default:model={model};task={context.dataset.metadata.task.type.value};run_type=train"

@@ -31,14 +31,13 @@ from xtime.ml import ClassificationTask, Feature, FeatureType, RegressionTask, T
 from xtime.registry import ClassRegistry
 
 __all__ = [
-    "DatasetSplit",
-    "DatasetMetadata",
-    "Dataset",
-    "parse_dataset_name",
-    "build_dataset",
-    "get_known_unknown_datasets",
-    "get_dataset_builder_registry",
-    "DatasetBuilder",
+    "DatasetSplit",  # Train, test, valid or any other splits without metadata attached.
+    "DatasetMetadata",  # Metadata about concrete dataset.
+    "Dataset",  # Combines metadata with multiple splits into one structure.
+    "DatasetBuilder",  # Class that builds one or multiple versions of a particular dataset.
+    "DatasetFactory",  # Abstract dataset factory.
+    "SerializedDatasetFactory",  # Factory creates datasets that were previously serialized on disk.
+    "RegisteredDatasetFactory",  # Factory creates datasets that are implemented in child classes of `DatasetBuilder`.
     "DatasetTestCase",
 ]
 
@@ -47,7 +46,7 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class DatasetSplit:
-    """A dataset for one Machine Learning step (train/eval/test etc.)."""
+    """A dataset for one Machine Learning split (train/eval/test etc.)."""
 
     TRAIN = "train"
     VALID = "valid"
@@ -77,6 +76,8 @@ class DatasetSplit:
 
 @dataclass
 class DatasetMetadata:
+    """Dataset metadata that includes dataset name and version, task, features information and user properties."""
+
     name: str
     version: str
     task: t.Optional[t.Union[ClassificationTask, RegressionTask]] = None
@@ -117,6 +118,8 @@ class DatasetMetadata:
 
 @dataclass
 class Dataset:
+    """Dataset includes its metadata and splits."""
+
     metadata: DatasetMetadata
     splits: t.Dict[str, DatasetSplit] = field(default_factory=lambda: {})
 
@@ -202,6 +205,8 @@ class Dataset:
 
         Args:
             directory: Directory where dataset is stored.
+        Returns:
+            Dataset instance.
         """
         import pickle
 
@@ -216,8 +221,42 @@ class Dataset:
                 ds.splits[split_name] = DatasetSplit(x=data["x"], y=data["y"])
         return ds
 
+    @staticmethod
+    def create(dataset: str, **kwargs) -> "Dataset":
+        """Create a dataset.
+
+        Args:
+            dataset: Dataset specification supported by the projects. Examples include serialized datasets (dataset is
+                a file path to a directory), and standard (registered datasets) in which case the `dataset` is the name
+                and version (name:version)
+            kwargs: If this is a registered dataset, kwargs are passed to `DatasetBuilder.build` method.
+        Returns:
+            Dataset instance.
+        """
+        factories: t.List[DatasetFactory] = DatasetFactory.resolve_factories(dataset)
+        registered_datasets = sorted(RegisteredDatasetFactory.registry.keys())
+        if not factories:
+            raise ValueError(
+                f"Dataset (dataset={dataset}) not found in the registry of datasets and not resolved as a serialized "
+                f"dataset. Available datasets in registry: {registered_datasets}."
+            )
+        if len(factories) > 1:
+            sources: str = ". ".join(factory.describe() for factory in factories)
+            raise ValueError(f"The dataset (name='{dataset}') can be loaded from multiple locations. {sources}.")
+        return factories[0].create(**kwargs)
+
+    @staticmethod
+    def parse_name(name: str) -> t.Tuple[t.Optional[str], t.Optional[str]]:
+        """Parse name and return (name, version) tuple."""
+        name = name.strip()
+        if not name:
+            return None, None
+        return (name, None) if ":" not in name else name.split(":", maxsplit=1)
+
 
 class DatasetBuilder(object):
+    """Base class for standard datasets."""
+
     NAME: t.Optional[str] = None
 
     @staticmethod
@@ -300,40 +339,101 @@ class DatasetBuilder(object):
         return dataset
 
 
-_registry = ClassRegistry(base_cls="xtime.datasets.DatasetBuilder", path=Path(__file__).parent, module="xtime.datasets")
+class DatasetFactory(abc.ABC):
+    """Base class factories that are used to create dataset instances.
 
+    Factories are responsible for creating datasets from various sources. The example of sources are serialized datasets
+    on disks or standard datasets supported by the project. Each instance of a factory is responsible for creating an
+    instance of a particular dataset.
+    """
 
-def get_dataset_builder_registry() -> ClassRegistry:
-    return _registry
+    def __init__(self) -> None: ...
 
+    def describe(self) -> str:
+        return ""
 
-def parse_dataset_name(name: str) -> t.Tuple[str, t.Optional[str]]:
-    name_and_version = (name, None) if ":" not in name else name.split(":")
-    if len(name_and_version) != 2:
-        raise ValueError(f"Invalid dataset name: {name}.")
-    return name_and_version
+    @abc.abstractmethod
+    def create(self, **kwargs) -> Dataset:
+        raise NotImplementedError
 
-
-def build_dataset(name: str, **kwargs) -> Dataset:
-    name, version = parse_dataset_name(name)
-    version = version or "default"
-    if _registry.contains(name) is False:
-        _available_datasets = sorted(_registry.keys())
-        raise ValueError(
-            f"Dataset (name=`{name}`) not found in the registry of datasets. Available datasets: {_available_datasets}."
+    @staticmethod
+    def resolve_factories(dataset: str) -> t.List["DatasetFactory"]:
+        """Identify all factories that can create this dataset."""
+        return list(
+            filter(
+                lambda factory: factory is not None,
+                [SerializedDatasetFactory.resolve(dataset), RegisteredDatasetFactory.resolve(dataset)],
+            )
         )
-    return _registry.get(name)().build(version, **kwargs)
 
 
-def get_known_unknown_datasets(fully_qualified_names: t.List[str]) -> t.Tuple[t.List[str], t.List[str]]:
-    known, unknown = [], []
-    for fully_qualified_name in fully_qualified_names:
-        name, version = parse_dataset_name(fully_qualified_name)
-        if not _registry.contains(name) or not _registry.get(name)().version_supported(version or "default"):
-            unknown.append(fully_qualified_name)
-        else:
-            known.append(fully_qualified_name)
-    return known, unknown
+class SerializedDatasetFactory(DatasetFactory):
+    """Factory for creating datasets previously serialized on disk.
+
+    Args:
+        dir_path: Directory path to a serialized dataset.
+    """
+
+    def __init__(self, dir_path: Path) -> None:
+        super().__init__()
+        self.dir_path = dir_path
+
+    def describe(self) -> str:
+        return f"Serialized dataset (path={self.dir_path.as_posix()})."
+
+    def create(self, **kwargs) -> Dataset:
+        return Dataset.load(self.dir_path)
+
+    @classmethod
+    def resolve(cls, dataset: str) -> t.Optional["SerializedDatasetFactory"]:
+        """Try resolving dataset name as a previously serialized dataset.
+
+        Args:
+            dataset: A possible path to a dataset
+        Returns:
+            SerializedDatasetLoader instance if the name maybe pointing to a serialized dataset, None otherwise.
+                It is not guaranteed that dataset path indeed points to a correct dataset.
+        """
+        file_path = Path(dataset)
+        if file_path.is_file() and file_path.name == "metadata.yaml":
+            return SerializedDatasetFactory(file_path.parent.absolute())
+        if file_path.is_dir() and (file_path / "metadata.yaml").is_file():
+            return SerializedDatasetFactory(file_path.absolute())
+        return None
+
+
+class RegisteredDatasetFactory(DatasetFactory):
+    """Factory for creating standard datasets.
+
+    Args:
+        name: Dataset name.
+        version: Dataset version.
+    """
+
+    registry = ClassRegistry(
+        base_cls="xtime.datasets.DatasetBuilder", path=Path(__file__).parent, module="xtime.datasets"
+    )
+
+    def __init__(self, name: str, version: str) -> None:
+        super().__init__()
+        self.name = name
+        self.version = version
+
+    def describe(self) -> str:
+        return f"Registered dataset (name={self.name}, version={self.version})."
+
+    def create(self, **kwargs) -> Dataset:
+        return self.registry.get(self.name)().build(self.version, **kwargs)
+
+    @classmethod
+    def resolve(cls, dataset: str) -> t.Optional["RegisteredDatasetFactory"]:
+        name, version = Dataset.parse_name(dataset)
+        if not name:
+            return None
+        version = version or "default"
+        if cls.registry.contains(name) and cls.registry.get(name)().version_supported(version):
+            return RegisteredDatasetFactory(name, version)
+        return None
 
 
 class DatasetTestCase(TestCase):
@@ -368,13 +468,13 @@ class DatasetTestCase(TestCase):
                 test_fn(self, ds, params)
 
     def _load_dataset(self, fully_qualified_name: str) -> t.Tuple[t.Any, str, str]:
-        name, version = parse_dataset_name(fully_qualified_name)
-        dataset_builder_cls: t.Type = _registry.get(name)
+        name, version = Dataset.parse_name(fully_qualified_name)
+        dataset_builder_cls: t.Type = RegisteredDatasetFactory.registry.get(name)
         self.assertIs(
             dataset_builder_cls,
             self.CLASS,
             f"fully_qualified_name={fully_qualified_name}, name={name}, version={version}, "
-            f"dataset_builder_cls={dataset_builder_cls}, _registry.keys()={_registry.keys()}",
+            f"dataset_builder_cls={dataset_builder_cls}, _registry.keys()={RegisteredDatasetFactory.registry.keys()}",
         )
         return dataset_builder_cls().build(version), name, version
 

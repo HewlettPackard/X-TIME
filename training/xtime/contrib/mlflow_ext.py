@@ -25,7 +25,7 @@ from mlflow.store.entities import PagedList
 from mlflow.utils.file_utils import local_file_uri_to_path
 
 from xtime import hparams
-from xtime.datasets import parse_dataset_name
+from xtime.datasets import Dataset
 from xtime.ml import Task
 from xtime.run import RunType
 
@@ -46,7 +46,7 @@ class MLflow(object):
             kwargs: dictionary of additional tags to set.
         """
         if dataset:
-            dataset_name, dataset_version = parse_dataset_name(dataset)
+            dataset_name, dataset_version = Dataset.parse_name(dataset)
             mlflow.set_tags({"dataset_name": dataset_name, "dataset_version": dataset_version})
         if run_type:
             mlflow.set_tag("run_type", run_type.value)
@@ -186,9 +186,18 @@ class MLflow(object):
         """
         # Some metrics produced by Ray Tune we are not interested in.
         _metrics_to_ignore = {
-            "timesteps_total", "time_this_iter_s", "timesteps_total", "episodes_total", "training_iteration",
-            "timestamp", "time_total_s", "pid", "time_since_restore", "timesteps_since_restore",
-            "iterations_since_restore", "warmup_time"
+            "timesteps_total",
+            "time_this_iter_s",
+            "timesteps_total",
+            "episodes_total",
+            "training_iteration",
+            "timestamp",
+            "time_total_s",
+            "pid",
+            "time_since_restore",
+            "timesteps_since_restore",
+            "iterations_since_restore",
+            "warmup_time",
         }
         for name, value in metrics.items():
             try:

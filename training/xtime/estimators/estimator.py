@@ -13,9 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
 import abc
 import copy
+import logging
 import os
 import typing as t
 from pathlib import Path
@@ -23,25 +23,28 @@ from unittest import TestCase
 
 import mlflow
 import numpy as np
+import pandas as pd
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
     log_loss,
     mean_squared_error,
     precision_score,
+    r2_score,
     recall_score,
     roc_auc_score,
 )
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
-from xtime.datasets.dataset import build_dataset
 from xtime.io import IO, encode
-from xtime.ml import METRICS, Task
+from xtime.ml import Task
 from xtime.registry import ClassRegistry
 from xtime.run import Context, Metadata, RunType
 
 __all__ = ["Estimator", "get_estimator_registry", "get_estimator", "unit_test_train_model", "unit_test_check_metrics"]
+
+logger = logging.getLogger(__name__)
 
 
 class Callback(object):
@@ -49,7 +52,15 @@ class Callback(object):
 
     def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None: ...
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None: ...
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+        """Called after the model's final evaluation.
+
+        Args:
+            dataset: Dataset used to train/test this the model.
+            estimator: Model
+            metrics: Dictionary of metrics returned by `Estimator.evaluate` method.
+        """
+        ...
 
 
 class ContainerCallback(Callback):
@@ -64,7 +75,7 @@ class ContainerCallback(Callback):
         for callback in self.callbacks:
             callback.after_fit(dataset, estimator)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
         for callback in self.callbacks:
             callback.after_test(dataset, estimator, metrics)
 
@@ -77,8 +88,16 @@ class MLflowCallback(Callback):
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         MLflow.set_tags(task=dataset.metadata.task)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
-        mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task.type]})
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+        # TODO: (sergey) why did I come up with this implementation originally (in other words, why not dumping all
+        #       metrics)? Is it because the metric value for some reason could be non-numeric?
+        # mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task.type]})
+
+        loggable_metrics = {}
+        for name, value in metrics.items():
+            if isinstance(value, (int, float, bool)):
+                loggable_metrics[name] = float(value)
+        mlflow.log_metrics(loggable_metrics)
 
 
 class TrainCallback(Callback):
@@ -114,7 +133,7 @@ class TrainCallback(Callback):
     def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         estimator.save_model(self.work_dir)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
         IO.save_yaml(encode(metrics), self.work_dir / "test_info.yaml")
 
 
@@ -137,7 +156,7 @@ class Estimator(object):
         no_defaults
         """
         if ctx.dataset is None:
-            ctx.dataset = build_dataset(ctx.metadata.dataset)
+            ctx.dataset = Dataset.create(ctx.metadata.dataset)
 
         if ctx.callbacks:
             callback: Callback = ContainerCallback(ctx.callbacks)
@@ -152,29 +171,21 @@ class Estimator(object):
         estimator.fit_model(ctx.dataset, **ctx.metadata.fit_params)
         callback.after_fit(ctx.dataset, estimator)
 
-        metrics = estimator.evaluate(ctx.dataset, ctx)
+        metrics: t.Dict = estimator.evaluate(ctx.dataset)
         callback.after_test(ctx.dataset, estimator, metrics)
 
         return metrics
 
-    def evaluate(self, dataset: Dataset, ctx: t.Optional[Context] = None, report: bool = True) -> t.Dict:
+    def evaluate(self, dataset: Dataset) -> t.Dict[str, t.Any]:
         if dataset.metadata.task.type.classification():
             metrics = self._evaluate_classifier(dataset)
         elif dataset.metadata.task.type.regression():
             metrics = self._evaluate_regressor(dataset)
         else:
             raise ValueError(f"Unsupported machine learning task {dataset.metadata.task}")
-        """
-        if report:
-            if context.get('run_type', RunType.TRAIN) == RunType.HPO_WITH_RAY_TUNE:
-                tune.report(**metrics)
-            else:
-                _metrics = ', '.join([f'{k}={metrics[k]}' for k in sorted(metrics.keys())])
-                print(f"Model name={context['model']}, metrics={_metrics}")
-        """
         return metrics
 
-    def _evaluate_classifier(self, dataset: Dataset) -> t.Dict:
+    def _evaluate_classifier(self, dataset: Dataset) -> t.Dict[str, t.Any]:
         """Report results of a training run.
         TODO: I can already have here results for train/valid (eval) splits.
         """
@@ -217,19 +228,37 @@ class Estimator(object):
 
         return metrics
 
-    def _evaluate_regressor(self, dataset: Dataset) -> t.Dict:
+    def _evaluate_regressor(self, dataset: Dataset) -> t.Dict[str, t.Any]:
+        """Evaluate regressor model."""
+        # Baseline predictor (strategy=mean) will be used to compute out-of-sample R-squared metric.
+        baseline_y_pred: t.Optional[float] = None
+        train_y_vals: np.ndarray = dataset.splits[DatasetSplit.TRAIN].y.values
+        if train_y_vals.ndim == 1 or (train_y_vals.ndim == 2 and train_y_vals.shape[1] == 1):
+            baseline_y_pred = train_y_vals.flatten().mean()
+        else:
+            logger.debug("Out-of-sample R-squared will not be computed (shape=%s)", str(train_y_vals.shape))
+        #
         metrics = {"dataset_mse": 0.0}
         _num_examples = 0
 
-        def _evaluate(x, y, name: str) -> None:
+        def _evaluate(x: pd.DataFrame, y: t.Union[pd.DataFrame, pd.Series], name: str) -> None:
             nonlocal _num_examples
-            mse = mean_squared_error(y_true=y, y_pred=self.model.predict(x))
-            metrics[f"{name}_mse"] = mse
             _num_examples += len(y)
-            metrics["dataset_mse"] += mse * len(y)
+
+            y_pred = self.model.predict(x)
+
+            mse_metric_name = f"{name}_mse"
+            metrics[mse_metric_name] = mean_squared_error(y_true=y, y_pred=y_pred)
+            metrics["dataset_mse"] += metrics[mse_metric_name] * len(y)
+
+            if baseline_y_pred is not None:
+                _benchmark_mse: float = float(np.average((y - baseline_y_pred) ** 2, axis=0))
+                metrics[f"{name}_r2_oos"] = 1.0 - metrics[mse_metric_name] / _benchmark_mse
+
+            metrics[f"{name}_r2"] = r2_score(y_true=y, y_pred=y_pred)
 
         for split_name in (DatasetSplit.TRAIN, DatasetSplit.VALID, DatasetSplit.TEST):
-            split = dataset.split(split_name)
+            split: t.Optional[DatasetSplit] = dataset.split(split_name)
             if split is not None:
                 _evaluate(split.x, split.y, split_name)
 

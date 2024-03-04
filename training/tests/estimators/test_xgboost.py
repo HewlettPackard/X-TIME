@@ -19,7 +19,7 @@ from unittest import TestCase
 import pytest
 
 from xtime.contrib.unittest_ext import with_temp_work_dir
-from xtime.datasets import Dataset, build_dataset
+from xtime.datasets import Dataset
 from xtime.estimators._xgboost import XGBoostEstimator
 from xtime.estimators.estimator import unit_test_check_metrics, unit_test_train_model
 
@@ -29,7 +29,7 @@ pytestmark = pytest.mark.estimators
 class TestXGBoostEstimator(TestCase):
     @with_temp_work_dir
     def test_churn_modelling_numerical(self) -> None:
-        ds: Dataset = build_dataset("churn_modelling:numerical")
+        ds: Dataset = Dataset.create("churn_modelling:numerical")
         self.assertIsInstance(ds, Dataset)
 
         metrics: t.Dict = unit_test_train_model(self, "xgboost", XGBoostEstimator, ds)
@@ -37,7 +37,7 @@ class TestXGBoostEstimator(TestCase):
 
     @with_temp_work_dir
     def test_year_prediction_msd_default(self) -> None:
-        ds: Dataset = build_dataset("year_prediction_msd:default")
+        ds: Dataset = Dataset.create("year_prediction_msd:default")
         self.assertIsInstance(ds, Dataset)
 
         metrics: t.Dict = unit_test_train_model(self, "xgboost", XGBoostEstimator, ds)
