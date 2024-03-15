@@ -26,7 +26,8 @@ from ray import tune
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetFactory, RegisteredDatasetFactory
 from xtime.errors import XTimeError
-from xtime.estimators import get_estimator_registry
+
+# from xtime.estimators import get_estimator_registry
 
 logger = logging.getLogger(__name__)
 
@@ -40,7 +41,7 @@ dataset_arg_help = (
 
 
 model_arg = click.argument("model", type=str, metavar="MODEL")
-model_arg_help = f"Available ML models are: {list(get_estimator_registry().keys())}."
+model_arg_help = f"To get list of available ML models, run `models list` command."
 
 
 params_option = click.option(
@@ -288,6 +289,8 @@ def models() -> None: ...
 @models.command("list", help="List all available models.")
 def model_list() -> None:
     try:
+        from xtime.estimators import get_estimator_registry
+
         print("Available models:")
         for name in get_estimator_registry().keys():
             print(f"- {name}")

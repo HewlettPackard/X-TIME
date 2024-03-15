@@ -16,8 +16,13 @@
 
 import importlib
 import inspect
+import logging
 import typing as t
 from pathlib import Path
+
+from xtime.errors import maybe_suggest_debug_level
+
+logger = logging.getLogger(__name__)
 
 __all__ = ["ClassRegistry"]
 
@@ -69,17 +74,41 @@ class ClassRegistry(object):
         base_cls_type = getattr(importlib.import_module(base_cls_module), base_cls_name)
         self._registry = {}
         for file_path in self._path.glob("*.py"):
-            module = importlib.import_module(f"{self._module}.{file_path.name[:-3]}")
-            for obj_name in dir(module):
-                obj = getattr(module, obj_name)
-                if (
-                    inspect.isclass(obj)
-                    and issubclass(obj, base_cls_type)
-                    and obj is not base_cls_type
-                    and getattr(obj, "NAME", None) is not None
-                ):
-                    for _name in [obj.NAME] if isinstance(obj.NAME, str) else obj.NAME:
-                        self._register(_name, obj, module)
+            module_name: str = f"{self._module}.{file_path.name[:-3]}"
+            try:
+                module = importlib.import_module(module_name)
+                logger.debug("New module (module=%s, path=%s).", module_name, self._path.as_posix())
+                registered = False
+                for obj_name in dir(module):
+                    obj = getattr(module, obj_name)
+                    if (
+                        inspect.isclass(obj)
+                        and issubclass(obj, base_cls_type)
+                        and obj is not base_cls_type
+                        and getattr(obj, "NAME", None) is not None
+                    ):
+                        for _name in [obj.NAME] if isinstance(obj.NAME, str) else obj.NAME:
+                            logger.debug(
+                                "New registrable class (name=%s, module=%s, path=%s).",
+                                _name,
+                                module_name,
+                                self._path.as_posix(),
+                            )
+                            registered = True
+                            self._register(_name, obj, module)
+                if not registered:
+                    logger.debug(
+                        "Registrable classes not found (module=%s, path=%s).", module_name, self._path.as_posix()
+                    )
+            except ImportError as err:
+                logger.error(
+                    "Import module error (name=%s, path=%s, import_error=%s).%s",
+                    module_name,
+                    self._path.as_posix(),
+                    str(err),
+                    maybe_suggest_debug_level(logger),
+                )
+                logger.debug("Import module error details.", exc_info=err)
 
     def _register(self, name: str, registrable: t.Any, module) -> None:
         if name in self._registry:
