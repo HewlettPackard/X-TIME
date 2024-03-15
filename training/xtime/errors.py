@@ -13,6 +13,30 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import logging
+import typing as t
+
+__all__ = [
+    "maybe_suggest_debug_level",
+    "ErrorCode",
+    "XTimeError",
+    "ConfigurationError",
+    "EstimatorError",
+    "DatasetError",
+]
+
+
+def maybe_suggest_debug_level(logger: t.Optional[logging.Logger] = None, prefix: str = " ", suffix: str = ".") -> str:
+    if logger is None or not logger.isEnabledFor(logging.DEBUG):
+        return (
+            f"{prefix}Detailed information is logged when logging level is "
+            f"set to `debug` (rerun with --log-level=debug){suffix}"
+        )
+    return ""
+
+
+def exception_if_debug(error: Exception, logger: logging.Logger) -> t.Optional[Exception]:
+    return error if logger.isEnabledFor(logging.DEBUG) else None
 
 
 class ErrorCode:
