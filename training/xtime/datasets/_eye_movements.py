@@ -13,15 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
-from openml.datasets import get_dataset as get_openml_dataset
-from openml.datasets.dataset import OpenMLDataset
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
-from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
+from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetPrerequisites, DatasetSplit
 from .preprocessing import ChangeColumnsType, ChangeColumnsTypeToCategory, CheckColumnsOrder, DropColumns
 
 __all__ = ["EyeMovementsBuilder"]
@@ -33,6 +30,9 @@ class EyeMovementsBuilder(DatasetBuilder):
     def __init__(self) -> None:
         super().__init__(openml=True)
         self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+
+    def _check_pre_requisites(self) -> None:
+        DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/1044")
 
     def _build_default_dataset(self) -> Dataset:
         """Create `eye_movements` train/valid/test datasets.
@@ -51,6 +51,9 @@ class EyeMovementsBuilder(DatasetBuilder):
             Input: 26 features
             Task: multi-class classification (Irrelevant / Relevant / Correct)
         """
+        from openml.datasets import get_dataset as get_openml_dataset
+        from openml.datasets.dataset import OpenMLDataset
+
         # Init parameters.
         random_state: int = 0
         validation_size: float = 0.1
