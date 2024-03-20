@@ -4,8 +4,22 @@ have been tested in Windows and Linux (Ubuntu) environments.
 ```shell
 conda env create --file ./environment.yml
 conda activate xtime-training
-poetry install
+
+# Install all mandatory and optional dependencies (including XGBoost, CatBoost, LightGBM and all other libraries
+# needed for preprocessing data)
+poetry install --all-extras 
+
+# Optionally, install only needed dependencies (select all or only needed dependency groups)
+poetry install --extras "catboost xgboost"
 ```
+
+Extra dependencies:
+- `catboost` CatBoost ML library.
+- `xgboost` XGBoost ML library.
+- `lightgbm` LightGBM library.
+- `timeseries` Packages to create ML datasets for time series data. Installs: [`tsfresh`].
+
+
 
 I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
 > If on Windows OS, run the following cell. The 2nd command can fail - then go to your python directory and run it. 
