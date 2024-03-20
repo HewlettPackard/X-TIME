@@ -50,9 +50,15 @@ PyQt5 = "5.15.2"               # Fixes "inable to find installation candidates f
 [tool.poetry.extras]
 openml = ["openml"]
 timeseries = ["tsfresh"]
+
 catboost = ["catboost"]
 lightgbm = ["lightgbm"]
 xgboost = ["xgboost"]
+
+datasets = ["openml", "tsfresh"]
+models = ["catboost", "lightgbm", "xgboost"]
+
+all = ["openml", "tsfresh", "catboost", "lightgbm", "xgboost"]
 
 [tool.black]
 # python -m black --config pyproject.toml ./xtime ./tests
