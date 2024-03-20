@@ -17,8 +17,11 @@ Extra dependencies:
 - `catboost` CatBoost ML library.
 - `xgboost` XGBoost ML library.
 - `lightgbm` LightGBM library.
-- `timeseries` Packages to create ML datasets for time series data. Installs: [`tsfresh`].
+- `timeseries` Packages to create ML datasets for time series data.
 - `openml` Library required by several datasets hosted on OpenML site.
+- `datasets`: Install packages to ensure all datasets can be loaded (includes [`openml`, `timeseries`]).
+- `models`: Install packages to ensure all models can be loaded (includes [`catboost`, `xgboost`, `lightgbm`]).
+- `all`: Install all extra packages.
 
 
 
