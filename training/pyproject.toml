@@ -10,7 +10,6 @@ packages = [{include = "xtime"}]
 python = "^3.9"
 llvmlite = ">0.34.0"        # Without this, in Windows OS poetry selects 0.34 that does not have pre-built packages.
 scikit-learn = "1.2.2"      # core dependency
-openml = "0.13.1"           # core dependency
 mlflow = "2.2.2"            # core dependency
 ray = { version = "2.3.1", extras = ["tune", "default"] }   # core dependency
 numpy = "1.23.5"            # core dependency
@@ -29,7 +28,8 @@ coloredlogs = "15.0.1"      # command line interface
 #   1. `poetry install --all-extras`  install all extra dependencies.
 #   2. `poetry install --extras xgboost`
 # If no `--all-extras` / `--extras` provided, the respective installed packages will be uninstalled.
-tsfresh = { version = "0.20.2", optional = true }  # Feature extraction for time series data.
+openml = { version = "0.13.1", optional = true }   # Prerequisite dependency for OpenML datasets.
+tsfresh = { version = "0.20.2", optional = true }  # Prerequisite dependency for time series data sets.
 catboost = { version = "1.1.1", optional = true }  # Gradient boosting trees - CatBoost library.
 lightgbm = { version = "3.3.5", optional = true }  # Gradient boosting trees - LightGBM library.
 xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - XGBoost library.
@@ -48,6 +48,7 @@ pandasgui = "0.2.14"
 PyQt5 = "5.15.2"               # Fixes "inable to find installation candidates for pyqt5-qt5 (x.x.x)" in Ubuntu
 
 [tool.poetry.extras]
+openml = ["openml"]
 timeseries = ["tsfresh"]
 catboost = ["catboost"]
 lightgbm = ["lightgbm"]

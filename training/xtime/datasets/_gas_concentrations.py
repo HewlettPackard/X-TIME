@@ -15,14 +15,12 @@
 ###
 
 import pandas as pd
-from openml.datasets import get_dataset as get_openml_dataset
-from openml.datasets.dataset import OpenMLDataset
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import LabelEncoder
 
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
-from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
+from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetPrerequisites, DatasetSplit
 
 __all__ = ["GasConcentrationsBuilder"]
 
@@ -33,6 +31,9 @@ class GasConcentrationsBuilder(DatasetBuilder):
     def __init__(self) -> None:
         super().__init__(openml=True)
         self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+
+    def _check_pre_requisites(self) -> None:
+        DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/1477")
 
     def _build_default_dataset(self) -> Dataset:
         """Create `gas-drift-different-concentrations` train/valid/test datasets.
@@ -48,6 +49,9 @@ class GasConcentrationsBuilder(DatasetBuilder):
             Input: 129 features
             Task: multi-class classification - 6 classes.
         """
+        from openml.datasets import get_dataset as get_openml_dataset
+        from openml.datasets.dataset import OpenMLDataset
+
         # Init parameters.
         random_state: int = 0
         validation_size: float = 0.1

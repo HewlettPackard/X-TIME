@@ -26,6 +26,7 @@ from unittest import TestCase
 import pandas as pd
 from pandas import CategoricalDtype
 
+from xtime.errors import DatasetError
 from xtime.io import IO
 from xtime.ml import ClassificationTask, Feature, FeatureType, RegressionTask, Task
 from xtime.registry import ClassRegistry
@@ -38,6 +39,7 @@ __all__ = [
     "DatasetFactory",  # Abstract dataset factory.
     "SerializedDatasetFactory",  # Factory creates datasets that were previously serialized on disk.
     "RegisteredDatasetFactory",  # Factory creates datasets that are implemented in child classes of `DatasetBuilder`.
+    "DatasetPrerequisites",  # Standard checks for dataset prerequisites.
     "DatasetTestCase",
 ]
 
@@ -434,6 +436,28 @@ class RegisteredDatasetFactory(DatasetFactory):
         if cls.registry.contains(name) and cls.registry.get(name)().version_supported(version):
             return RegisteredDatasetFactory(name, version)
         return None
+
+
+class DatasetPrerequisites:
+    """Various standard checks for dataset prerequisites."""
+
+    @staticmethod
+    def check_openml(dataset_name: str, openml_url: str) -> None:
+        """Check if the `openml` library is installed.
+
+        Args:
+            dataset_name: Name of a dataset.
+            openml_url: An OpenML dataset URL
+        """
+        try:
+            import openml
+        except ImportError:
+            raise DatasetError.missing_prerequisites(
+                "The `%s` dataset is an OpenML dataset (%s), and the `openml` package needs to be installed. "
+                "This package is an extra dependency of this project belonging to the `openml` group. With poetry, "
+                "install it by running either `poetry install --extras openml` or `poetry install --all-extras` "
+                "commands.".format(dataset_name, openml_url)
+            )
 
 
 class DatasetTestCase(TestCase):

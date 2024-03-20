@@ -18,6 +18,7 @@ Extra dependencies:
 - `xgboost` XGBoost ML library.
 - `lightgbm` LightGBM library.
 - `timeseries` Packages to create ML datasets for time series data. Installs: [`tsfresh`].
+- `openml` Library required by several datasets hosted on OpenML site.
 
 
 
