@@ -13,9 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import sys
 import typing as t
 from pathlib import Path
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from xtime.contrib.unittest_ext import with_temp_work_dir
 from xtime.datasets.dataset import (
@@ -23,10 +24,12 @@ from xtime.datasets.dataset import (
     DatasetBuilder,
     DatasetFactory,
     DatasetMetadata,
+    DatasetPrerequisites,
     DatasetSplit,
     RegisteredDatasetFactory,
     SerializedDatasetFactory,
 )
+from xtime.errors import DatasetError
 
 
 class TestDataset(TestCase):
@@ -61,3 +64,23 @@ class TestDataset(TestCase):
                 RegisteredDatasetFactory,
                 f"Expected 'RegisteredDatasetFactory' class for '{dataset_name}' dataset.",
             )
+
+    def test_dataset_prerequisites_get_install_lib_help(self) -> None:
+        msg: str = DatasetPrerequisites._get_install_lib_help("openml", "openml")
+        self.assertIsInstance(msg, str)
+
+        msg: str = DatasetPrerequisites._get_install_lib_help("openml", ["openml", "datasets", "all"])
+        self.assertIsInstance(msg, str)
+
+        msg: str = DatasetPrerequisites._get_install_lib_help("tsfresh", ["timeseries", "datasets", "all"])
+        self.assertIsInstance(msg, str)
+
+    def test_dataset_prerequisites_check_openml(self) -> None:
+        with mock.patch.dict(sys.modules, {"openml": None}):
+            with self.assertRaises(DatasetError):
+                DatasetPrerequisites.check_openml("gas_concentrations", "openml.org/d/1477")
+
+    def test_dataset_prerequisites_check_tsfresh(self) -> None:
+        with mock.patch.dict(sys.modules, {"tsfresh": None}):
+            with self.assertRaises(DatasetError):
+                DatasetPrerequisites.check_tsfresh("fraud_detection")

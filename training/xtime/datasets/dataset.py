@@ -442,6 +442,17 @@ class DatasetPrerequisites:
     """Various standard checks for dataset prerequisites."""
 
     @staticmethod
+    def _get_install_lib_help(lib_name: str, groups: t.Union[str, t.List[str]]) -> str:
+        help_msg = (
+            "The `%s` library is an extra dependency of this project belonging to the `%s` group(s). "
+            "With `poetry`, install it by running either (as an example) `poetry install --extras %s` or "
+            "`poetry install --all-extras` commands."
+        )
+        if isinstance(groups, str):
+            groups = [groups]
+        return help_msg.format(lib_name, str(groups), groups[0])
+
+    @staticmethod
     def check_openml(dataset_name: str, openml_url: str) -> None:
         """Check if the `openml` library is installed.
 
@@ -452,11 +463,24 @@ class DatasetPrerequisites:
         try:
             import openml
         except ImportError:
+            install_help_msg = DatasetPrerequisites._get_install_lib_help("openml", ["openml", "datasets", "all"])
+            error_msg = "The `%s` dataset is an OpenML dataset (%s), and the `openml` library needs to be installed. %s"
+            raise DatasetError.missing_prerequisites(error_msg.format(dataset_name, openml_url, install_help_msg))
+
+    @staticmethod
+    def check_tsfresh(dataset_name: str) -> None:
+        try:
+            import tsfresh
+        except ImportError:
+            install_help_msg = DatasetPrerequisites._get_install_lib_help("tsfresh", ["timeseries", "datasets", "all"])
             raise DatasetError.missing_prerequisites(
-                "The `%s` dataset is an OpenML dataset (%s), and the `openml` package needs to be installed. "
-                "This package is an extra dependency of this project belonging to the `openml` group. With poetry, "
-                "install it by running either `poetry install --extras openml` or `poetry install --all-extras` "
-                "commands.".format(dataset_name, openml_url)
+                f"The `%s` dataset requires `tsfresh` library to compute machine learning features. %s Once it is "
+                "installed, there may be incompatible CUDA runtime found (see if the cause for the import error is "
+                "`numba.cuda.cudadrv.error.NvvmSupportError` exception) - this may occur because `tsfresh` depends on "
+                "`stumpy` that depends on `numba` that detects CUDA runtime and tries to use it if available. Try "
+                "disabling CUDA for numba by exporting NUMBA_DISABLE_CUDA environment variable "
+                "(https://numba.pydata.org/numba-doc/dev/reference/envvars.html#envvar-NUMBA_DISABLE_CUDA): "
+                "`export NUMBA_DISABLE_CUDA=1`.".format(dataset_name, install_help_msg)
             )
 
 
