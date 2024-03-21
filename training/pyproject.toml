@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "extime-training"
+name = "xtime-training"
 version = "0.1.0"
 description = ""
 authors = ["Hewlett Packard Labs"]
