@@ -22,6 +22,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
+from xtime.datasets.dataset import DatasetPrerequisites
 from xtime.datasets.preprocessing import TimeSeriesEncoderV1
 from xtime.errors import DatasetError
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
@@ -73,20 +74,7 @@ class MADELINEBuilder(DatasetBuilder):
             )
 
         # Check `tsfresh` library can be imported.
-        try:
-            import tsfresh.feature_extraction.feature_calculators as ts_features
-
-        except ImportError:
-            raise DatasetError.missing_prerequisites(
-                "The Madeline dataset requires `tsfresh` library to compute ML features. If it has not been installed, "
-                "please install it with `pip install tsfresh==0.20.2`. If it is installed, there may be incompatible "
-                "CUDA runtime found (see if the cause for the import error is "
-                "`numba.cuda.cudadrv.error.NvvmSupportError` exception) - this may occur because `tsfresh` depends on "
-                "`stumpy` that depends on `numba` that detects CUDA runtime and tries to use it if available. Try "
-                "disabling CUDA for numba by exporting NUMBA_DISABLE_CUDA environment variable "
-                "(https://numba.pydata.org/numba-doc/dev/reference/envvars.html#envvar-NUMBA_DISABLE_CUDA): "
-                "`export NUMBA_DISABLE_CUDA=1`."
-            )
+        DatasetPrerequisites.check_tsfresh(self.NAME)
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
