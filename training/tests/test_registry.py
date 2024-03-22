@@ -54,6 +54,7 @@ class TestRegistry(TestCase):
             "madeline",
             "fraud_detection",
             "harth",
+            "appliances_energy_prediction",
         ]
 
         self.assertIsInstance(names, list)
