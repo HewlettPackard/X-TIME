@@ -36,7 +36,7 @@ class YearPredictionMSDBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """
 
         https://archive.ics.uci.edu/ml/datasets/yearpredictionmsd

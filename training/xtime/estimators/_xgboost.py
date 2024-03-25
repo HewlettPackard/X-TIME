@@ -18,12 +18,13 @@ import copy
 import typing as t
 from pathlib import Path
 
-import xgboost as xgb
+from xgboost.sklearn import XGBClassifier, XGBModel, XGBRegressor
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.ml import TaskType
 
+from ..errors import DatasetError
 from .estimator import Estimator
 
 
@@ -67,7 +68,7 @@ class XGBoostEstimator(Estimator):
             params.update({"gpu_id": 0, "tree_method": "gpu_hist"})
 
         self.params = params
-        self.model: xgb.XGBModel = self.make_model(dataset_metadata, xgb.XGBClassifier, xgb.XGBRegressor, params)
+        self.model: XGBModel = self.make_model(dataset_metadata, XGBClassifier, XGBRegressor, params)
 
     def save_model(self, save_dir: Path) -> None:
         self.model.save_model(save_dir / "model.ubj")
@@ -89,6 +90,8 @@ class XGBoostEstimator(Estimator):
 
         train_split = dataset.split(DatasetSplit.TRAIN)
         eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+        if train_split is None or eval_split is None:
+            raise DatasetError.missing_train_eval_splits(dataset.metadata.name, train_split, eval_split)
 
         kwargs.update(
             #         validation_0                    validation_1

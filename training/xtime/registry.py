@@ -20,7 +20,7 @@ import logging
 import typing as t
 from pathlib import Path
 
-from xtime.errors import maybe_suggest_debug_level
+from xtime.errors import XTimeError, maybe_suggest_debug_level
 
 logger = logging.getLogger(__name__)
 
@@ -49,7 +49,8 @@ class ClassRegistry(object):
         self._base_cls = base_cls
         self._path = path.resolve()
         self._module = module
-        self._registry: t.Optional[t.Dict[str, t.Type]] = None
+        self._initialized = False
+        self._registry: t.Dict[str, t.Type] = {}
 
     def contains(self, name: str) -> bool:
         """Check if a class with the given name is registered in the registry."""
@@ -66,7 +67,7 @@ class ClassRegistry(object):
         return list(self._registry.keys())
 
     def _maybe_init(self) -> None:
-        if self._registry is None:
+        if self._initialized is False:
             self._init()
 
     def _init(self) -> None:
@@ -109,6 +110,23 @@ class ClassRegistry(object):
                     maybe_suggest_debug_level(logger),
                 )
                 logger.debug("Import module error details.", exc_info=err)
+            except XTimeError as err:
+                from xtime.errors import ErrorCode
+
+                if err.error_code not in (
+                    ErrorCode.DATASET_MISSING_PREREQUISITES_ERROR,
+                    ErrorCode.ESTIMATOR_MISSING_PREREQUISITES_ERROR,
+                ):
+                    raise
+
+                logger.warning(
+                    "Import module warning (name=%s, path=%s, import_error=%s).",
+                    module_name,
+                    self._path.as_posix(),
+                    str(err),
+                )
+
+        self._initialized = True
 
     def _register(self, name: str, registrable: t.Any, module) -> None:
         if name in self._registry:

@@ -16,6 +16,7 @@
 
 import logging
 import os
+import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -35,7 +36,9 @@ logger = logging.getLogger(__name__)
 _XTIME_DATASETS_FD = "XTIME_DATASETS_FD"
 """Environment variable that points to a directory with FD (Fraud Detection) dataset."""
 
-_FD_HOME_PAGE = "https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary?resource=download"  # noqa
+_FD_HOME_PAGE = (
+    "https://www.kaggle.com/datasets/volodymyrgavrysh/fraud-detection-bank-dataset-20k-records-binary?resource=download"  # noqa
+)
 """Dataset home page."""
 
 _FD_DATASET_FILE = "fraud_detection_bank_dataset.csv"
@@ -56,6 +59,7 @@ class FDBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
+        self._dataset_dir: t.Optional[Path] = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -64,27 +68,30 @@ class FDBuilder(DatasetBuilder):
                 f"No environment variable found ({_XTIME_DATASETS_FD}) that should point to a directory with "
                 f"FD (Fraud Detection) dataset that can be downloaded from `{_FD_HOME_PAGE}`."
             )
-        self._dataset_dir = Path(os.environ[_XTIME_DATASETS_FD]).absolute()
-        if self._dataset_dir.is_file():
-            self._dataset_dir = self._dataset_dir.parent
-        if not (self._dataset_dir / _FD_DATASET_FILE).is_file():
+        dataset_dir: Path = Path(os.environ[_XTIME_DATASETS_FD]).absolute()
+        if dataset_dir.is_file():
+            dataset_dir = dataset_dir.parent
+        if not (dataset_dir / _FD_DATASET_FILE).is_file():
             raise DatasetError.missing_prerequisites(
-                f"FD dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
+                f"FD dataset location was identified as `{dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_FD_DATASET_FILE}`) not found in this location. Please, download v1.1 of this "
                 f"dataset from its home page `{_FD_HOME_PAGE}`."
             )
-
         # Check `tsfresh` library can be imported.
         DatasetPrerequisites.check_tsfresh(self.NAME)
+        #
+        self._dataset_dir = dataset_dir
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
             raise ValueError(f"{self.__class__.__name__}: `default` dataset does not accept arguments.")
-        self._clean_dataset()
         self._create_default_dataset()
 
-        train_df = pd.read_csv(self._dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-train.csv"))
-        test_df = pd.read_csv(self._dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-test.csv"))
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        train_df = pd.read_csv(dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-train.csv"))
+        test_df = pd.read_csv(dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-test.csv"))
 
         features = [
             Feature(col, FeatureType.CONTINUOUS, cardinality=int(train_df[col].nunique()))
@@ -108,7 +115,7 @@ class FDBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.BINARY_CLASSIFICATION, num_classes=2),
                 features=features,
-                properties={"source": self._dataset_dir.as_uri()},
+                properties={"source": dataset_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train_df.drop(label, axis=1, inplace=False), y=train_df[label]),
@@ -117,38 +124,32 @@ class FDBuilder(DatasetBuilder):
         )
         return dataset
 
-    def _clean_dataset(self) -> None:
-        """Clean raw FD dataset."""
-        # Do not clean it again if it has already been cleaned.
-        # Dataset provides a single file in `fraud_detection_bank_dataset.csv` format
-        # Use the raw file directly
-        _clean_dataset_file = (self._dataset_dir / _FD_DATASET_FILE).with_suffix(".csv")
-        if _clean_dataset_file.is_file():
-            return
-
     def _create_default_dataset(self) -> None:
         """Create default train/test splits and save them to files.
 
         Input to this function is the clean dataset created by the `_clean_dataset` method of this class.
         """
         # Do not generate datasets if they have already been generated.
-        default_train_dataset_file = self._dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-train.csv")
-        default_test_dataset_file = self._dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-test.csv")
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        default_train_dataset_file = dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-train.csv")
+        default_test_dataset_file = dataset_dir / (_FD_DATASET_FILE[0:-4] + "-default-test.csv")
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
         # Load clean dataset into a data frame (user_id,activity,timestamp,x,y,z)
-        clean_dataset_file = (self._dataset_dir / _FD_DATASET_FILE).with_suffix(".csv")
-        assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
+        dataset_file = (dataset_dir / _FD_DATASET_FILE).with_suffix(".csv")
+        assert dataset_file.is_file(), "Dataset file does not exist (this is internal error)."
 
-        # df: pd.DataFrame = pd.read_csv(clean_dataset_file, dtype=dtypes)
-        df: pd.DataFrame = pd.read_csv(clean_dataset_file)
+        # df: pd.DataFrame = pd.read_csv(dataset_file, dtype=dtypes)
+        df: pd.DataFrame = pd.read_csv(dataset_file)
 
         # Check for missing values
         assert not df.isna().any().any(), "There are missing values in the DataFrame"
 
         # Raw file has 114 columns (index, 112 features, labels `targets` )
-        assert df.shape[1] == 114, f"Clean dataset expected to have 114 columns (shape={df.shape})."
+        assert df.shape[1] == 114, f"Dataset expected to have 114 columns (shape={df.shape})."
 
         # Drop the first (index) column
         df = df.drop(df.columns[0], axis=1)

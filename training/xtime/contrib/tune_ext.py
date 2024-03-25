@@ -15,6 +15,7 @@
 ###
 
 import copy
+import math
 import os
 import typing as t
 from pathlib import Path
@@ -62,18 +63,16 @@ class RayTuneDriverToMLflowLoggerCallback(Callback):
 
     def __init__(self, metric: str, mode: str) -> None:
         super().__init__()
-        self.metric = metric
-        self.mode = _check_mode(mode)
-        self.best_value: t.Optional[float] = None
-        self.trial_index = 0
+        self.metric: str = metric
+        self.mode: str = _check_mode(mode)
+        self.best_value: float = math.inf if self.mode == "min" else -math.inf
+        self.trial_index: int = 0
 
     def on_trial_result(self, iteration: int, trials: t.List[Trial], trial: Trial, result: t.Dict, **info) -> None:
         self.trial_index += 1
 
         value = result[self.metric]
-        if self.best_value is None:
-            self.best_value = value
-        elif self.mode == "min":
+        if self.mode == "min":
             self.best_value = min(self.best_value, value)
         else:
             self.best_value = max(self.best_value, value)
@@ -115,20 +114,23 @@ class Analysis(object):
                     "failed_trials_names": list(failed_trials.index),
                 }
 
-            best_trial: Trial = experiment.get_best_trial(perf_metric, mode="min")
-            best_params = IO.load_json((Path(best_trial.logdir) / "params.json").as_posix())
-            best_results = IO.load_json((Path(best_trial.logdir) / "result.json").as_posix())
-            best_results = {k: best_results[k] for k in perf_metrics}
-            summary["best_run"] = {"perf_metric": perf_metric, "parameters": best_params, "results": best_results}
+            summary["best_run"] = {}
+            best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
+            if best_trial is not None:
+                best_params = IO.load_json((Path(best_trial.logdir) / "params.json").as_posix())
+                best_results = IO.load_json((Path(best_trial.logdir) / "result.json").as_posix())
+                best_results = {k: best_results[k] for k in perf_metrics}
+                summary["best_run"] = {"perf_metric": perf_metric, "parameters": best_params, "results": best_results}
 
             summary["metric_variations"] = {}
-            succeeded_trials: pd.DataFrame = experiment.results_df[experiment.results_df[perf_metric].notna()]
-            results = succeeded_trials.sort_values([perf_metric], ascending=True)
-            for metric in perf_metrics:
-                summary["metric_variations"][metric] = {
-                    "mean": results[metric].mean().item(),
-                    "std": results[metric].std().item(),
-                }
+            if experiment.results_df is not None:
+                succeeded_trials: pd.DataFrame = experiment.results_df[experiment.results_df[perf_metric].notna()]
+                results = succeeded_trials.sort_values([perf_metric], ascending=True)
+                for metric in perf_metrics:
+                    summary["metric_variations"][metric] = {
+                        "mean": results[metric].mean().item(),
+                        "std": results[metric].std().item(),
+                    }
 
             summary["mlflow_run"] = mlflow_run_id
             return summary
@@ -168,7 +170,7 @@ class Analysis(object):
         # Get primary ML metric that this task is to be evaluated on.
         perf_metric = METRICS.get_primary_metric(ds_metadata.task)
         # Get the best Ray Tune trial that minimizes given metric
-        best_trial: Trial = experiment.get_best_trial(perf_metric, mode="min")
+        best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
         # Create return object
         model = mlflow_run.data.tags["model"]
         models = {
@@ -180,15 +182,20 @@ class Analysis(object):
         }
         best_trial_info = {
             "mlflow_run_id": mlflow_run_id,  # MLflow run ID
-            "tune_trial_id": best_trial.trial_id,  # Ray Tune Run ID
-            "trial_path": best_trial.logdir,  # Local path to ray tune trial directory
             "model": model,  # Model name (xgboost, light_gbm_clf, catboost, rf_clf)
             "dataset_info_file": (artifact_path / "dataset_info.yaml").as_posix(),  # Info about dataset
         }
-        if (Path(best_trial.logdir) / "params.json").is_file():
-            best_trial_info["params_file"] = "params.json"
-        if (Path(best_trial.logdir) / models[model]).is_file():
-            best_trial_info["model_file"] = models[model]
+        if best_trial is not None:
+            best_trial_info.update(
+                {
+                    "tune_trial_id": best_trial.trial_id,  # Ray Tune Run ID
+                    "trial_path": best_trial.logdir,  # Local path to ray tune trial directory
+                }
+            )
+            if (Path(best_trial.logdir) / "params.json").is_file():
+                best_trial_info["params_file"] = "params.json"
+            if (Path(best_trial.logdir) / models[model]).is_file():
+                best_trial_info["model_file"] = models[model]
         return best_trial_info
 
     @staticmethod
@@ -231,7 +238,7 @@ class Analysis(object):
             ds_metadata = DatasetMetadata.from_json(IO.load_yaml(artifact_path / "dataset_info.yaml"))
             metrics = ["test_mse"] if ds_metadata.task.type.regression() else ["test_accuracy", "test_loss_mean"]
 
-            trials: t.List[Trial] = experiment.trials
+            trials: t.List[Trial] = experiment.trials or []
             for trial in trials:
                 if trial.status != Trial.TERMINATED:
                     continue
@@ -368,7 +375,7 @@ class YamlEncoder:
             (sample.Uniform, "uniform"),
             (sample.LogUniform, "loguniform"),
         ]
-        sdict = {"_sampler": "none"}
+        sdict: t.Dict[str, t.Any] = {"_sampler": "none"}
         for stype, sname in names:
             if isinstance(sampler, stype):
                 sdict["_sampler"] = sname

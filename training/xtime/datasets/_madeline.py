@@ -16,6 +16,7 @@
 
 import logging
 import os
+import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -55,6 +56,7 @@ class MADELINEBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
+        self._dataset_dir: t.Optional[Path] = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -63,18 +65,19 @@ class MADELINEBuilder(DatasetBuilder):
                 f"No environment variable found ({_XTIME_DATASETS_MADELINE}) that should point to a directory with "
                 f"Madeline dataset that can be downloaded from `{_MADELINE_HOME_PAGE}`."
             )
-        self._dataset_dir = Path(os.environ[_XTIME_DATASETS_MADELINE]).absolute()
-        if self._dataset_dir.is_file():
-            self._dataset_dir = self._dataset_dir.parent
-        if not (self._dataset_dir / _MADELINE_DATASET_FILE).is_file():
+        dataset_dir = Path(os.environ[_XTIME_DATASETS_MADELINE]).absolute()
+        if dataset_dir.is_file():
+            dataset_dir = dataset_dir.parent
+        if not (dataset_dir / _MADELINE_DATASET_FILE).is_file():
             raise DatasetError.missing_prerequisites(
-                f"MADELINE dataset location was identified as `{self._dataset_dir}`, but this is either not a "
+                f"MADELINE dataset location was identified as `{dataset_dir}`, but this is either not a "
                 f"directory or dataset file (`{_MADELINE_DATASET_FILE}`) not found in this location. Please, "
                 f"download this dataset from its home page `{_MADELINE_HOME_PAGE}`."
             )
-
         # Check `tsfresh` library can be imported.
         DatasetPrerequisites.check_tsfresh(self.NAME)
+        #
+        self._dataset_dir = dataset_dir
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
@@ -82,8 +85,11 @@ class MADELINEBuilder(DatasetBuilder):
         self._clean_dataset()
         self._create_default_dataset()
 
-        train_df = pd.read_csv(self._dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-train.csv"))
-        test_df = pd.read_csv(self._dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-test.csv"))
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        train_df = pd.read_csv(dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-train.csv"))
+        test_df = pd.read_csv(dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-test.csv"))
 
         # Features values are Integers
         features = [
@@ -108,7 +114,7 @@ class MADELINEBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.BINARY_CLASSIFICATION, num_classes=2),
                 features=features,
-                properties={"source": self._dataset_dir.as_uri()},
+                properties={"source": dataset_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train_df.drop(label, axis=1, inplace=False), y=train_df[label]),
@@ -119,12 +125,15 @@ class MADELINEBuilder(DatasetBuilder):
 
     def _clean_dataset(self) -> None:
         """Clean raw MADELINE dataset."""
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not clean it again if it has already been cleaned.
-        _clean_dataset_file = (self._dataset_dir / _MADELINE_DATASET_FILE).with_suffix(".csv")
+        _clean_dataset_file = (dataset_dir / _MADELINE_DATASET_FILE).with_suffix(".csv")
         if _clean_dataset_file.is_file():
             return
 
-        with open(self._dataset_dir / _MADELINE_DATASET_FILE, "rt") as input_stream:
+        with open(dataset_dir / _MADELINE_DATASET_FILE, "rt") as input_stream:
             with open(_clean_dataset_file, "wt") as output_stream:
                 # As shown in raw file at the top
                 # Write labels (label), and features (V1 to V259)
@@ -143,14 +152,18 @@ class MADELINEBuilder(DatasetBuilder):
 
         Input to this function is the clean dataset created by the `_clean_dataset` method of this class.
         """
+        #
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not generate datasets if they have already been generated.
-        default_train_dataset_file = self._dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-train.csv")
-        default_test_dataset_file = self._dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-test.csv")
+        default_train_dataset_file = dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-train.csv")
+        default_test_dataset_file = dataset_dir / (_MADELINE_DATASET_FILE[0:-5] + "-default-test.csv")
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
-        clean_dataset_file = (self._dataset_dir / _MADELINE_DATASET_FILE).with_suffix(".csv")
-        assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
+        clean_dataset_file = (dataset_dir / _MADELINE_DATASET_FILE).with_suffix(".csv")
+        assert clean_dataset_file.is_file(), "Clean dataset does not exist (this is internal error)."
 
         df: pd.DataFrame = pd.read_csv(clean_dataset_file)
 

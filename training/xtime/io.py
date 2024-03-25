@@ -97,8 +97,9 @@ class IO(object):
 
     @staticmethod
     def work_dir() -> Path:
-        if mlflow.active_run() is not None:
-            return Path(local_file_uri_to_path(mlflow.active_run().info.artifact_uri))
+        active_run: t.Optional[mlflow.ActiveRun] = mlflow.active_run()
+        if active_run is not None:
+            return Path(local_file_uri_to_path(active_run.info.artifact_uri))
         return Path.cwd()
 
     @staticmethod
@@ -170,12 +171,13 @@ class IO(object):
 
     @staticmethod
     def save_data_frame(df: pd.DataFrame, file_path: t.Union[str, Path]) -> None:
-        if file_path.endswith(".yaml"):
+        name: str = to_path(file_path).name
+        if name.endswith(".yaml"):
             IO.save_yaml(df.to_dict("records"), file_path)
-        elif file_path.endswith(".json"):
+        elif name.endswith(".json"):
             IO.save_yaml(df.to_dict("records"), file_path)
         else:
-            if not file_path.endswith((".csv", ".csv.gz")):
+            if not name.endswith((".csv", ".csv.gz")):
                 raise NotImplementedError(f"Do not know how to serialize data frame to `{file_path}`.")
             df.to_csv(file_path)
 

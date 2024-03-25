@@ -35,7 +35,7 @@ class GesturePhaseSegmentationBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/4538")
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `Gesture Phase Segmentation Processed` train/valid/test datasets.
 
             Dataset source: openml.org/d/4538
@@ -67,6 +67,8 @@ class GesturePhaseSegmentationBuilder(DatasetBuilder):
         # categorical_indicator  t.List[bool]  32          No categorical features
         # attributed_names       t.List[str]   32          5 categories: ['D', 'P', 'S', 'H', 'R']
         x, y, _, _ = data.get_data(target=data.default_target_attribute, dataset_format="dataframe")
+        assert isinstance(x, pd.DataFrame), f"Expecting x to be of type pd.DataFrame (type = {type(x)})."
+        assert isinstance(y, pd.Series), f"Expecting y to be of type pd.Series (type = {type(y)})."
 
         # Encode labels
         y = pd.Series(LabelEncoder().fit_transform(y), index=y.index, name=y.name)

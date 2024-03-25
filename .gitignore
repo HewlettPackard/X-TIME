@@ -24,6 +24,8 @@ catboost_info/
 *.pkl
 model.txt
 run_context.yaml
+dist/
+.pyre/
 
 # cycle_accurate folder
 ## autogen.sh

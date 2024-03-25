@@ -51,7 +51,7 @@ def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
         )
         if hparams is None:
             hparams = f"auto:default:model={model};task={context.dataset.metadata.task.type.value};run_type=train"
-            logger.info(f"Hyperparameters are not provided, using default ones: '%s'.", hparams)
+            logger.info("Hyperparameters are not provided, using default ones: '%s'.", hparams)
 
         hp_dict: t.Dict = get_hparams(hparams)
         logger.info("Hyperparameters resolved to: '%s'", hp_dict)

@@ -14,4 +14,3 @@
 # limitations under the License.
 ###
 
-from xtime.contrib.mlflow_ext import MLflow

@@ -75,7 +75,6 @@ class TestTimeSeriesEncoder(TestCase):
 
 
 class TestTimeSeriesEncoderV1(TestCase):
-
     NUM_FEATURES = 19
 
     def test_features(self) -> None:

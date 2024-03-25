@@ -202,4 +202,20 @@ Other variables specific to some datasets:
   By setting this variable to 1 it is possible to disable this patching (see `xtime.datasets.DatasetBuilder` class for 
   more details). Usage example: `export XTIME_DISABLE_PATCH_MINIO=1`. When this patching is not disabled, the `xtime`
   looks for proxy server using the following ordered list of environment variables: `https_proxy`, `HTTPS_PROXY`, 
-  `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used. 
+  `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used.
+
+# Contribution guidelines
+We will be glad to accept new features, machine learning models or datasets, documentation updates and bug fixes. We
+use the following development guidelines:
+1. Fork this project.
+2. Clone your own fork and configure the python environment by installing all dependencies (e.g., `poetry install --all-extras`).
+3. Create and checkout a new branch (e.g., `bugfix/format-msg`, `feature/new-regression-metric` or `docs/readme-update`).
+4. Fix a bug or implement a new feature, add unit tests.
+5. Run `ruff` and `pyre` (fix warnings and/or errors):
+   ```shell
+   ruff format .
+   ruff check --fix .
+   pyre --search-path $(python -c 'import site; print(site.getsitepackages()[0])') check
+   ```
+6. Run unit tests `pytest`. 
+7. Commit you changes, push to your fork and create a pull request.

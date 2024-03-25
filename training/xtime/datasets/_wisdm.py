@@ -16,6 +16,7 @@
 
 import logging
 import os
+import typing as t
 from itertools import product
 from pathlib import Path
 
@@ -59,6 +60,7 @@ class WISDMBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
+        self._dataset_dir: t.Optional[Path] = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -67,18 +69,19 @@ class WISDMBuilder(DatasetBuilder):
                 f"No environment variable found ({_XTIME_DATASETS_WISDM}) that should point to a directory with "
                 f"WISDM (WIreless Sensor Data Mining) dataset v1.1 that can be downloaded from `{_WISDM_HOME_PAGE}`."
             )
-        self._dataset_dir = Path(os.environ[_XTIME_DATASETS_WISDM]).absolute()
-        if self._dataset_dir.is_file():
-            self._dataset_dir = self._dataset_dir.parent
-        if not (self._dataset_dir / _WISDM_DATASET_FILE).is_file():
+        dataset_dir = Path(os.environ[_XTIME_DATASETS_WISDM]).absolute()
+        if dataset_dir.is_file():
+            dataset_dir = dataset_dir.parent
+        if not (dataset_dir / _WISDM_DATASET_FILE).is_file():
             raise DatasetError.missing_prerequisites(
-                f"WISDM dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
+                f"WISDM dataset location was identified as `{dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_WISDM_DATASET_FILE}`) not found in this location. Please, download v1.1 of this "
                 f"dataset from its home page `{_WISDM_HOME_PAGE}`."
             )
-
         # Check `tsfresh` library can be imported.
         DatasetPrerequisites.check_tsfresh(self.NAME)
+        #
+        self._dataset_dir = dataset_dir
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
@@ -86,8 +89,11 @@ class WISDMBuilder(DatasetBuilder):
         self._clean_dataset()
         self._create_default_dataset()
 
-        train_df = pd.read_csv(self._dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-train.csv"))
-        test_df = pd.read_csv(self._dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-test.csv"))
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        train_df = pd.read_csv(dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-train.csv"))
+        test_df = pd.read_csv(dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-test.csv"))
 
         # These are the base feature names (will have prefixes such as `x_`, `y_` and `z_`). This check needs to be
         # consistent with feature generation in `_create_default_dataset` method.
@@ -120,7 +126,7 @@ class WISDMBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=6),
                 features=features,
-                properties={"source": self._dataset_dir.as_uri()},
+                properties={"source": dataset_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train_df.drop(label, axis=1, inplace=False), y=train_df[label]),
@@ -131,15 +137,18 @@ class WISDMBuilder(DatasetBuilder):
 
     def _clean_dataset(self) -> None:
         """Clean raw WISDM dataset."""
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not clean it again if it has already been cleaned.
-        _clean_dataset_file = (self._dataset_dir / _WISDM_DATASET_FILE).with_suffix(".csv")
+        _clean_dataset_file = (dataset_dir / _WISDM_DATASET_FILE).with_suffix(".csv")
         if _clean_dataset_file.is_file():
             return
 
         # These are class names expected to be present. No other class names should present.
         class_names = {"Walking", "Jogging", "Upstairs", "Downstairs", "Sitting", "Standing"}
 
-        with open(self._dataset_dir / _WISDM_DATASET_FILE, "rt") as input_stream:
+        with open(dataset_dir / _WISDM_DATASET_FILE, "rt") as input_stream:
             with open(_clean_dataset_file, "wt") as output_stream:
                 output_stream.write("user_id,activity,timestamp,x,y,z\n")
                 for idx, line in enumerate(input_stream):
@@ -174,15 +183,18 @@ class WISDMBuilder(DatasetBuilder):
 
         Input to this function is the clean dataset created by the `_clean_dataset` method of this class.
         """
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not generate datasets if they have already been generated.
-        default_train_dataset_file = self._dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-train.csv")
-        default_test_dataset_file = self._dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-test.csv")
+        default_train_dataset_file = dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-train.csv")
+        default_test_dataset_file = dataset_dir / (_WISDM_DATASET_FILE[0:-4] + "-default-test.csv")
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
         # Load clean dataset into a data frame (user_id,activity,timestamp,x,y,z)
-        clean_dataset_file = (self._dataset_dir / _WISDM_DATASET_FILE).with_suffix(".csv")
-        assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
+        clean_dataset_file = (dataset_dir / _WISDM_DATASET_FILE).with_suffix(".csv")
+        assert clean_dataset_file.is_file(), "Clean dataset does not exist (this is internal error)."
         dtypes = {
             "user_id": "int64",
             "activity": "string",

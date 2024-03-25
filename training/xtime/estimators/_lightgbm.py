@@ -18,12 +18,13 @@ import copy
 import typing as t
 from pathlib import Path
 
-import lightgbm as lgb
+from lightgbm.sklearn import LGBMClassifier, LGBMModel, LGBMRegressor
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
-from xtime.ml import TaskType
+from xtime.ml import ClassificationTask, TaskType
 
+from ..errors import DatasetError
 from .estimator import Estimator
 
 
@@ -37,16 +38,20 @@ class LightGBMClassifierEstimator(Estimator):
     }
 
     def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+        """
+        https://lightgbm.readthedocs.io/en/latest/Parameters.html
+        """
         super().__init__()
         params = copy.deepcopy(params)
         params["objective"] = LightGBMClassifierEstimator.OBJECTIVES[dataset_metadata.task.type]
         if dataset_metadata.task.type == TaskType.MULTI_CLASS_CLASSIFICATION:
-            params["num_class"] = dataset_metadata.task.num_classes
+            task: ClassificationTask = t.cast(ClassificationTask, dataset_metadata.task)
+            params["num_class"] = task.num_classes
         if gpu_available():
             params["device"] = "GPU"
 
         self.params = params
-        self.model: lgb.LGBMModel = self.make_model(dataset_metadata, lgb.LGBMClassifier, lgb.LGBMRegressor, params)
+        self.model: LGBMModel = self.make_model(dataset_metadata, LGBMClassifier, LGBMRegressor, params)
 
     def save_model(self, save_dir: Path) -> None:
         self.model.booster_.save_model(save_dir / "model.txt")
@@ -54,6 +59,8 @@ class LightGBMClassifierEstimator(Estimator):
     def fit_model(self, dataset: Dataset, **kwargs) -> None:
         train_split = dataset.split(DatasetSplit.TRAIN)
         eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+        if train_split is None or eval_split is None:
+            raise DatasetError.missing_train_eval_splits(dataset.metadata.name, train_split, eval_split)
 
         kwargs = copy.deepcopy(kwargs)
         kwargs.update(
@@ -63,4 +70,5 @@ class LightGBMClassifierEstimator(Estimator):
                 "categorical_feature": dataset.metadata.categorical_feature_names(),
             }
         )
+
         self.model.fit(train_split.x, train_split.y, **kwargs)

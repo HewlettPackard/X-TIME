@@ -38,7 +38,7 @@ from sklearn.metrics import (
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.io import IO, encode
-from xtime.ml import Task
+from xtime.ml import ClassificationTask, Task
 from xtime.registry import ClassRegistry
 from xtime.run import Context, Metadata, RunType
 
@@ -137,7 +137,7 @@ class TrainCallback(Callback):
         IO.save_yaml(encode(metrics), self.work_dir / "test_info.yaml")
 
 
-class Estimator(object):
+class Estimator:
     def __init__(self, *args, **kwargs) -> None:
         self.params: t.Optional[t.Dict] = None
         self.model = None
@@ -157,6 +157,7 @@ class Estimator(object):
         """
         if ctx.dataset is None:
             ctx.dataset = Dataset.create(ctx.metadata.dataset)
+        dataset: Dataset = ctx.dataset
 
         if ctx.callbacks:
             callback: Callback = ContainerCallback(ctx.callbacks)
@@ -165,14 +166,14 @@ class Estimator(object):
             if mlflow.active_run() is not None:
                 callback = ContainerCallback([callback, MLflowCallback(hparams, ctx)])
 
-        estimator = cls(hparams, ctx.dataset.metadata)
+        estimator = cls(hparams, dataset.metadata)
 
-        callback.before_fit(ctx.dataset, estimator)
-        estimator.fit_model(ctx.dataset, **ctx.metadata.fit_params)
-        callback.after_fit(ctx.dataset, estimator)
+        callback.before_fit(dataset, estimator)
+        estimator.fit_model(dataset, **ctx.metadata.fit_params)
+        callback.after_fit(dataset, estimator)
 
-        metrics: t.Dict = estimator.evaluate(ctx.dataset)
-        callback.after_test(ctx.dataset, estimator, metrics)
+        metrics: t.Dict = estimator.evaluate(dataset)
+        callback.after_test(dataset, estimator, metrics)
 
         return metrics
 
@@ -192,6 +193,11 @@ class Estimator(object):
         metrics = {"dataset_accuracy": 0.0, "dataset_loss_total": 0.0, "dataset_loss_mean": 0.0}
         _num_examples = 0
 
+        assert isinstance(
+            dataset.metadata.task, ClassificationTask
+        ), "Invalid task type (expecting `ClassificationTask` task)."
+        task: ClassificationTask = dataset.metadata.task
+
         def _evaluate(x, y, name: str) -> None:
             nonlocal _num_examples
             predicted_probas = self.model.predict_proba(x)  # (n_samples, 2)
@@ -200,7 +206,7 @@ class Estimator(object):
             metrics[f"{name}_loss_mean"] = float(log_loss(y, predicted_probas, normalize=True))
             metrics[f"{name}_loss_total"] = float(metrics["train_loss_mean"] * len(y))
 
-            if dataset.metadata.task.num_classes == 2:
+            if task.num_classes == 2:
                 metrics[f"{name}_auc"] = float(roc_auc_score(y, predicted_probas[:, 1]))  # clas-1 probabilities
                 metrics[f"{name}_f1"] = float(f1_score(y, predicted_labels))
                 metrics[f"{name}_precision"] = float(precision_score(y, predicted_labels))

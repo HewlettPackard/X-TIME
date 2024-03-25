@@ -21,13 +21,9 @@ from unittest import TestCase, mock
 from xtime.contrib.unittest_ext import with_temp_work_dir
 from xtime.datasets.dataset import (
     Dataset,
-    DatasetBuilder,
     DatasetFactory,
-    DatasetMetadata,
     DatasetPrerequisites,
-    DatasetSplit,
     RegisteredDatasetFactory,
-    SerializedDatasetFactory,
 )
 from xtime.errors import DatasetError
 

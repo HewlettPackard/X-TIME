@@ -84,7 +84,7 @@ def search_hp(
 
         if hparams is None:
             hparams = f"auto:default:model={model};task={ctx.dataset.metadata.task.type.value};run_type=hpo"
-            logger.info(f"Hyperparameters are not provided, using default ones: '%s'.", hparams)
+            logger.info("Hyperparameters are not provided, using default ones: '%s'.", hparams)
         param_space: t.Dict = get_hparams(hparams)
         logger.info("Hyperparameter search space resolved to: '%s'", param_space)
 
@@ -101,6 +101,7 @@ def search_hp(
             ),
             algorithm,
         )
+        assert tune_config.metric is not None and tune_config.mode is not None, "Internal error (metric not specified)."
         run_config = RunConfig(
             name="ray_tune",
             local_dir=artifact_path.as_posix(),
@@ -132,14 +133,15 @@ def _init_search_algorithm(tune_config: TuneConfig, algorithm: str) -> TuneConfi
     # None and 0 means the same thing - no limit, so set to 0 to simplify subsequent comparison.
     if tune_config.max_concurrent_trials is None:
         tune_config.max_concurrent_trials = 0
+    max_concurrent_trials: int = tune_config.max_concurrent_trials
 
     if algorithm == "random":
-        tune_config.search_alg = BasicVariantGenerator(random_state=1, max_concurrent=tune_config.max_concurrent_trials)
+        tune_config.search_alg = BasicVariantGenerator(random_state=1, max_concurrent=max_concurrent_trials)
     elif algorithm == "hyperopt":
         tune_config.search_alg = HyperOptSearch(
             metric=tune_config.metric, mode=tune_config.mode, n_initial_points=20, random_state_seed=1
         )
-        if tune_config.max_concurrent_trials == 0:
+        if max_concurrent_trials == 0:
             logger.info("TuneConfig's max_concurrent_trials is unlimited - setting to 2 for HyperOptSearch algorithm.")
             tune_config.max_concurrent_trials = 2
     else:
@@ -173,26 +175,39 @@ def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
     """
     best_result: Result = results.get_best_result()
     metrics: t.Dict = copy.deepcopy(best_result.metrics or {})
-    missing_metrics: t.Set = {m for m in METRICS[ctx.dataset.metadata.task.type] if m not in metrics}
-    if missing_metrics:
-        print(f"[WARNING] Missing metrics in the best trial: {missing_metrics}. Program may crash.")
+
+    if ctx.dataset is not None:
+        missing_metrics: t.Set = {m for m in METRICS[ctx.dataset.metadata.task.type] if m not in metrics}
+        if missing_metrics:
+            print(f"[WARNING] Missing metrics in the best trial: {missing_metrics}. Program may crash.")
+
     return metrics
 
 
 def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: t.Dict, active_run: ActiveRun) -> None:
     best_result: Result = results.get_best_result()
-    _relative_path: str = Path(best_result.log_dir).relative_to(local_dir).as_posix()
+
+    _relative_path: str = ""
+    local_path: str = ""
+    trial_uri: str = ""
+
+    if best_result.log_dir is not None:
+        log_dir: Path = best_result.log_dir
+        _relative_path = Path(log_dir).relative_to(local_dir).as_posix()
+        local_path = log_dir.as_posix()
+        trial_uri = f"mlflow:///{active_run.info.run_id}/{_relative_path}"
+
     num_failed_trials: int = results.num_errors
     IO.save_to_file(
         {
             "relative_path": _relative_path,
-            "local_path": best_result.log_dir.as_posix(),
+            "local_path": local_path,
             "config": encode(best_result.config),
             "metrics": encode(metrics),
             "num_failed_trials": num_failed_trials,
             "num_successful_trials": len(results) - num_failed_trials,
             "run_uri": f"mlflow:///{active_run.info.run_id}",
-            "trial_uri": f"mlflow:///{active_run.info.run_id}/{_relative_path}",
+            "trial_uri": trial_uri,
         },
         (local_dir / "best_trial.yaml").as_posix(),
     )

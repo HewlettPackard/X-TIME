@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.pipeline import Pipeline
 
@@ -34,7 +35,7 @@ class EyeMovementsBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/1044")
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `eye_movements` train/valid/test datasets.
 
             Dataset source: openml.org/d/1044
@@ -66,6 +67,8 @@ class EyeMovementsBuilder(DatasetBuilder):
 
         # Load from local cache (x - pandas data frame, y - pandas series)
         x, y, _, _ = data.get_data(target=data.default_target_attribute, dataset_format="dataframe")
+        assert isinstance(x, pd.DataFrame), f"Expecting x to be of type pd.DataFrame (type = {type(x)})."
+        assert isinstance(y, pd.Series), f"Expecting y to be of type pd.Series (type = {type(y)})."
 
         # Encode labels. Move from `category` type to int type with labels [0, 1, 2]
         y = y.astype(int)
