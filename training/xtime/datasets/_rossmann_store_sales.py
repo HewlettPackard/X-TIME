@@ -51,7 +51,7 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
                 f"{(self._data_dir / self._store_file).as_posix()}."
             )
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         train: pd.DataFrame = pd.read_csv((self._data_dir / self._train_file).as_posix())
         store: pd.DataFrame = pd.read_csv((self._data_dir / self._store_file).as_posix())
 

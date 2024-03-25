@@ -20,11 +20,11 @@ import ray.tune.search.sample as sample
 import yaml
 
 from xtime.contrib.tune_ext import (
-    Analysis,
+    Analysis,  # noqa
     RandomVarDomain,
-    RayTuneDriverToMLflowLoggerCallback,
+    RayTuneDriverToMLflowLoggerCallback,  # noqa
     add_representers,
-    gpu_available,
+    gpu_available,  # noqa
 )
 
 
@@ -81,7 +81,10 @@ class TestYamlRepresenters(TestCase):
         self.assertIn(domain_t, {sample.Integer, sample.Float}, "Invalid domain type.")
 
         def _check(
-            _rv: sample.Domain, _sampler_t: t.Optional[t.Type], _q: t.Optional = None, _base: t.Optional = None
+            _rv: t.Union[sample.Integer, sample.Float],
+            _sampler_t: t.Optional[t.Type],
+            _q: t.Optional[int] = None,
+            _base: t.Optional[int] = None,
         ) -> None:
             self.assertIsInstance(_rv, domain_t)
             self.assertEqual(lower, _rv.lower)
@@ -119,7 +122,7 @@ class TestYamlRepresenters(TestCase):
         mean, sd = 1.1, 0.45
         q = 0.1
 
-        def _check(_rv: sample.Float, _sampler_t: t.Optional[t.Type], _q: t.Optional = None) -> None:
+        def _check(_rv: sample.Float, _sampler_t: t.Optional[t.Type], _q: t.Optional[float] = None) -> None:
             self.assertEqual(float("-inf"), _rv.lower)
             self.assertEqual(float("+inf"), _rv.upper)
             self._check_sampler(type(_rv), _rv.sampler, sampler_type=_sampler_t, q=_q, mean=mean, sd=sd)
@@ -136,7 +139,7 @@ class TestYamlRepresenters(TestCase):
         sampler: t.Optional[sample.Sampler],
         sampler_type: t.Optional[t.Type] = None,
         base: t.Optional[int] = None,
-        q: t.Optional[int] = None,
+        q: t.Optional[t.Union[int, float]] = None,
         mean: t.Optional[float] = None,
         sd: t.Optional[float] = None,
     ) -> None:

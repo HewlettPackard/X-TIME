@@ -14,4 +14,3 @@
 # limitations under the License.
 ###
 
-from xtime.stages.describe import describe

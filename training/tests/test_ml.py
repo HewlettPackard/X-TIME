@@ -18,7 +18,7 @@ import uuid
 from unittest import TestCase
 
 from xtime.contrib.unittest_ext import check_enum
-from xtime.ml import METRICS, ClassificationTask, Feature, FeatureType, RegressionTask, Task, TaskType, _Metrics
+from xtime.ml import METRICS, ClassificationTask, Feature, FeatureType, RegressionTask, Task, TaskType
 
 
 class TestML(TestCase):

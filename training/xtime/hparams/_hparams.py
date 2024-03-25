@@ -66,7 +66,7 @@ HParamsSpace = t.Dict
 class JsonEncoder(json.JSONEncoder):
     """Custom JSON encoder to support additional types."""
 
-    def default(self, obj: t.Any) -> t.Any:
+    def default(self, obj):
         if isinstance(obj, ValueSpec):
             return {"dtype": str(obj.dtype), "default": obj.default, "space": self.default(obj.space)}
         if isinstance(obj, Domain):
@@ -117,7 +117,7 @@ class HParamsSpec(object):
         configs = [config for _, config in generate_variants(self.space())]
         return np.random.choice(configs) if configs else None
 
-    def merge(self, *args: t.Iterable[t.Dict], use_default: bool = True) -> t.Dict:
+    def merge(self, *args: t.Dict, use_default: bool = True) -> t.Dict:
         _params = self.default() if use_default else {}
         for arg in args:
             _params.update(arg or {})
@@ -134,16 +134,16 @@ def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
             code of this function.
     """
 
-    hp_dict: t.Optional[t.Dict] = None
+    hp_dict: t.Any = None
     if source is None:
         # Just empty dict of hyperparameters.
         hp_dict = {}
-    elif isinstance(source, t.Dict):
+    elif isinstance(source, dict):
         # It is assumed that source is already a valid hyperparameter dictionary.
         hp_dict = copy.deepcopy(source)
-    elif isinstance(source, (t.List, t.Tuple)):
+    elif isinstance(source, (list, tuple)):
         # This is a list of multiple sources.
-        hp_dict: t.Dict = {}
+        hp_dict = {}
         for one_source in source:
             hp_dict.update(get_hparams(one_source))
     elif isinstance(source, str):
@@ -160,12 +160,13 @@ def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
             # Try to parse string that contains hyperparameters.
             hp_dict = from_string(source)
 
-    if not isinstance(hp_dict, dict):
-        raise ValueError(
-            f"Unsupported source of hparams (source=(value={source}, type={type(source)}). Extracted hyperparameters "
-            f"expected to be a dictionary but hp_dict=(value={hp_dict}, type={type(hp_dict)})."
-        )
-    return hp_dict
+    if isinstance(hp_dict, dict):
+        return hp_dict
+
+    raise ValueError(
+        f"Unsupported source of hparams (source=(value={source}, type={type(source)}). Extracted hyperparameters "
+        f"expected to be a dictionary but hp_dict=(value={hp_dict}, type={type(hp_dict)})."
+    )
 
 
 def from_auto(params: t.Optional[str] = None) -> t.Dict:
@@ -225,7 +226,11 @@ def from_auto(params: t.Optional[str] = None) -> t.Dict:
         else:
             raise ValueError(f"Unknown run_type={run_type}. Must be one of 'train', 'hpo'.")
 
-        return recommendations[0] if recommendations else {}
+        if recommendations:
+            return recommendations[0]
+        return {}
+    else:
+        raise RuntimeError(f"Unsupported hyperparameter source (params={params}, source={source}).")
 
 
 def from_string(params: t.Optional[str] = None) -> t.Dict:
@@ -315,9 +320,14 @@ def from_mlflow(url: str) -> t.Dict:
         else:
             experiment = tune.ExperimentAnalysis((artifact_path / "ray_tune").as_posix())
             dataset_info: t.Dict = IO.load_dict(artifact_path / "dataset_info.yaml")
-            best_trial: Trial = experiment.get_best_trial(
+            best_trial: t.Optional[Trial] = experiment.get_best_trial(
                 "valid_mse" if dataset_info["Dataset"]["task"] == "REGRESSION" else "valid_loss_mean", mode="min"
             )
+            if best_trial is None:
+                raise RuntimeError(
+                    f"Can't identify best trial to retrieve hyperparameters (run_type={run_type}, "
+                    f"run_id={run.info.run_id}, status={run.info.status})."
+                )
             best_trial_path = Path(best_trial.logdir)
         hp_dict = from_file(best_trial_path / "params.json")
     else:

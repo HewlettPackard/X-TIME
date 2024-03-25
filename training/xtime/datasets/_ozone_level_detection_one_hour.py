@@ -1,5 +1,6 @@
 import logging
 import os
+import typing as t
 from pathlib import Path
 
 import numpy as np
@@ -44,6 +45,7 @@ class OLD1HRBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
+        self._dataset_dir: t.Optional[Path] = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -53,19 +55,20 @@ class OLD1HRBuilder(DatasetBuilder):
                 f"OLD1HR (Ozone Level Detection) dataset (`{_OLD1HR_DATASET_FILE}`) that can be downloaded "
                 f"from `{_OLD1HR_HOME_PAGE}`."
             )
-        self._dataset_dir = Path(os.environ[_XTIME_DATASETS_OLD1HR]).absolute()
-        if self._dataset_dir.is_file():
-            self._dataset_dir = self._dataset_dir.parent
-        if not (self._dataset_dir / _OLD1HR_DATASET_FILE).is_file():
+        dataset_dir = Path(os.environ[_XTIME_DATASETS_OLD1HR]).absolute()
+        if dataset_dir.is_file():
+            dataset_dir = dataset_dir.parent
+        if not (dataset_dir / _OLD1HR_DATASET_FILE).is_file():
             raise DatasetError.missing_prerequisites(
-                f"OLD1HR dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
+                f"OLD1HR dataset location was identified as `{dataset_dir}`, but this is either not a directory "
                 f"or dataset file (`{_OLD1HR_DATASET_FILE}`) not found in this location. Please, "
                 f"download (`{_OLD1HR_DATASET_FILE}`) of this "
                 f"dataset from its home page `{_OLD1HR_HOME_PAGE}`."
             )
-
         # Check `tsfresh` library can be imported.
         DatasetPrerequisites.check_tsfresh(self.NAME)
+        #
+        self._dataset_dir = dataset_dir
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
@@ -73,8 +76,11 @@ class OLD1HRBuilder(DatasetBuilder):
         self._clean_dataset()
         self._create_default_dataset()
 
-        train_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv"))
-        test_df = pd.read_csv(self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv"))
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        train_df = pd.read_csv(dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv"))
+        test_df = pd.read_csv(dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv"))
 
         label: str = "label"
 
@@ -100,7 +106,7 @@ class OLD1HRBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.BINARY_CLASSIFICATION, num_classes=2),
                 features=features,
-                properties={"source": self._dataset_dir.as_uri()},
+                properties={"source": dataset_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train_df.drop(label, axis=1, inplace=False), y=train_df[label]),
@@ -111,12 +117,15 @@ class OLD1HRBuilder(DatasetBuilder):
 
     def _clean_dataset(self) -> None:
         """Clean raw OLD1HR dataset."""
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not clean it again if it has already been cleaned.
-        _clean_dataset_file = (self._dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
+        _clean_dataset_file = (dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
         if _clean_dataset_file.is_file():
             return
 
-        with open(self._dataset_dir / _OLD1HR_DATASET_FILE, "rt") as input_stream:
+        with open(dataset_dir / _OLD1HR_DATASET_FILE, "rt") as input_stream:
             with open(_clean_dataset_file, "wt") as output_stream:
                 # output_stream.write("user_id,activity,timestamp,x,y,z\n")
                 for idx, line in enumerate(input_stream):
@@ -135,25 +144,28 @@ class OLD1HRBuilder(DatasetBuilder):
 
         Input to this function is the clean dataset created by the `_clean_dataset` method of this class.
         """
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not generate datasets if they have already been generated.
-        default_train_dataset_file = self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv")
-        default_test_dataset_file = self._dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv")
+        default_train_dataset_file = dataset_dir / (_OLD1HR_DATASET_FILE + "-default-train.csv")
+        default_test_dataset_file = dataset_dir / (_OLD1HR_DATASET_FILE + "-default-test.csv")
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
         # Load clean dataset into a data frame (Date, 72 continuous features,
         # labels (two classes 1: ozone day, 0: normal day))
-        clean_dataset_file = (self._dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
-        assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
+        clean_dataset_file = (dataset_dir / _OLD1HR_DATASET_FILE).with_suffix(".csv")
+        assert clean_dataset_file.is_file(), "Clean dataset does not exist (this is internal error)."
 
         df: pd.DataFrame = pd.read_csv(clean_dataset_file, delimiter=",", header=None)
 
         # dataset doesn't have feature_names but the information is provided
-        feature_names_df = pd.read_csv(self._dataset_dir / "feature_names.csv", header=None)
+        feature_names_df = pd.read_csv(dataset_dir / "feature_names.csv", header=None)
 
         df.columns = feature_names_df[0].tolist()
 
-        df_with_feature_names = self._dataset_dir / (_OLD1HR_DATASET_FILE + "_with_feature_names.csv")
+        df_with_feature_names = dataset_dir / (_OLD1HR_DATASET_FILE + "_with_feature_names.csv")
         df.to_csv(df_with_feature_names, index=False)
 
         # Following some of the examples from: https://www.kaggle.com/datasets/prashant111/ozone-level-detection/code

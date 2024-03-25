@@ -35,16 +35,14 @@ lightgbm = { version = "3.3.5", optional = true }  # Gradient boosting trees - L
 xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - XGBoost library.
 
 [tool.poetry.group.dev.dependencies]
-black = "24.1.1"
-isort = "5.13.2"
-flake8 = "7.0.0"
-Flake8-pyproject = "1.2.3"     # This enables flake8 to load its config from pyproject file.
+pyre-check = "0.9.19"          # Type checking tool (`pyre --search-path $(python -c 'import site; print(site.getsitepackages()[0])') check`)
+ruff = "0.3.4"                 # Replace black, isort, flake with `ruff check [--fix]` and `ruff format`
 pytest = "8.0.0"               # Running unit tests (`pytest ./tests` instead of `python -m unittest`)
 pytest-xdist = "3.5.0"         # Parallel `pytest` (`python -m pytest -n auto ./tests`)
 
 [tool.poetry.group.eda.dependencies]
 jupyter = "1.0.0"
-pandasgui = "0.2.14"
+pandasgui = "0.2.14"           # FIXME: This does not work in Jupyter notebooks on Linux headless systems.
 PyQt5 = "5.15.2"               # Fixes "inable to find installation candidates for pyqt5-qt5 (x.x.x)" in Ubuntu
 
 [tool.poetry.extras]
@@ -60,17 +58,21 @@ models = ["catboost", "lightgbm", "xgboost"]
 
 all = ["openml", "tsfresh", "catboost", "lightgbm", "xgboost"]
 
-[tool.black]
-# python -m black --config pyproject.toml ./xtime ./tests
+
+[tool.ruff]
 line-length = 120
-skip-magic-trailing-comma = true
+indent-width = 4
+target-version = 'py39'
+extend-include = ["*.ipynb"]
 
-[tool.isort]
-# python -m isort ./xtime ./tests
-profile = "black"
 
-[tool.flake8]
-max-line-length = 120
+[tool.ruff.format]
+indent-style = "space"
+
+
+[tool.ruff.lint]
+extend-select = ["I"]  # I - isort
+
 
 [tool.pytest.ini_options]
 markers = [

@@ -49,7 +49,7 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
                 f"must exist: {(self._data_dir / self._data_file).as_posix()}."
             )
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `blastchar (Telco Customer Churn)` train/valid/test datasets.
 
             Dataset source: https://www.kaggle.com/datasets/blastchar/telco-customer-churn

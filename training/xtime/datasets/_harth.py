@@ -88,6 +88,7 @@ class HARTHBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
+        self._dataset_dir: t.Optional[Path] = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -97,27 +98,28 @@ class HARTHBuilder(DatasetBuilder):
                 f"a directory with Human Activity Recognition Trondheim (HARTH) dataset that "
                 f"can be downloaded from `{_HARTH_HOME_PAGE}`."
             )
-        self._dataset_dir = Path(os.environ[_XTIME_DATASETS_HARTH]).absolute()
-        if self._dataset_dir.is_file():
-            self._dataset_dir = self._dataset_dir.parent
+        dataset_dir = Path(os.environ[_XTIME_DATASETS_HARTH]).absolute()
+        if dataset_dir.is_file():
+            dataset_dir = dataset_dir.parent
 
         # With multiple files present in this dataset
         # Check for all files and report a list of missing file(s) if not found
         missing_files = []
         for file in _HARTH_DATASET_FILES:
-            if not (self._dataset_dir / file).is_file():
+            if not (dataset_dir / file).is_file():
                 missing_files.append(file)
         if missing_files:
             # Report the missing files
             missing_files_str = ", ".join(missing_files)
             raise DatasetError.missing_prerequisites(
-                f"HARTH dataset location was identified as `{self._dataset_dir}`, but this is either not a directory "
+                f"HARTH dataset location was identified as `{dataset_dir}`, but this is either not a directory "
                 f"or dataset file(s): {missing_files_str}, not found in this location. Please download the "
                 f"dataset from {_HARTH_HOME_PAGE}."
             )
-
         # Check `tsfresh` library can be imported.
         DatasetPrerequisites.check_tsfresh(self.NAME)
+        #
+        self._dataset_dir = dataset_dir
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         if kwargs:
@@ -125,8 +127,11 @@ class HARTHBuilder(DatasetBuilder):
         self._merge_dataset()
         self._create_default_dataset()
 
-        train_df = pd.read_csv(self._dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-train.csv"))
-        test_df = pd.read_csv(self._dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-test.csv"))
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
+        train_df = pd.read_csv(dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-train.csv"))
+        test_df = pd.read_csv(dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-test.csv"))
 
         # These are the base feature names (will have prefixes such as):
         # `back_x_`, `back_y_`, `back_z_`, `thigh_x_`, `thigh_y_` and `thigh_z_`
@@ -161,7 +166,7 @@ class HARTHBuilder(DatasetBuilder):
                 version="default",
                 task=ClassificationTask(TaskType.MULTI_CLASS_CLASSIFICATION, num_classes=12),
                 features=features,
-                properties={"source": self._dataset_dir.as_uri()},
+                properties={"source": dataset_dir.as_uri()},
             ),
             splits={
                 DatasetSplit.TRAIN: DatasetSplit(x=train_df.drop(label, axis=1, inplace=False), y=train_df[label]),
@@ -184,8 +189,10 @@ class HARTHBuilder(DatasetBuilder):
             return None
 
     def _merge_dataset(self) -> None:
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
 
-        _merged_dataset_file = self._dataset_dir / _HARTH_DATASET_MERGED_FILE
+        _merged_dataset_file = dataset_dir / _HARTH_DATASET_MERGED_FILE
         if _merged_dataset_file.is_file():
             return
 
@@ -193,7 +200,7 @@ class HARTHBuilder(DatasetBuilder):
 
         for file in _HARTH_DATASET_FILES:
             subject_id = self.extract_subject_id(file)  # Extract subject ID from file name
-            subject_df = pd.read_csv(self._dataset_dir / file)
+            subject_df = pd.read_csv(dataset_dir / file)
             if subject_df.shape[1] == 9:
                 # Check if the DataFrame has an "index" column and drop it if it exists
                 # Not all but some of them have "index" column (e.g. `S015.csv`)
@@ -224,15 +231,19 @@ class HARTHBuilder(DatasetBuilder):
 
         Input to this function is the clean dataset created by the `_clean_dataset` method of this class.
         """
+        #
+        assert self._dataset_dir is not None, "Dataset directory is none."
+        dataset_dir: Path = self._dataset_dir
+
         # Do not generate datasets if they have already been generated.
-        default_train_dataset_file = self._dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-train.csv")
-        default_test_dataset_file = self._dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-test.csv")
+        default_train_dataset_file = dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-train.csv")
+        default_test_dataset_file = dataset_dir / (_HARTH_DATASET_MERGED_FILE[0:-4] + "-default-test.csv")
         if default_train_dataset_file.is_file() and default_test_dataset_file.is_file():
             return
 
         # Load clean dataset into a data frame (timestamp,back_x,back_y,back_z,thigh_x,thigh_y,thigh_z,label)
-        clean_dataset_file = (self._dataset_dir / _HARTH_DATASET_MERGED_FILE).with_suffix(".csv")
-        assert clean_dataset_file.is_file(), f"Clean dataset does not exist (this is internal error)."
+        clean_dataset_file = (dataset_dir / _HARTH_DATASET_MERGED_FILE).with_suffix(".csv")
+        assert clean_dataset_file.is_file(), "Clean dataset does not exist (this is internal error)."
         dtypes = {
             "timestamp": "object",
             "back_x": "float64",

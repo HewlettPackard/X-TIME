@@ -35,7 +35,7 @@ class GasConcentrationsBuilder(DatasetBuilder):
     def _check_pre_requisites(self) -> None:
         DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/1477")
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `gas-drift-different-concentrations` train/valid/test datasets.
 
             Dataset source: openml.org/d/1477
@@ -64,6 +64,8 @@ class GasConcentrationsBuilder(DatasetBuilder):
 
         # Load from local cache
         x, y, _, _ = data.get_data(target=data.default_target_attribute, dataset_format="dataframe")
+        assert isinstance(x, pd.DataFrame), f"Expecting x to be of type pd.DataFrame (type = {type(x)})."
+        assert isinstance(y, pd.Series), f"Expecting y to be of type pd.Series (type = {type(y)})."
 
         # Encode labels (it's categorical column with values from [1, 6])
         y = pd.Series(LabelEncoder().fit_transform(y), index=y.index, name=y.name)

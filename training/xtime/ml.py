@@ -41,7 +41,7 @@ class TaskType(str, Enum):
         return self is TaskType.REGRESSION
 
 
-class Task(object):
+class Task:
     def __init__(self, type_: t.Union[TaskType, str]) -> None:
         self.type = TaskType(type_)
 
@@ -49,7 +49,7 @@ class Task(object):
         return {"type": self.type.value}
 
     @staticmethod
-    def from_json(json_obj: t.Dict) -> t.Union["ClassificationTask", "RegressionTask"]:
+    def from_json(json_obj: t.Dict) -> "Task":
         json_obj = copy.deepcopy(json_obj)
         type_: TaskType = TaskType(json_obj.pop("type"))
         if type_.classification():
@@ -80,7 +80,7 @@ class ClassificationTask(Task):
             )
 
         super().__init__(type_)
-        self.num_classes = num_classes
+        self.num_classes: int = num_classes
 
     def to_json(self) -> t.Dict:
         _dict = super().to_json()

@@ -179,8 +179,9 @@ class TimeSeries:
         if not has_transform:
             # With transform (such as computing segment mode) we can't conduct these tests.
             assert _windows.ndim == 3, f"Invalid train windows shape (shape={_windows.shape})."
-            assert _windows.shape[1] == window_size, \
-                f"Invalid train windows shape (shape={_windows.shape}, window_size={window_size})."
+            assert (
+                _windows.shape[1] == window_size
+            ), f"Invalid train windows shape (shape={_windows.shape}, window_size={window_size})."
         return _windows
 
 

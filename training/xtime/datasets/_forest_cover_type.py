@@ -40,7 +40,7 @@ class ForestCoverTypeBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
 
-    def _build_default_dataset(self) -> Dataset:
+    def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `Forest Cover Type (cover_type)` train/valid/test datasets.
 
             Dataset source: https://www.kaggle.com/c/forest-cover-type-prediction

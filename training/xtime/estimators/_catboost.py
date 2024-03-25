@@ -18,7 +18,15 @@ import copy
 import typing as t
 from pathlib import Path
 
-import catboost as cb
+try:
+    import catboost as cb
+except ImportError:
+    from xtime.errors import DatasetError, EstimatorError
+
+    raise EstimatorError.missing_prerequisites(
+        "CatBoost estimator is not available because `catboost` library is not installed. This library is optional in "
+        "this project and should be installed by specifying the `catboost` optional (extra) dependency."
+    )
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
@@ -59,14 +67,17 @@ class CatboostEstimator(Estimator):
     def fit_model(self, dataset: Dataset, **kwargs) -> None:
         train_split = dataset.split(DatasetSplit.TRAIN)
         eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+        if train_split is None or eval_split is None:
+            raise DatasetError.missing_train_eval_splits(dataset.metadata.name, train_split, eval_split)
 
         kwargs = copy.deepcopy(kwargs)
         kwargs.update(
             {
+                "eval_set": [(eval_split.x, eval_split.y)],
                 "cat_features": dataset.metadata.categorical_feature_names(),
                 "early_stopping_rounds": 15,
-                "eval_set": [(eval_split.x, eval_split.y)],
                 "verbose": True,
             }
         )
+
         self.model.fit(train_split.x, train_split.y, **kwargs)

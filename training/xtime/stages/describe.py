@@ -30,11 +30,13 @@ def describe(report_type: str, run: t.Optional[str] = None, file: t.Optional[str
 
     summary: t.Optional[t.Union[t.Dict, pd.DataFrame]] = None
     if report_type == "summary":
-        summary: t.Dict = Analysis.get_summary(run)
+        assert run is not None, "The `run` can't be none here."
+        summary = Analysis.get_summary(run)
     elif report_type == "best_trial":
-        summary: t.Dict = Analysis.get_best_trial(run)
+        assert run is not None, "The `run` can't be none here."
+        summary = Analysis.get_best_trial(run)
     elif report_type == "final_trials":
-        summary: pd.DataFrame = Analysis.get_final_trials()
+        summary = Analysis.get_final_trials()
 
     if file:
         IO.save_to_file(summary, file)

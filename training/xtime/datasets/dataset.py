@@ -16,6 +16,7 @@
 
 import abc
 import copy
+import importlib.util
 import logging
 import os
 import typing as t
@@ -82,7 +83,7 @@ class DatasetMetadata:
 
     name: str
     version: str
-    task: t.Optional[t.Union[ClassificationTask, RegressionTask]] = None
+    task: Task
     features: t.List[Feature] = field(default_factory=lambda: [])
     properties: t.Dict[str, t.Any] = field(default_factory=lambda: {})
 
@@ -172,10 +173,11 @@ class Dataset:
         info: t.Dict = self.metadata.to_json()
         info["splits"] = {}
         for name, split in self.splits.items():
-            info["splits"][name] = {"x": list(split.x.shape), "y": list(split.y.shape)}
+            y_shape: t.Optional[t.List[int]] = list(split.y.shape) if split.y is not None else None
+            info["splits"][name] = {"x": list(split.x.shape), "y": y_shape}
         return info
 
-    def save(self, directory: t.Optional[t.Union[str, Path]] = None) -> None:
+    def save(self, directory: Path = Path.cwd()) -> None:
         """Save dataset to disk.
 
         Args:
@@ -185,7 +187,7 @@ class Dataset:
 
         from xtime.io import IO
 
-        directory = Path(directory or Path.cwd().as_posix())
+        directory = directory.absolute()
         directory.mkdir(parents=True, exist_ok=True)
 
         def _save_split(_ds: DatasetSplit, _split_name: str) -> None:
@@ -202,7 +204,7 @@ class Dataset:
         IO.save_yaml(self.metadata.to_json(), directory / "metadata.yaml")
 
     @classmethod
-    def load(cls, directory: t.Union[str, Path]) -> "Dataset":
+    def load(cls, directory: Path) -> "Dataset":
         """Load dataset from disk.
 
         Args:
@@ -248,12 +250,17 @@ class Dataset:
         return factories[0].create(**kwargs)
 
     @staticmethod
-    def parse_name(name: str) -> t.Tuple[t.Optional[str], t.Optional[str]]:
+    def parse_name(name: str) -> t.Tuple[str, str]:
         """Parse name and return (name, version) tuple."""
         name = name.strip()
         if not name:
-            return None, None
-        return (name, None) if ":" not in name else name.split(":", maxsplit=1)
+            return "", ""
+        if ":" not in name:
+            return name, ""
+
+        _split: t.List[str] = name.split(":", maxsplit=1)
+        assert len(_split) == 2, f"Expecting list size to be 2 (size={len(_split)})."
+        return _split[0], _split[1]
 
 
 class DatasetBuilder(object):
@@ -460,21 +467,17 @@ class DatasetPrerequisites:
             dataset_name: Name of a dataset.
             openml_url: An OpenML dataset URL
         """
-        try:
-            import openml
-        except ImportError:
+        if importlib.util.find_spec("openml") is None:
             install_help_msg = DatasetPrerequisites._get_install_lib_help("openml", ["openml", "datasets", "all"])
-            error_msg = "The `%s` dataset is an OpenML dataset (%s), and the `openml` library needs to be installed. %s"
+            error_msg = "The `{}` dataset is an OpenML dataset ({}), and the `openml` library needs to be installed. {}"
             raise DatasetError.missing_prerequisites(error_msg.format(dataset_name, openml_url, install_help_msg))
 
     @staticmethod
     def check_tsfresh(dataset_name: str) -> None:
-        try:
-            import tsfresh
-        except ImportError:
+        if importlib.util.find_spec("tsfresh") is None:
             install_help_msg = DatasetPrerequisites._get_install_lib_help("tsfresh", ["timeseries", "datasets", "all"])
             raise DatasetError.missing_prerequisites(
-                f"The `%s` dataset requires `tsfresh` library to compute machine learning features. %s Once it is "
+                "The `{}` dataset requires `tsfresh` library to compute machine learning features. {} Once it is "
                 "installed, there may be incompatible CUDA runtime found (see if the cause for the import error is "
                 "`numba.cuda.cudadrv.error.NvvmSupportError` exception) - this may occur because `tsfresh` depends on "
                 "`stumpy` that depends on `numba` that detects CUDA runtime and tries to use it if available. Try "
@@ -517,6 +520,7 @@ class DatasetTestCase(TestCase):
 
     def _load_dataset(self, fully_qualified_name: str) -> t.Tuple[t.Any, str, str]:
         name, version = Dataset.parse_name(fully_qualified_name)
+        self.assertIsNotNone(name, f"Dataset name is none (fully_qualified_name={fully_qualified_name}).")
         dataset_builder_cls: t.Type = RegisteredDatasetFactory.registry.get(name)
         self.assertIs(
             dataset_builder_cls,
@@ -533,7 +537,8 @@ class DatasetTestCase(TestCase):
         self.assertEqual(ds.metadata.version, params["version"])
         if ds.metadata.task.type.classification():
             self.assertIsInstance(ds.metadata.task, ClassificationTask)
-            self.assertEqual(ds.metadata.task.num_classes, params["num_classes"])
+            cl_task: ClassificationTask = t.cast(ClassificationTask, ds.metadata.task)
+            self.assertEqual(cl_task.num_classes, params["num_classes"])
         else:
             self.assertIsInstance(ds.metadata.task, RegressionTask)
         self.assertEqual(ds.metadata.task.type, params["task"])

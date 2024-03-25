@@ -19,6 +19,7 @@ import logging
 import sys
 import typing as t
 from multiprocessing import Process
+from pathlib import Path
 
 import click
 import coloredlogs
@@ -41,7 +42,7 @@ dataset_arg_help = (
 
 
 model_arg = click.argument("model", type=str, metavar="MODEL")
-model_arg_help = f"To get list of available ML models, run `models list` command."
+model_arg_help = "To get list of available ML models, run `models list` command."
 
 
 params_option = click.option(
@@ -169,9 +170,6 @@ def experiment_search_hp(
     num_validate_trials: int = 0,
     gpu: bool = False,
 ) -> None:
-    # When no --params are provided, the `params` will be empty. Setting no None here
-    # will enable the search_hp function to retrieve default parameters in this case.
-    params = params if len(params) > 0 else None
     try:
         known_problems = dataset.split(sep=";")
         for _problem in known_problems:
@@ -183,7 +181,17 @@ def experiment_search_hp(
             try:
                 process = Process(
                     target=_run_search_hp_pipeline,
-                    args=(_problem, model, algorithm, params, num_search_trials, num_validate_trials, gpu),
+                    # When no --params are provided, the `params` will be empty. Setting no None here
+                    # will enable the search_hp function to retrieve default parameters in this case.
+                    args=(
+                        _problem,
+                        model,
+                        algorithm,
+                        params if len(params) > 0 else None,
+                        num_search_trials,
+                        num_validate_trials,
+                        gpu,
+                    ),
                 )
                 process.start()
                 process.join()
@@ -243,25 +251,6 @@ def dataset_describe(dataset: str) -> None:
         print_err_and_exit(err)
 
 
-@datasets.command("save", help=f"Save a DATASET dataset version on disk. {dataset_arg_help}")
-@dataset_arg
-@click.option(
-    "--directory",
-    "-d",
-    required=False,
-    type=str,
-    default=None,
-    metavar="DIRECTORY",
-    help="Output directory where DATASET dataset is to be saved.",
-)
-def dataset_save(dataset: str, directory: t.Optional[str] = None) -> None:
-    try:
-        ds: Dataset = Dataset.create(dataset).validate()
-        ds.save(directory)
-    except Exception as err:
-        print_err_and_exit(err)
-
-
 @datasets.command("list", help="List all available datasets.")
 def dataset_list() -> None:
     from prettytable import PrettyTable
@@ -278,6 +267,26 @@ def dataset_list() -> None:
         print("Examples:")
         print("\t- `python -m xtime.main dataset describe churn_modelling:default`")
         print("\t- `python -m xtime.main dataset describe eye_movements:numerical`")
+    except Exception as err:
+        print_err_and_exit(err)
+
+
+@datasets.command("save", help=f"Save a DATASET dataset version on disk. {dataset_arg_help}")
+@dataset_arg
+@click.option(
+    "--directory",
+    "-d",
+    required=False,
+    type=click.Path(exists=False, dir_okay=True, file_okay=False, path_type=Path, resolve_path=True),
+    default=None,
+    metavar="DIRECTORY",
+    help="Output directory where DATASET dataset is to be saved. If not specified, current working directory is used.",
+    callback=lambda ctx, param, val: val if val is not None else Path.cwd(),
+)
+def dataset_save(dataset: str, directory: Path) -> None:
+    try:
+        ds: Dataset = Dataset.create(dataset).validate()
+        ds.save(directory)
     except Exception as err:
         print_err_and_exit(err)
 

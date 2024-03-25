@@ -23,7 +23,6 @@ TaskLike = t.TypeVar("TaskLike", bound=Task)
 
 
 class TestRecommender(TestCase):
-
     def test_default_lightgbm(self):
         params: t.Dict = get_hparams("auto:default:model=lightgbm;task=multi_class_classification")
         self.assertIsInstance(params, dict)

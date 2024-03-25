@@ -82,7 +82,7 @@ class MLflow(object):
     def get_runs(
         client: t.Optional[MlflowClient] = None,
         experiment_ids: t.Optional[t.List[str]] = None,
-        filter_string: t.Optional[str] = None,
+        filter_string: str = "",
     ) -> t.List[Run]:
         """Return MLflow runs that match given query (filter string).
 
@@ -102,7 +102,9 @@ class MLflow(object):
         page_token: t.Optional[str] = None
         while True:
             _runs: PagedList[Run] = client.search_runs(
-                experiment_ids=experiment_ids, filter_string=filter_string, page_token=page_token
+                experiment_ids=experiment_ids if experiment_ids is not None else MLflow.get_experiment_ids(client),
+                filter_string=filter_string,
+                page_token=page_token,
             )
             runs.extend(_runs)
             page_token = _runs.token

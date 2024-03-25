@@ -25,7 +25,6 @@ from click.testing import CliRunner, Result
 from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
 from xtime.errors import ErrorCode
 from xtime.main import (
-    _run_search_hp_pipeline,
     cli,
     dataset_describe,
     dataset_list,
@@ -67,7 +66,7 @@ class TestMain(TestCase):
         ]
         for cli_func in cli_funcs:
             self.assertIsInstance(cli_func, BaseCommand)
-            result: Result = CliRunner().invoke(cli_func, [f"--help"])
+            result: Result = CliRunner().invoke(cli_func, ["--help"])
             self.assertEqual(result.exit_code, 0)
 
     def test_dataset_describe(self) -> None:

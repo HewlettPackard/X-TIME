@@ -43,8 +43,10 @@ class ErrorCode:
     GENERIC_ERROR = 2
     CONFIGURATION_ERROR = 50
     ESTIMATOR_ERROR = 100
+    ESTIMATOR_MISSING_PREREQUISITES_ERROR = 101
     DATASET_ERROR = 150
     DATASET_MISSING_PREREQUISITES_ERROR = 151
+    DATASET_MISSING_TRAIN_EVAL_SPLITS_ERROR = 152
 
 
 class XTimeError(Exception):
@@ -66,6 +68,12 @@ class EstimatorError(XTimeError):
     def __init__(self, message: str) -> None:
         super().__init__(message, error_code=ErrorCode.ESTIMATOR_ERROR)
 
+    @classmethod
+    def missing_prerequisites(cls, message: str) -> "EstimatorError":
+        error = EstimatorError(message)
+        error._error_code = ErrorCode.ESTIMATOR_MISSING_PREREQUISITES_ERROR
+        return error
+
 
 class DatasetError(XTimeError):
     def __init__(self, message: str) -> None:
@@ -75,4 +83,14 @@ class DatasetError(XTimeError):
     def missing_prerequisites(cls, message: str) -> "DatasetError":
         error = DatasetError(message)
         error._error_code = ErrorCode.DATASET_MISSING_PREREQUISITES_ERROR
+        return error
+
+    @classmethod
+    def missing_train_eval_splits(cls, dataset: str, train_split: t.Any, eval_split: t.Any) -> "DatasetError":
+        message: str = (
+            f"Missing train and/or eval split (dataset={dataset}, "
+            f"train_split_is_none={train_split is None}, eval_split_is_none={eval_split is None})."
+        )
+        error = DatasetError(message)
+        error._error_code = ErrorCode.DATASET_MISSING_TRAIN_EVAL_SPLITS_ERROR
         return error
