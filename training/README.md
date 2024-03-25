@@ -1,10 +1,40 @@
+# Introduction
+The `xtime.training` subproject was developed to train gradient boosting decision tree models and optimize their
+hyperparameters. It can be used via its Python API, but it was really developed with command line interface in mind. It
+was tested with XGBoost, LightGBM, CatBoost and Scikit-Learn implementations. The project uses MLflow to track results
+of experiments, and Ray Tune to optimize hyperparameters. Several tabular datasets that are supported out of the box are
+the datasets that we found in papers. New datasets are added from time to time (including those beyond tabular datasets,
+for instance, timeseries datasets).
+
+
 # Prerequisites
+## Clone the project
+```shell
+git clone https://github.com/HewlettPackard/X-TIME.git
+cd ./X-TIME/training
+```
+It is assumed that all example commands in this README file run in the `xtime.training` root directory (the one that 
+contains `pyproject.toml` and this README file).
+
+## Create Python environment
 This project was tested with several versions of python including `3.9.18`. Some or all of the available features
-have been tested in Windows and Linux (Ubuntu) environments.
+have been tested in Windows and Linux (Ubuntu) environments. Some notebook features (such as Pandas GUI) are not going
+to work on headless Linux systems.
+
+The project provides the `environment.yml` file to create a `conda` python virtual environment with minimal dependencies 
+needed to install project dependencies (this project uses `poetry` to manage its dependencies). Alternatively, users 
+can use other mechanism to create python environments (e.g., `virtualenv`). With `conda` and `environment.yml`, the 
+process looks like this:
 ```shell
 conda env create --file ./environment.yml
 conda activate xtime-training
+```
 
+## Installing dependencies
+The `xtime.training` uses `poetry` to manage its dependencies. They include mandatory and optional dependencies. 
+Optional dependencies are all machine learning libraries (such as `catboost`) and some dependencies that are used in
+datasets (such as `openml` and `tsfresh`). Optional dependencies are specified as `extra` dependencies.
+```shell
 # Install all mandatory and optional dependencies (including XGBoost, CatBoost, LightGBM and all other libraries
 # needed for preprocessing data)
 poetry install --all-extras 
@@ -13,7 +43,8 @@ poetry install --all-extras
 poetry install --extras "catboost xgboost"
 ```
 
-Extra dependencies:
+This project defines the following extra dependencies (this list maybe outdated, please, look at `pyproject.toml` for
+detailed and, possibly, more accurate information):
 - `catboost` CatBoost ML library.
 - `xgboost` XGBoost ML library.
 - `lightgbm` LightGBM library.
@@ -23,9 +54,7 @@ Extra dependencies:
 - `models`: Install packages to ensure all models can be loaded (includes [`catboost`, `xgboost`, `lightgbm`]).
 - `all`: Install all extra packages.
 
-
-
-I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
+> I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
 > If on Windows OS, run the following cell. The 2nd command can fail - then go to your python directory and run it. 
 > Once done, restart the kernel.
 > ```shell
@@ -33,14 +62,17 @@ I have the following note in one of my Jupyter notebooks (do not recall the reas
 > !python Scripts\pywin32_postinstall.py -install
 > ```
 
-# Environment
+
+# User environment
 There are no special requirements except users may need to provide information about their proxy servers. The `xtime`
 may fail to download some or all datasets if proxy servers are not configured properly. To configure proxy servers,
-export two environment variables `HTTP_PROXY` and `HTTPS_PROXY`.
+export two environment variables `HTTP_PROXY` and `HTTPS_PROXY`. In addition, the `Environment variables` section in
+this file briefly describes what environment variables users can/should use to enable or configure certain features
+of this project.
 
 
 # Datasets
-For a list of datasets, Jupyter notebooks and preprocesssing pipelines see this [README](./xtime/datasets/README.md) 
+For a list of datasets, Jupyter notebooks and pre-processing pipelines see this [README](./xtime/datasets/README.md) 
 file. Jupyter notebooks with exploratory data analysis (EDA) are available in the [notebooks](./notebooks/datasets) 
 directory. 
 
@@ -78,9 +110,14 @@ represented as a dictionary. Keys are names of hyperparameters. Values, dependin
 value specs of prior value distributions. 
 
 The following is supported:
-- `--params=default` Load default HPs for a given model. Default HPs for ML models have been borrowed from respective 
-  papers. Default hyperparameters only exists in a context defined by, at least, a model (`xgboost`, `catboost` etc) and 
-  a task (binary or multi-class classification, regression). 
+- `--params=auto:{NAME}:{P1}={V1};{P2}={V2};{Pn}={Pn}` Load hyperparameters from a source named `{NAME}` that is 
+  supported by the `xtime.training` project providing additional context using `key-value` pairs `(P1,V1)`, `(P2,V2)`,
+  ..., `(PN,VN)`. This is reserved for internal hyperparameter recommender engines where `{NAME}` is used to select
+  what recommender engine to use, and `key-value` pairs serve as a filter string. The following sources are supported:
+  - `default` is a default hyperparameter and hyperparameter search space recommender. Users must specify a query 
+    containing three mandatory keys - `model`, `task` and `run_type`. The model's valid values are [`lightgbm`, `dummy`
+    `rf`, `catboost`, `xgboost`]. The task's valid values are [`binary_classification`, `multi_class_classification`,
+    `regression`]. The run_type's valid values are [`train`, `hpo`]. 
 - `--params=mlflow:///MLFLOW_RUN_ID` Load HPs from MLflow RUN. If this run is a hyperparameter search run, 
   hyperparameters associated with the best run are retrieved.
 - `--params=params:lr=0.03;batch_size=128` Load hyperparameter from a provided string. This is a convenient way to 
@@ -95,18 +132,24 @@ The following is supported:
 
 The following examples demonstrate how to specify hyperparameters on a command line:
 ```shell
+# Provide default hyperparameters
+python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo
+
 # Provide hyperparameters as a single argument
 python -m xtime.main hparams query --params='params:lr=0.01;batch=tune.uniform(1, 128);n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))'
 
 # Provide hyperparameters as multiple arguments. Result is the same as above.
 python -m xtime.main hparams query --params='params:lr=0.01;batch=tune.uniform(1, 128)' --params='params:n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))'
-
-# As it was mentioned above, to provide default (aka recommended) hyperparameters, one needs to provide a context.
-# When running HP search experiments or training runs, the context is provided by users via positional DATASET and MODEL
-# command line arguments.
-python -m xtime.main hparams query --params=default --ctx='model="xgboost";task="multi_class_classification";num_classes=5'
 ```
 
+> There is one important limitation. Default (auto) hyperparameters are used when no hyperparameters are provided by
+> users. To continue using them along with user hyperparameters, provide default HPs as the first source of HPs (observe
+> difference in output):
+> ```shell
+> python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo
+> python -m xtime.main hparams query --params=params:learning_rate=0.4
+> python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo --params=params:learning_rate=0.4
+> ```
 
 # Tracking results of experiments
 XTIME uses MLflow to track results of ML training and hyperparameter optimization experiments (but not for data 
@@ -117,8 +160,12 @@ Windows) how to start a custom instance of MLflow tracking server:
 ```shell
 # Maybe run in a separate screen session
 screen -S mlflow_server
+
 # This is where run artifacts (e.g., files) will be stored. SQLite database for storing runs metadata will be stored in 
-# the same directory.
+# the same directory. If this server will be used across multiple machines, make sure this path is mounted on all these
+# machines under the same path. In addition, if multiple users will be using the same MLflow server, they all must have
+# read and write access permissions.
+# PS - you may need to change permissions / owner of this directory. 
 export ARTIFACT_STORE=/opt/mlflow
 
 # Adjust host and port parameters as needed.
@@ -126,8 +173,10 @@ export PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION=python
 mlflow server --backend-store-uri sqlite:///${ARTIFACT_STORE}/mlruns.db --default-artifact-root=file://${ARTIFACT_STORE}/mlruns --host=0.0.0.0 --port=10000
 ```
 
-Then, before running experiments, export MLflow URI:
+Then, before running experiments, export the MLflow URI (or set it using MLflow python API):
 ```shell
+# You may need to replace 127.0.0.1 with actual server IP address when running MLflow server and experiments on 
+# different machines.
 export MLFLOW_TRACKING_URI=http://127.0.0.1:10000
 ```
 
@@ -157,6 +206,9 @@ python -m xtime.main models --help
 
 # Xtime stages related to machine learning experiments. 
 python -m xtime.main experiment --help
+
+# Explore hyperparameters and hyperparameter search spaces.
+python -m xtime.main hparams query --help
 ```
 
 The following example shows how to run a hyperparameter search experiment with 100 trials and random search.
@@ -203,6 +255,21 @@ Other variables specific to some datasets:
   more details). Usage example: `export XTIME_DISABLE_PATCH_MINIO=1`. When this patching is not disabled, the `xtime`
   looks for proxy server using the following ordered list of environment variables: `https_proxy`, `HTTPS_PROXY`, 
   `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used.
+
+# Using `xtime.training` as a project dependency
+This project can be specified as a dependency for a project using `poetry`:
+```toml
+[tool.poetry.dependencies]
+# Adjust extra packages based on your needs.
+# Remove or adjust revision (commit).
+xtime-training = { git = "https://github.com/HewlettPackard/X-TIME", rev = "69edb9e", subdirectory = "training", extras=["datasets", "xgboost"] }
+```
+
+or `pip` syntax (in `requirements.txt`):
+```requirements
+"xtime-training[datasets,xgboost] @ git+https://github.com/HewlettPackard/X-TIME@69edb9e#subdirectory=training"
+```
+
 
 # Contribution guidelines
 We will be glad to accept new features, machine learning models or datasets, documentation updates and bug fixes. We
