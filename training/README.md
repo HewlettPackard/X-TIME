@@ -62,6 +62,21 @@ detailed and, possibly, more accurate information):
 > !python Scripts\pywin32_postinstall.py -install
 > ```
 
+## Running jupyter notebooks
+```shell
+# Activate the same Python environment, with conda:
+conda activate xtime-training
+
+# Go to the `xtime.training` subproject.
+cd ./training
+
+# Update python path to be able to import `xtime.training` modules.
+export PYTHONPATH=$(pwd)
+
+# Run Jupyter Lab.
+jupyter lab --ip='0.0.0.0' --port=8888 --no-browser --allow-root
+```
+
 
 # User environment
 There are no special requirements except users may need to provide information about their proxy servers. The `xtime`
