@@ -125,7 +125,7 @@ represented as a dictionary. Keys are names of hyperparameters. Values, dependin
 value specs of prior value distributions. 
 
 The following is supported:
-- `--params=auto:{NAME}:{P1}={V1};{P2}={V2};{Pn}={Pn}` Load hyperparameters from a source named `{NAME}` that is 
+- `--params="auto:{NAME}:{P1}={V1};{P2}={V2};{Pn}={Pn}"` Load hyperparameters from a source named `{NAME}` that is 
   supported by the `xtime.training` project providing additional context using `key-value` pairs `(P1,V1)`, `(P2,V2)`,
   ..., `(PN,VN)`. This is reserved for internal hyperparameter recommender engines where `{NAME}` is used to select
   what recommender engine to use, and `key-value` pairs serve as a filter string. The following sources are supported:
@@ -133,37 +133,37 @@ The following is supported:
     containing three mandatory keys - `model`, `task` and `run_type`. The model's valid values are [`lightgbm`, `dummy`
     `rf`, `catboost`, `xgboost`]. The task's valid values are [`binary_classification`, `multi_class_classification`,
     `regression`]. The run_type's valid values are [`train`, `hpo`]. 
-- `--params=mlflow:///MLFLOW_RUN_ID` Load HPs from MLflow RUN. If this run is a hyperparameter search run, 
+- `--params="mlflow:///MLFLOW_RUN_ID"` Load HPs from MLflow RUN. If this run is a hyperparameter search run, 
   hyperparameters associated with the best run are retrieved.
-- `--params=params:lr=0.03;batch_size=128` Load hyperparameter from a provided string. This is a convenient way to 
+- `--params="params:lr=0.03;batch_size=128"` Load hyperparameter from a provided string. This is a convenient way to 
   specify HPs on a command line. The string is parsed as a dictionary. Keys and values are separated by `=`. 
   Key-value pairs are separated by `;`. Values could include functions in `math` package, can use search spaces from 
   ray `tune` library (see [search spaces](https://docs.ray.io/en/latest/tune/api/search_space.html)), and also can use
   the `ValueSpec` class to define hyperparameter specification on a command line. When value is a string value, quote 
   and escape its value, e.g. `--params=params:tree_method=\"hist\"`.
   > The implementation is not secure and uses pythons `eval` function to parse parameter values.
-- `--params=file:///mnt/space/ml/hparams.json` Load hyperparameters from a `JSON` file. The file should contain a 
+- `--params="file:///mnt/space/ml/hparams.json"` Load hyperparameters from a `JSON` file. The file should contain a 
   dictionary with hyperparameters. Other file types are supported (`YAML`, `YML`). The `file` scheme is optional.
 
 The following examples demonstrate how to specify hyperparameters on a command line:
 ```shell
 # Provide default hyperparameters
-python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo
+python -m xtime.main hparams query --params="auto:default:model=xgboost;task=binary_classification;run_type=hpo"
 
 # Provide hyperparameters as a single argument
-python -m xtime.main hparams query --params='params:lr=0.01;batch=tune.uniform(1, 128);n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))'
+python -m xtime.main hparams query --params="params:lr=0.01;batch=tune.uniform(1, 128);n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))"
 
 # Provide hyperparameters as multiple arguments. Result is the same as above.
-python -m xtime.main hparams query --params='params:lr=0.01;batch=tune.uniform(1, 128)' --params='params:n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))'
+python -m xtime.main hparams query --params="params:lr=0.01;batch=tune.uniform(1, 128)" --params="params:n_estimators=ValueSpec(int, 100, tune.randint(100, 4001))"
 ```
 
 > There is one important limitation. Default (auto) hyperparameters are used when no hyperparameters are provided by
 > users. To continue using them along with user hyperparameters, provide default HPs as the first source of HPs (observe
 > difference in output):
 > ```shell
-> python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo
-> python -m xtime.main hparams query --params=params:learning_rate=0.4
-> python -m xtime.main hparams query --params=auto:default:model=xgboost;task=binary_classification;run_type=hpo --params=params:learning_rate=0.4
+> python -m xtime.main hparams query --params="auto:default:model=xgboost;task=binary_classification;run_type=hpo"
+> python -m xtime.main hparams query --params="params:learning_rate=0.4"
+> python -m xtime.main hparams query --params="auto:default:model=xgboost;task=binary_classification;run_type=hpo" --params="params:learning_rate=0.4"
 > ```
 
 # Tracking results of experiments
@@ -229,7 +229,7 @@ python -m xtime.main hparams query --help
 The following example shows how to run a hyperparameter search experiment with 100 trials and random search.
 ```shell
 # This dataset contains categorical features, so we need to "override" the default tree method for XGBoost. 
-python -m xtime.main experiment search_hp telco_customer_churn:default xgboost random --params=default --params='params:tree_method="hist"' --num-search-trials=1 
+python -m xtime.main experiment search_hp telco_customer_churn:default xgboost random --params="auto:default:model=xgboost;task=binary_classification;run_type=hpo" --params='params:tree_method="hist"' --num-search-trials=1 
 ```
 Once the above command is executed, it will print out the MLflow run ID. This ID can be used to query MLflow for
 hyperparameters associated with the best run. The following command will print out the best hyperparameters:
