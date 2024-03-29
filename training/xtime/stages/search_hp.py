@@ -177,9 +177,18 @@ def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
     metrics: t.Dict = copy.deepcopy(best_result.metrics or {})
 
     if ctx.dataset is not None:
-        missing_metrics: t.Set = {m for m in METRICS[ctx.dataset.metadata.task.type] if m not in metrics}
+        expected_metrics: t.List[str] = METRICS[ctx.dataset.metadata.task.type]
+        missing_metrics: t.Set = {m for m in expected_metrics if m not in metrics}
         if missing_metrics:
-            print(f"[WARNING] Missing metrics in the best trial: {missing_metrics}. Program may crash.")
+            logger.warning(
+                "Expected metrics not found in best trial (log_dir=%s): dataset=%s, task=%s, expected_metrics=%s, "
+                "missing_metrics=%s.",
+                best_result.log_dir,
+                ctx.dataset.metadata.name,
+                ctx.dataset.metadata.task.type,
+                expected_metrics,
+                missing_metrics,
+            )
 
     return metrics
 

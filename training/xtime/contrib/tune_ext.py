@@ -119,7 +119,7 @@ class Analysis(object):
             if best_trial is not None:
                 best_params = IO.load_json((Path(best_trial.logdir) / "params.json").as_posix())
                 best_results = IO.load_json((Path(best_trial.logdir) / "result.json").as_posix())
-                best_results = {k: best_results[k] for k in perf_metrics}
+                best_results = {k: best_results[k] for k in perf_metrics if k in best_results}
                 summary["best_run"] = {"perf_metric": perf_metric, "parameters": best_params, "results": best_results}
 
             summary["metric_variations"] = {}
@@ -127,10 +127,11 @@ class Analysis(object):
                 succeeded_trials: pd.DataFrame = experiment.results_df[experiment.results_df[perf_metric].notna()]
                 results = succeeded_trials.sort_values([perf_metric], ascending=True)
                 for metric in perf_metrics:
-                    summary["metric_variations"][metric] = {
-                        "mean": results[metric].mean().item(),
-                        "std": results[metric].std().item(),
-                    }
+                    if metric in results.columns:
+                        summary["metric_variations"][metric] = {
+                            "mean": results[metric].mean().item(),
+                            "std": results[metric].std().item(),
+                        }
 
             summary["mlflow_run"] = mlflow_run_id
             return summary
