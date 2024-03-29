@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
 import copy
+import logging
 import typing as t
 from pathlib import Path
 
@@ -26,6 +26,8 @@ from xtime.ml import TaskType
 
 from ..errors import DatasetError
 from .estimator import Estimator
+
+logger = logging.getLogger(__name__)
 
 
 class XGBoostEstimator(Estimator):
@@ -65,7 +67,8 @@ class XGBoostEstimator(Estimator):
             }
         )
         if gpu_available():
-            params.update({"gpu_id": 0, "tree_method": "gpu_hist"})
+            logger.info("GPU enabled for XGBoost Estimator: device=cuda, tree_method=hist.")
+            params.update({"device": "cuda", "tree_method": "hist"})
 
         self.params = params
         self.model: XGBModel = self.make_model(dataset_metadata, XGBClassifier, XGBRegressor, params)
