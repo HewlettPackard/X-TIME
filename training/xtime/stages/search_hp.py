@@ -45,7 +45,7 @@ logger = logging.getLogger(__name__)
 
 
 def search_hp(
-    dataset: str, model: str, algorithm: str, hparams: t.Optional[HParamsSource], num_trials: int, gpu: bool = False
+    dataset: str, model: str, algorithm: str, hparams: t.Optional[HParamsSource], num_trials: int, gpu: float = 0
 ) -> str:
     estimator: t.Type[Estimator] = get_estimator(model)
 
@@ -110,8 +110,8 @@ def search_hp(
         )
 
         objective_fn = tune.with_parameters(estimator.fit, ctx=ctx)
-        if gpu:
-            objective_fn = tune.with_resources(objective_fn, {"gpu": 1})
+        if gpu > 0:
+            objective_fn = tune.with_resources(objective_fn, {"gpu": gpu})
         tuner = tune.Tuner(objective_fn, param_space=param_space, tune_config=tune_config, run_config=run_config)
         results: ResultGrid = tuner.fit()
 
