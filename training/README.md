@@ -271,6 +271,19 @@ Other variables specific to some datasets:
   looks for proxy server using the following ordered list of environment variables: `https_proxy`, `HTTPS_PROXY`, 
   `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used.
 
+
+# GPU support
+Gradient boosting tree estimators (CatBoost, LightGBM and XGBoost) will use GPUs when `CUDA_VISIBLE_DEVICES` variable 
+is set.
+- `train` When running a training experiment, export `CUDA_VISIBLE_DEVICES` environment variable amd point to a single 
+  GPU to use.
+- `search_hp` When running hyperparameter optimization experiments, `CUDA_VISIBLE_DEVICES` can point to multiple devices
+  to be used by the Ray Tune trial scheduler. In addition, to use GPUs users must provide `--gpu` option. The value 
+  is a floating point number between 0 and 1 that defines how much GPU a single trial can potentially use. For instance,
+  with `--gpu 0.1` Ray Tune can schedule 10 parallel trials on a single GPU. When no value provided (`--gpu`), it is
+  automatically set to 1 (this is backward compatible with previous implementation when `--gpu` was a flag).
+
+
 # Using `xtime.training` as a project dependency
 This project can be specified as a dependency for a project using `poetry`:
 ```toml

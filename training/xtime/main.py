@@ -77,7 +77,7 @@ def _run_search_hp_pipeline(
     hparams: t.Optional[t.Tuple[str]],
     num_search_trials: int,
     num_validate_trials: int = 0,
-    gpu: bool = False,
+    gpu: float = 0,
 ) -> None:
     from xtime.stages.search_hp import search_hp
 
@@ -160,7 +160,11 @@ def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
     default=0,
     help="Number of trials to retrain a model using the best configuration found with HPO.",
 )
-@click.option("--gpu", is_flag=True, help="Use GPUs (1 GPU per trial).")
+@click.option(
+    "--gpu", required=False, type=float, is_flag=False, default=0, flag_value=1,
+    help="A GPU fraction to use for a single trial (a number between 0 and 1). When 0, not GPUs will be used. When 1, "
+         "a single GPU will be exclusively used by a single trial."
+)
 def experiment_search_hp(
     dataset: str,
     model: str,
@@ -168,8 +172,11 @@ def experiment_search_hp(
     params: t.Tuple[str],
     num_search_trials: int,
     num_validate_trials: int = 0,
-    gpu: bool = False,
+    gpu: float = 0,
 ) -> None:
+    if not (0 <= gpu <= 1):
+        print("The `--gpu` option value must be a floating point value from [0, 1].")
+        exit(1)
     try:
         known_problems = dataset.split(sep=";")
         for _problem in known_problems:
