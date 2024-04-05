@@ -161,9 +161,14 @@ def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
     help="Number of trials to retrain a model using the best configuration found with HPO.",
 )
 @click.option(
-    "--gpu", required=False, type=float, is_flag=False, default=0, flag_value=1,
+    "--gpu",
+    required=False,
+    type=float,
+    is_flag=False,
+    default=0,
+    flag_value=1,
     help="A GPU fraction to use for a single trial (a number between 0 and 1). When 0, not GPUs will be used. When 1, "
-         "a single GPU will be exclusively used by a single trial."
+    "a single GPU will be exclusively used by a single trial.",
 )
 def experiment_search_hp(
     dataset: str,
