@@ -29,11 +29,12 @@ from ray import tune
 from ray.tune import Callback
 from ray.tune.experiment import Trial
 from ray.tune.search import sample
+from tqdm import tqdm
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import DatasetMetadata
 from xtime.io import IO
-from xtime.ml import METRICS
+from xtime.ml import METRICS, Task
 from xtime.run import RunType
 
 __all__ = ["gpu_available", "RayTuneDriverToMLflowLoggerCallback", "Analysis", "RandomVarDomain", "add_representers"]
@@ -44,6 +45,30 @@ def gpu_available() -> bool:
     if os.environ.get("CUDA_VISIBLE_DEVICES", None):
         return True
     return False
+
+
+def get_trial_dir(
+    trial_dir: Path, model_file: str, backup_trial_dir_resolver: t.Optional[t.Callable] = None
+) -> t.Optional[Path]:
+    """Helper function to identify the directory containing all artifacts for a given Ray Tune trial.
+
+    This is a temporarily ad-hoc solution that we needed due to original location of MLflow artifacts we had in our
+    environment. We ran out of space and had to move these artifacts (create a backup copy) some place else. This
+    function can be used to identify the actual directory containing trial artifacts (in particular, ML model).
+
+    Args:
+        trial_dir: Candidate trial directory. Originally, this is default location resolved ar Mlflow artifact.
+        model_file: Model file name that must exist.
+        backup_trial_dir_resolver: Optional callback that provides next trial candidate directory.
+
+    Returns:
+        Path instance where all mandatory files exist.
+    """
+    if all([(trial_dir / name).is_file() for name in (model_file, "params.json", "result.json")]):
+        return trial_dir
+    if backup_trial_dir_resolver:
+        return get_trial_dir(backup_trial_dir_resolver(trial_dir), model_file)
+    return None
 
 
 class RayTuneDriverToMLflowLoggerCallback(Callback):
@@ -83,6 +108,94 @@ class RayTuneDriverToMLflowLoggerCallback(Callback):
 
 
 class Analysis(object):
+    @staticmethod
+    def get_trial_stats(run: str, **kwargs) -> t.List[t.Dict]:
+        """Return descriptive statistics for a given hyperparameter search experiment.
+
+        Not all models can be supported.
+
+        Args:
+            run: MLflow run ID that must correspond to Ray Tune experiment.
+            **kwargs: Additional (optional arguments).
+
+        Returns:
+            List of dictionaries where each dictionary describes one ray tune trial. it will contain information about
+                the model (`model_` prefix), the dataset (`dataset_` prefix), ray tune execution environment (`tune_`
+                prefix), MLflow execution environment (`mlflow_` prefix), model input parameters (`param_` prefix) and
+                model performance metrics (`metric_` prefix).
+        """
+        from xtime.estimators.estimator import Model
+
+        mlflow_run_id = run[10:] if run.startswith("mlflow:///") else run
+        mlflow_run = mlflow.get_run(mlflow_run_id)
+        run_type: RunType = RunType(mlflow_run.data.tags["run_type"])
+        if run_type != RunType.HPO:
+            raise ValueError(f"Unsupported MLflow run ({mlflow_run.data.tags['run_type']})")
+        trials_stats: t.List[t.Dict] = []
+        artifact_path: Path = Path(local_file_uri_to_path(mlflow_run.info.artifact_uri))
+        task: Task = Task.from_dataset_info(IO.load_yaml(artifact_path / "dataset_info.yaml"))
+        trial_dirs: t.List[Path] = [_dir for _dir in (artifact_path / "ray_tune").iterdir() if _dir.is_dir()]
+
+        if mlflow_run.data.tags["model"] == "xgboost":
+            from xtime.contrib.xgboost_ext import get_model_stats
+        elif mlflow_run.data.tags["model"] in ("rf", "rf_clf"):
+            from xtime.contrib.sklearn_ext import get_model_stats
+        else:
+            raise ValueError(f"Unsupported model ({mlflow_run.data.tags['model']})")
+
+        for trial_dir in tqdm(
+            trial_dirs, total=len(trial_dirs), desc="Hyperparameter search trials", unit="trials", leave=False
+        ):
+            model_file: str = Model.get_file_name(mlflow_run.data.tags["model"])
+            resolved_trial_dir = get_trial_dir(trial_dir, model_file, kwargs.get("backup_trial_dir_resolver", None))
+            if resolved_trial_dir is None:
+                print(f"WARNING no valid trial directory found (id={mlflow_run_id}, path={trial_dir}).")
+                continue
+            trial_stats = {
+                "model_file": (resolved_trial_dir / model_file).as_posix(),
+                "model_name": mlflow_run.data.tags["model"],
+                "dataset_name": mlflow_run.data.tags["problem"],
+                "tune_root_path": (artifact_path / "ray_tune").as_posix(),
+                "tune_trial_path": resolved_trial_dir.as_posix(),
+                "mlflow_run_id": mlflow_run_id,
+            }
+
+            try:
+                model_stats: t.Dict = get_model_stats(resolved_trial_dir, task.type)
+                for k, v in model_stats.items():
+                    trial_stats["model_" + k] = v
+            except (IOError, EOFError):
+                # When there's something wrong with the serialized model.
+                print("WARNING can't get model stats, dir=", resolved_trial_dir.as_posix())
+                continue
+
+            model_params: t.Dict = IO.load_dict(resolved_trial_dir / "params.json")
+            for k, v in model_params.items():
+                trial_stats["param_" + k] = v
+
+            metrics: t.Dict = IO.load_dict(resolved_trial_dir / "result.json")
+            _known_metrics = {
+                "dataset_accuracy",
+                "dataset_loss_total",
+                "train_accuracy",
+                "train_loss_mean",
+                "train_loss_total",
+                "valid_accuracy",
+                "valid_loss_mean",
+                "valid_loss_total",
+                "test_accuracy",
+                "test_loss_mean",
+                "test_loss_total",
+                "dataset_loss_mean",
+            }
+            for k, v in metrics.items():
+                if k in _known_metrics:
+                    trial_stats["metric_" + k] = v
+
+            trials_stats.append(trial_stats)
+
+        return trials_stats
+
     @staticmethod
     def get_summary(run: str) -> t.Dict:
         """Get the summary of a run.

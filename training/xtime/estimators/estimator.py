@@ -38,11 +38,18 @@ from sklearn.metrics import (
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.io import IO, encode
-from xtime.ml import ClassificationTask, Task
+from xtime.ml import ClassificationTask, Task, TaskType
 from xtime.registry import ClassRegistry
 from xtime.run import Context, Metadata, RunType
 
-__all__ = ["Estimator", "get_estimator_registry", "get_estimator", "unit_test_train_model", "unit_test_check_metrics"]
+__all__ = [
+    "Estimator",
+    "get_estimator_registry",
+    "get_estimator",
+    "Model",
+    "unit_test_train_model",
+    "unit_test_check_metrics",
+]
 
 logger = logging.getLogger(__name__)
 
@@ -290,6 +297,72 @@ def get_estimator_registry() -> ClassRegistry:
 
 def get_estimator(name: str) -> t.Type[Estimator]:
     return _registry.get(name)
+
+
+class Model:
+    """Class to load models serialized by estimators."""
+
+    _model_files: t.Dict[str, str] = {
+        "catboost": "model.bin",
+        "lightgbm": "model.txt",
+        "xgboost": "model.ubj",
+        "dummy": "model.pkl",
+        "rf": "model.pkl",
+        "rf_clf": "model.pkl",
+    }
+    """Mapping from a model name to a file name (the `rf_clf` was used in initial versions of this project)."""
+
+    @staticmethod
+    def get_file_name(model_name: str) -> str:
+        """Return model file name based upon model name.
+
+        Args:
+            model_name: Name of a model (xgboost, catboost, etc.). See `Model._model_files` dictionary.
+
+        Returns:
+            A file name for a given model.
+        """
+        model_file: t.Optional[str] = Model._model_files.get(model_name, None)
+        if not model_file:
+            raise ValueError(f"Unsupported model type ('{model_name}').")
+        return model_file
+
+    @staticmethod
+    def load_model(path: Path, model_name: str, task_type: TaskType) -> t.Any:
+        """Load model stored in a given path.
+
+        Args:
+            path: Directory path where a model is stored (e.g., MLflow artifact path or Ray Tune trial directory).
+            model_name: Model name (xgboost, catboost, etc.).
+            task_type: Task (regression, single/multi-class classification) this model solves.
+
+        Returns:
+            Instance of a model. This will be an instance of a model of a respective framework (e.g.,
+                xgboost.XGBRegressor, catboost.CatBoostClassifier, etc.).
+        """
+        model_file: str = Model.get_file_name(model_name)
+        if not (path / model_file).is_file():
+            raise FileNotFoundError(f"No model file ('{model_file}') found in '{path}' for '{model_name}' model.")
+
+        if model_name == "xgboost":
+            import xgboost
+
+            model = xgboost.XGBClassifier() if task_type.classification() else xgboost.XGBRegressor()
+            model.load_model(path / model_file)
+        elif model_name == "catboost":
+            import catboost
+
+            model = catboost.CatBoostClassifier() if task_type.classification() else catboost.CatBoostRegressor
+            model.load_model((path / model_file).as_posix())
+        elif model_name in {"dummy", "rf", "rf_clf"}:
+            import pickle
+
+            with open(path / model_file, "rb") as file:
+                model = pickle.load(file)
+        else:
+            raise NotImplementedError(f"Model loading ({model_name}) has not been implemented yet.")
+
+        return model
 
 
 def unit_test_train_model(test_case: TestCase, model_name: str, model_class: t.Any, ds: Dataset) -> t.Dict:
