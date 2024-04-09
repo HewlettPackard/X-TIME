@@ -184,19 +184,39 @@ class Estimator:
 
         return metrics
 
-    def evaluate(self, dataset: Dataset) -> t.Dict[str, t.Any]:
+    def evaluate(self, dataset: Dataset, **kwargs) -> t.Dict[str, t.Any]:
         if dataset.metadata.task.type.classification():
-            metrics = self._evaluate_classifier(dataset)
+            metrics = self._evaluate_classifier(dataset, **kwargs)
         elif dataset.metadata.task.type.regression():
+            if kwargs:
+                logger.warning(
+                    "The regressor evaluation method does not support any additional arguments (%s). "
+                    "They will be ignored.",
+                    kwargs,
+                )
             metrics = self._evaluate_regressor(dataset)
         else:
             raise ValueError(f"Unsupported machine learning task {dataset.metadata.task}")
         return metrics
 
-    def _evaluate_classifier(self, dataset: Dataset) -> t.Dict[str, t.Any]:
+    def _evaluate_classifier(
+        self, dataset: Dataset, predict_proba_kwargs: t.Optional[t.Dict] = None
+    ) -> t.Dict[str, t.Any]:
         """Report results of a training run.
+
         TODO: I can already have here results for train/valid (eval) splits.
+
+        Args:
+            dataset: Dataset to evaluate this model on.
+            predict_proba_kwargs: Key-value arguments for the `model.predict_proba` call. These arguments are model
+                specific, and can be used, for instance, to limit number of trees in a tree-based models (e.g.,
+                XGBoost).
+
+        Returns:
+            Dictionary with metrics computed on different splits for the input `datasets`.
         """
+        predict_proba_kwargs = predict_proba_kwargs or {}
+
         metrics = {"dataset_accuracy": 0.0, "dataset_loss_total": 0.0, "dataset_loss_mean": 0.0}
         _num_examples = 0
 
@@ -207,7 +227,7 @@ class Estimator:
 
         def _evaluate(x, y, name: str) -> None:
             nonlocal _num_examples
-            predicted_probas = self.model.predict_proba(x)  # (n_samples, 2)
+            predicted_probas = self.model.predict_proba(x, **predict_proba_kwargs)  # (n_samples, 2)
             predicted_labels = np.argmax(predicted_probas, axis=1)  # (n_samples,)
             metrics[f"{name}_accuracy"] = float(accuracy_score(y, predicted_labels))
             metrics[f"{name}_loss_mean"] = float(log_loss(y, predicted_probas, normalize=True))
