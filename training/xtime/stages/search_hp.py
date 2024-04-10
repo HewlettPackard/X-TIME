@@ -37,6 +37,7 @@ from xtime.contrib.tune_ext import Analysis, RayTuneDriverToMLflowLoggerCallback
 from xtime.datasets import Dataset
 from xtime.estimators import Estimator, get_estimator
 from xtime.hparams import HParamsSource, get_hparams
+from xtime.hparams import from_string as hparams_from_string
 from xtime.io import IO, encode
 from xtime.ml import METRICS
 from xtime.run import Context, Metadata, RunType
@@ -45,7 +46,13 @@ logger = logging.getLogger(__name__)
 
 
 def search_hp(
-    dataset: str, model: str, algorithm: str, hparams: t.Optional[HParamsSource], num_trials: int, gpu: float = 0
+    dataset: str,
+    model: str,
+    algorithm: str,
+    hparams: t.Optional[HParamsSource],
+    num_trials: int,
+    gpu: float = 0,
+    fit_params: str = "",
 ) -> str:
     estimator: t.Type[Estimator] = get_estimator(model)
 
@@ -71,6 +78,12 @@ def search_hp(
         run_id: str = active_run.info.run_id
 
         ctx = Context(Metadata(dataset=dataset, model=model, run_type=RunType.HPO), dataset=Dataset.create(dataset))
+
+        fit_params = fit_params or ""
+        if fit_params:
+            ctx.metadata.fit_params.update(hparams_from_string(fit_params))
+            logger.info("Update fit params (%s).", ctx.metadata.fit_params)
+
         IO.save_yaml(ctx.dataset.metadata.to_json(), artifact_path / "dataset_info.yaml", raise_on_error=False)
         _set_tags(
             dataset=dataset,

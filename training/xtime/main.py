@@ -78,17 +78,18 @@ def _run_search_hp_pipeline(
     num_search_trials: int,
     num_validate_trials: int = 0,
     gpu: float = 0,
+    fit_params: str = "",
 ) -> None:
     from xtime.stages.search_hp import search_hp
 
     """Run an ML pipeline that includes (1) hyperparameter search and (2) analysis how stable hyperparameters are."""
-    mlflow_uri: str = search_hp(dataset, model, algorithm, hparams, num_search_trials, gpu)
+    mlflow_uri: str = search_hp(dataset, model, algorithm, hparams, num_search_trials, gpu, fit_params)
     if num_validate_trials > 0:
         validate_hparams = [
             mlflow_uri,  # Take the best hyperparameters from this MLFlow run.
             {"random_state": tune.randint(0, int(2**32 - 1))},  # And vary random seed to validate these HPs are stable.
         ]
-        search_hp(dataset, model, "random", validate_hparams, num_validate_trials, gpu)
+        search_hp(dataset, model, "random", validate_hparams, num_validate_trials, gpu, fit_params)
 
 
 @click.group(name="xtime", help="Machine Learning benchmarks for tabular data for XTIME project.")
@@ -170,6 +171,15 @@ def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
     help="A GPU fraction to use for a single trial (a number between 0 and 1). When 0, not GPUs will be used. When 1, "
     "a single GPU will be exclusively used by a single trial.",
 )
+@click.option(
+    "--fit-params",
+    required=False,
+    multiple=False,
+    default="",
+    type=str,
+    help="Optional parameters for a estimator's `fit_model` method. They are model-specific  and can include "
+    " parameters such as `early_stopping_rounds` for XGBoost models.",
+)
 def experiment_search_hp(
     dataset: str,
     model: str,
@@ -178,6 +188,7 @@ def experiment_search_hp(
     num_search_trials: int,
     num_validate_trials: int = 0,
     gpu: float = 0,
+    fit_params: str = "",
 ) -> None:
     if not (0 <= gpu <= 1):
         print("The `--gpu` option value must be a floating point value from [0, 1].")
@@ -203,6 +214,7 @@ def experiment_search_hp(
                         num_search_trials,
                         num_validate_trials,
                         gpu,
+                        fit_params,
                     ),
                 )
                 process.start()
