@@ -13,4 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+from unittest import TestCase
 
+from xtime.contrib.mlflow_ext import MLflow
+
+
+class TestMLflow(TestCase):
+    def test_get_run_id(self) -> None:
+        run_id = "c2596b2ef44f4d9fa8c9dd62c222abbb"
+
+        self.assertEqual(run_id, MLflow.get_run_id(run_id))
+        self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:{run_id}"))
+        self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:/{run_id}"))
+        self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:///{run_id}"))

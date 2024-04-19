@@ -14,8 +14,11 @@
 # limitations under the License.
 ###
 
+import logging
 import os
+import re
 import typing as t
+import urllib.parse as url_parser
 from pathlib import Path
 
 import mlflow
@@ -30,6 +33,8 @@ from xtime.ml import Task
 from xtime.run import RunType
 
 __all__ = ["MLflow"]
+
+logger = logging.getLogger(__name__)
 
 
 class MLflow(object):
@@ -207,3 +212,23 @@ class MLflow(object):
                     mlflow.log_metric(name, value)
             except mlflow.MlflowException:
                 continue
+
+    @staticmethod
+    def get_run_id(url: str) -> str:
+        """Parse URL, identify MLflow run ID and return it.
+
+        Args:
+            url: MLflow run URL. The format must be consistent with URL specs (e.g., https://en.wikipedia.org/wiki/URL).
+                See unit tests for more details (tests/contrib/test_mlflow_ext.py). Valid URLs are:
+                    - `run_id`
+                    - `mlflow:run_id`, `mlflow:/run_id` and `mlflow:///run_id`.
+        """
+        parsed: url_parser.ParseResult = url_parser.urlparse(url)
+        run_id: str = parsed.path
+        if parsed.scheme == "mlflow":
+            while run_id and run_id[0] == "/":
+                run_id = run_id[1:]
+        matches: t.List[str] = re.findall(r"^[a-zA-Z0-9]+$", run_id)
+        if not matches or matches[0] != run_id:
+            logger.warning("Probably invalid MLflow URL (%s). Run ID was resolved to '%s'.", url, run_id)
+        return run_id
