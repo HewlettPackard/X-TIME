@@ -18,7 +18,7 @@ import typing as t
 from pathlib import Path
 
 import pandas as pd
-import xgboost
+from xgboost import XGBModel
 
 from xtime.estimators.estimator import Model
 from xtime.ml import TaskType
@@ -70,22 +70,48 @@ class TreeTraversal:
                 self._traverse(child)
 
 
-def get_model_stats(model_path: Path, task_type: TaskType) -> t.Dict:
-    """Compute some basic statistics of a mode.
+def get_model_stats(
+    model_dir: Path, task_type: TaskType, num_trees: int = 0, cache: t.Optional[t.Dict] = None
+) -> t.Dict:
+    """Compute some basic statistics of an XGBoost model.
 
     Args:
-        model_path: Directory that contains an XGBoost model.
-        task_type: Task type this model was trained for.
-
+        model_dir: Directory that contains an XGBoost model.
+        task_type: Task type this model was trained for (need to be able to load the right model).
+        num_trees: Number of trees to use to compute statistics. For multi-class classification problems (num classes
+            > 2), this must be `num_rounds * num_classes`. The value of `0` means use all trees.
+        cache: If this function needs to be called multiple times, if the cache is not None, the function will cache
+            the trees data frame in this cache under the "trees" key.
     Returns:
-        Dictionary with some descriptive statistics of this model.
+        Dictionary with some descriptive statistics of this model that include the following: maximal tree depth,
+        maximal number of leaves, total number of trees. If `num_trees` is specified, and it is smaller or equal
+        to actual number of trees, then number of trees will equal to this number.
     """
-    model: xgboost.XGBModel = Model.load_model(model_path, "xgboost", task_type)
-    if not isinstance(model, xgboost.XGBModel):
-        raise ValueError(f"Unexpected XGBoost model loaded from '{model_path}' (type = {type(model)}).")
+
+    def _get_stats(_trees: pd.DataFrame) -> t.Dict:
+        _num_trees = _trees.shape[0] if num_trees <= 0 else min(num_trees, _trees.shape[0])
+        return {
+            "max_depth": _trees["depth"][0:_num_trees].max(),
+            "max_leaves": _trees["num_leaves"][0:_num_trees].max(),
+            "num_trees": _num_trees,
+        }
+
+    if cache is not None and "trees" in cache:
+        return _get_stats(cache["trees"])
+
+    if cache is not None and "model" in cache:
+        model: XGBModel = cache["model"]
+    else:
+        model = Model.load_model(model_dir, "xgboost", task_type)
+    if not isinstance(model, XGBModel):
+        raise ValueError(f"Unexpected XGBoost model loaded from '{model_dir}' (type = {type(model)}).")
+    if cache is not None and "model" not in cache:
+        cache["model"] = model
 
     # For multi-class classification problems, number of `trees = num_classes x num_trees_per_class`
     trees: pd.DataFrame = pd.DataFrame(
         [TreeTraversal().traverse(json.loads(n)).as_dict() for n in model.get_booster().get_dump(dump_format="json")]
     )
-    return {"max_depth": trees["depth"].max(), "max_leaves": trees["num_leaves"].max(), "num_trees": trees.shape[0]}
+    if cache is not None:
+        cache["trees"] = trees
+    return _get_stats(trees)
