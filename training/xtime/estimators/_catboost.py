@@ -65,19 +65,22 @@ class CatboostEstimator(Estimator):
         self.model.save_model((save_dir / "model.bin").as_posix())
 
     def fit_model(self, dataset: Dataset, **kwargs) -> None:
-        train_split = dataset.split(DatasetSplit.TRAIN)
-        eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
-        if train_split is None or eval_split is None:
-            raise DatasetError.missing_train_eval_splits(dataset.metadata.name, train_split, eval_split)
-
         kwargs = copy.deepcopy(kwargs)
+
+        train_split = dataset.split(DatasetSplit.TRAIN)
+        if train_split is None:
+            raise DatasetError.missing_train_split(dataset.metadata.name)
+
         kwargs.update(
             {
-                "eval_set": [(eval_split.x, eval_split.y)],
                 "cat_features": dataset.metadata.categorical_feature_names(),
                 "early_stopping_rounds": 15,
                 "verbose": True,
             }
         )
+
+        eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+        if eval_split is not None:
+            kwargs["eval_set"] = [(eval_split.x, eval_split.y)]
 
         self.model.fit(train_split.x, train_split.y, **kwargs)
