@@ -92,13 +92,15 @@ class XGBoostEstimator(Estimator):
         self.model.set_params(early_stopping_rounds=kwargs.pop("early_stopping_rounds"))
 
         train_split = dataset.split(DatasetSplit.TRAIN)
-        eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
-        if train_split is None or eval_split is None:
-            raise DatasetError.missing_train_eval_splits(dataset.metadata.name, train_split, eval_split)
+        if train_split is None:
+            raise DatasetError.missing_train_split(dataset.metadata.name)
+        eval_set = [(train_split.x, train_split.y)]  # validation_0
 
+        eval_split = dataset.split(DatasetSplit.EVAL_SPLITS)
+        if eval_split is not None:
+            eval_set.append((eval_split.x, eval_split.y))  # validation_1
         kwargs.update(
-            #         validation_0                    validation_1
-            eval_set=[(train_split.x, train_split.y), (eval_split.x, eval_split.y)],
+            eval_set=eval_set,
             verbose=kwargs.get("verbose", False),
         )
         self.model.fit(train_split.x, train_split.y, **kwargs)

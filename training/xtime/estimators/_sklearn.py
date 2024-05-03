@@ -28,6 +28,8 @@ from .estimator import Estimator
 
 __all__ = ["DummyEstimator", "RandomForestEstimator"]
 
+from ..errors import DatasetError
+
 
 class ScikitLearnEstimator(Estimator):
     def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata, classifier_cls, regressor_cls) -> None:
@@ -42,7 +44,9 @@ class ScikitLearnEstimator(Estimator):
             pickle.dump(self.model, file)
 
     def fit_model(self, dataset: Dataset, **kwargs) -> None:
-        train_split = dataset.splits[DatasetSplit.TRAIN]
+        train_split = dataset.split(DatasetSplit.TRAIN)
+        if train_split is None:
+            raise DatasetError.missing_train_split(dataset.metadata.name)
         self.model.fit(train_split.x, train_split.y, **kwargs)
 
 
