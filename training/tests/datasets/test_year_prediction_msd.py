@@ -33,7 +33,7 @@ class TestProblemChurnModelling(DatasetTestCase):
 
     NAME = "year_prediction_msd"
     CLASS = YearPredictionMSDBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS)]
+    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical32", _PARAMS)]
 
     def test_all(self) -> None:
         self._test_datasets()

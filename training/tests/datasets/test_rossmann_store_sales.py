@@ -33,7 +33,11 @@ class TestRossmannStoreSales(DatasetTestCase):
 
     NAME = "rossmann_store_sales"
     CLASS = RossmannStoreSalesBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical", _PARAMS)]
+    DATASETS = [
+        DatasetTestCase.standard("default", _PARAMS),
+        DatasetTestCase.standard("numerical", _PARAMS),
+        DatasetTestCase.standard("numerical32", _PARAMS),
+    ]
 
     def test_all(self) -> None:
         self._test_datasets()

@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import functools
 
 import pandas as pd
 from sklearn.model_selection import train_test_split
@@ -30,7 +31,11 @@ class GesturePhaseSegmentationBuilder(DatasetBuilder):
 
     def __init__(self) -> None:
         super().__init__(openml=True)
-        self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self.builders.update(
+            default=self._build_default_dataset,
+            numerical=self._build_numerical_dataset,
+            numerical32=functools.partial(self._build_numerical_dataset, precision="single"),
+        )
 
     def _check_pre_requisites(self) -> None:
         DatasetPrerequisites.check_openml(self.NAME, "openml.org/d/4538")

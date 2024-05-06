@@ -33,7 +33,11 @@ class TestGesturePhaseSegmentation(DatasetTestCase):
 
     NAME = "gesture_phase_segmentation"
     CLASS = GesturePhaseSegmentationBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical", _PARAMS)]
+    DATASETS = [
+        DatasetTestCase.standard("default", _PARAMS),
+        DatasetTestCase.standard("numerical", _PARAMS),
+        DatasetTestCase.standard("numerical32", _PARAMS),
+    ]
 
     def test_all(self) -> None:
         self._test_datasets()

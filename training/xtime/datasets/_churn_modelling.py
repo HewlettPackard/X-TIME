@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
+import functools
 import typing as t
 from pathlib import Path
 
@@ -43,7 +43,11 @@ class ChurnModellingBuilder(DatasetBuilder):
 
     def __init__(self, path: t.Optional[t.Union[str, Path]] = None, **kwargs) -> None:
         super().__init__()
-        self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self.builders.update(
+            default=self._build_default_dataset,
+            numerical=self._build_numerical_dataset,
+            numerical32=functools.partial(self._build_numerical_dataset, precision="single"),
+        )
         self.path: Path = IO.get_path(path, "~/.cache/kaggle/datasets/shrutime")
         self.file_name = kwargs.get("file_name", "Churn_Modelling.csv")
 

@@ -24,6 +24,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from unittest import TestCase
 
+import numpy as np
 import pandas as pd
 from pandas import CategoricalDtype
 
@@ -333,18 +334,28 @@ class DatasetBuilder(object):
     def _build_default_dataset(self, **kwargs) -> Dataset: ...
 
     def _build_numerical_dataset(self, **kwargs) -> Dataset:
+        kwargs = kwargs.copy()
+
+        precision: str = kwargs.pop("precision", "double")
+        if precision not in {"double", "single"}:
+            raise ValueError(f"Unsupported precision type ('{precision}').")
+
         if kwargs:
-            raise ValueError(f"{self.__class__.__name__}: `numerical` dataset does not accept arguments.")
+            raise ValueError(
+                f"{self.__class__.__name__}: `numerical` dataset did not consume the following parameters: {kwargs}."
+            )
 
         dataset = self._build_default_dataset()
 
         for feature in dataset.metadata.features:
             feature.type = FeatureType.CONTINUOUS
 
-        for split in dataset.splits.values():
-            split.x = split.x.astype(float)
+        dtype = np.float64 if precision == "double" else np.float32
+        dataset.metadata.version = "numerical" if precision == "double" else "numerical32"
 
-        dataset.metadata.version = "numerical"
+        for split in dataset.splits.values():
+            split.x = split.x.astype(dtype)
+
         return dataset
 
 
@@ -494,7 +505,7 @@ class DatasetTestCase(TestCase):
 
     @staticmethod
     def standard(version: str, common_params: t.Dict) -> t.Dict:
-        if version not in ("default", "numerical"):
+        if version not in ("default", "numerical", "numerical32"):
             raise ValueError(f"Non-standard version: {version}")
         params = {
             "version": version,
@@ -503,8 +514,10 @@ class DatasetTestCase(TestCase):
         }
         if version == "default":
             params["test_cases"].append(DatasetTestCase._test_default_dataset)
-        else:
+        elif version == "numerical":
             params["test_cases"].append(DatasetTestCase._test_numerical_dataset)
+        else:
+            params["test_cases"].append(DatasetTestCase._test_numerical32_dataset)
         return params
 
     def _test_datasets(self) -> None:
@@ -606,4 +619,20 @@ class DatasetTestCase(TestCase):
                 self.assertTrue(
                     pd.api.types.is_float_dtype(split.x[col].dtype),
                     f"Not a float dtype: col={col}, dtype={split.x[col].dtype}",
+                )
+
+    @staticmethod
+    def _test_numerical32_dataset(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+        for _, split in ds.splits.items():
+            self.assertEqual(len(split.x.columns), len(ds.metadata.features))
+            for col, feature in zip(split.x.columns, ds.metadata.features):
+                self.assertEqual(col, feature.name)
+                self.assertEqual(
+                    FeatureType.CONTINUOUS,
+                    feature.type,
+                    f"{feature} is expected to be CONTINUOUS in numerical dataset.",
+                )
+                self.assertTrue(
+                    split.x[col].dtype == np.float32,
+                    f"Not a float32 dtype: col={col}, dtype={split.x[col].dtype}",
                 )
