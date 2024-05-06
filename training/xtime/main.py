@@ -23,6 +23,7 @@ from pathlib import Path
 
 import click
 import coloredlogs
+import pandas as pd
 from ray import tune
 
 from xtime.datasets import Dataset, DatasetBuilder, DatasetFactory, RegisteredDatasetFactory
@@ -267,10 +268,42 @@ def datasets() -> None: ...
 
 @datasets.command("describe", help=f"Provide a brief DATASET dataset description. {dataset_arg_help}")
 @dataset_arg
-def dataset_describe(dataset: str) -> None:
+@click.option("--verbose", "-v", is_flag=True, help="Print details about the data data frames.")
+@click.option(
+    "--format",
+    "format_",
+    type=click.Choice(["json", "yaml", "pretty"]),
+    help="Output format. Default is `json`.",
+    default="json",
+)
+def dataset_describe(dataset: str, verbose: bool, format_: str) -> None:
     try:
         ds: Dataset = Dataset.create(dataset).validate()
-        json.dump(ds.summary(), sys.stdout, indent=4)
+        summary: t.Dict = ds.summary(verbose=verbose)
+
+        if format_ == "json":
+            json.dump(summary, sys.stdout, indent=4)
+        elif format_ == "yaml":
+            import yaml
+
+            yaml.dump(summary, sys.stdout)
+        else:
+            metadata: t.Dict = summary.pop("metadata")
+            features: t.List[t.Dict] = metadata.pop("features")
+
+            print("METADATA (general)")
+            json.dump(metadata, sys.stdout, indent=4)
+            print("")
+
+            print("FEATURES (features)")
+            print(pd.DataFrame(features).to_string(index=False))
+            print("")
+
+            print("SPLITS")
+            for split_name, split_info in summary["splits"].items():
+                print(f"split: {split_name}")
+                print(pd.DataFrame(split_info).to_string(index=False))
+        print("")
     except Exception as err:
         print_err_and_exit(err)
 
