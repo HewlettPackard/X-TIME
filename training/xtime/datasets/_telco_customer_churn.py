@@ -24,7 +24,7 @@ from sklearn.preprocessing import LabelEncoder
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
-from .preprocessing import ChangeColumnsTypeToCategory, CheckColumnsOrder
+from .preprocessing import ChangeColumnsType, ChangeColumnsTypeToCategory, CheckColumnsOrder
 
 __all__ = ["TelcoCustomerChurnBuilder"]
 
@@ -128,6 +128,8 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
                 ("check_cols_order", CheckColumnsOrder([f.name for f in features], label=label)),
                 # Update col types for binary features
                 ("set_category_type", ChangeColumnsTypeToCategory(features)),
+                # Change label data type
+                ("change_label_type", ChangeColumnsType([label], dtype="int32")),
             ]
         )
         data = pipeline.fit_transform(data)

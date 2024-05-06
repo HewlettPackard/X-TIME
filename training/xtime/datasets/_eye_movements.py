@@ -77,7 +77,7 @@ class EyeMovementsBuilder(DatasetBuilder):
         assert isinstance(y, pd.Series), f"Expecting y to be of type pd.Series (type = {type(y)})."
 
         # Encode labels. Move from `category` type to int type with labels [0, 1, 2]
-        y = y.astype(int)
+        y = y.astype("int32")
 
         #
         _binary_features = ["P1stFixation", "P2stFixation", "nextWordRegress"]

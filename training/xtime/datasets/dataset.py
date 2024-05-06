@@ -148,6 +148,14 @@ class Dataset:
         if error_msg:
             raise ValueError(f"Invalid dataset specification. {error_msg}")
 
+        # Check labels have int32 data type
+        if self.metadata.task.type.classification():
+            for split_name, split_data in self.splits.items():
+                if split_data.y.dtype != np.int32:
+                    # TODO sergey: raise an exception once unit tests are added for all datasets.
+                    # raise ValueError(f"Labels in '{split_name}' split should have int32 data type.")
+                    logger.warning("Labels in '%s' split should have int32 data type.", split_name)
+
     def num_examples(self, split_names: t.Optional[t.Union[str, t.Iterable[str]]] = None) -> int:
         if not split_names:
             split_names = self.splits.keys()
