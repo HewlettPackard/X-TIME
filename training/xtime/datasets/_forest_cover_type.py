@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
+import functools
 from pathlib import Path
 
 import numpy as np
@@ -38,7 +38,11 @@ class ForestCoverTypeBuilder(DatasetBuilder):
 
     def __init__(self) -> None:
         super().__init__()
-        self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self.builders.update(
+            default=self._build_default_dataset,
+            numerical=self._build_numerical_dataset,
+            numerical32=functools.partial(self._build_numerical_dataset, precision="single"),
+        )
 
     def _build_default_dataset(self, **kwargs) -> Dataset:
         """Create `Forest Cover Type (cover_type)` train/valid/test datasets.

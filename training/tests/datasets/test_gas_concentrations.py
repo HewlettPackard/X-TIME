@@ -33,7 +33,11 @@ class TestGasConcentrations(DatasetTestCase):
 
     NAME = "gas_concentrations"
     CLASS = GasConcentrationsBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical", _PARAMS)]
+    DATASETS = [
+        DatasetTestCase.standard("default", _PARAMS),
+        DatasetTestCase.standard("numerical", _PARAMS),
+        DatasetTestCase.standard("numerical32", _PARAMS),
+    ]
 
     def test_all(self) -> None:
         self._test_datasets()

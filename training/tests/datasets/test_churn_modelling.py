@@ -33,7 +33,11 @@ class TestChurnModelling(DatasetTestCase):
 
     NAME = "churn_modelling"
     CLASS = ChurnModellingBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical", _PARAMS)]
+    DATASETS = [
+        DatasetTestCase.standard("default", _PARAMS),
+        DatasetTestCase.standard("numerical", _PARAMS),
+        DatasetTestCase.standard("numerical32", _PARAMS),
+    ]
 
     def test_all(self) -> None:
         self._test_datasets()

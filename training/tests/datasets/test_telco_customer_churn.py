@@ -33,7 +33,11 @@ class TestProblemChurnModelling(DatasetTestCase):
 
     NAME = "telco_customer_churn"
     CLASS = TelcoCustomerChurnBuilder
-    DATASETS = [DatasetTestCase.standard("default", _PARAMS), DatasetTestCase.standard("numerical", _PARAMS)]
+    DATASETS = [
+        DatasetTestCase.standard("default", _PARAMS),
+        DatasetTestCase.standard("numerical", _PARAMS),
+        DatasetTestCase.standard("numerical32", _PARAMS),
+    ]
 
     def test_all(self) -> None:
         self._test_datasets()

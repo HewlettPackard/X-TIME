@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-
 import calendar
+import functools
 from pathlib import Path
 
 import numpy as np
@@ -36,7 +36,11 @@ class RossmannStoreSalesBuilder(DatasetBuilder):
 
     def __init__(self) -> None:
         super().__init__()
-        self.builders.update(default=self._build_default_dataset, numerical=self._build_numerical_dataset)
+        self.builders.update(
+            default=self._build_default_dataset,
+            numerical=self._build_numerical_dataset,
+            numerical32=functools.partial(self._build_numerical_dataset, precision="single"),
+        )
         self._data_dir = Path("~/.cache/kaggle/datasets/rossmann_store_sales").expanduser()
         self._train_file = "train.csv.gz"
         self._store_file = "store.csv.gz"
