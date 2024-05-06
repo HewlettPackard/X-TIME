@@ -27,6 +27,7 @@ from unittest import TestCase
 import numpy as np
 import pandas as pd
 from pandas import CategoricalDtype
+from pandas.core.dtypes.common import is_categorical_dtype
 
 from xtime.errors import DatasetError
 from xtime.io import IO
@@ -178,13 +179,52 @@ class Dataset:
 
         return self
 
-    def summary(self) -> t.Dict:
-        info: t.Dict = self.metadata.to_json()
-        info["splits"] = {}
-        for name, split in self.splits.items():
-            y_shape: t.Optional[t.List[int]] = list(split.y.shape) if split.y is not None else None
-            info["splits"][name] = {"x": list(split.x.shape), "y": y_shape}
-        return info
+    def summary(self, verbose: bool = False) -> t.Dict:
+        """Return summary of the datasets.
+
+        Args:
+            verbose: If true, return detailed information about the data set splits, else, return brief summary.
+        Returns:
+            A dictionary with two fields. The `metadata` field contains json-serializable dataset metadata. The
+            `splits` field contains information about dataset splits. This will be either brief or detailed information.
+        """
+        summary = {"metadata": self.metadata.to_json(), "splits": {}}
+        if not verbose:
+            # Provide brief description about splits
+            for name, split in self.splits.items():
+                y_shape: t.Optional[t.List[int]] = list(split.y.shape) if split.y is not None else None
+                summary["splits"][name] = {"x": list(split.x.shape), "y": y_shape}
+        else:
+            # Provide detailed description about splits
+            def _cats_to_str(_feat_values: pd.Series) -> str:
+                _value_counts: pd.Series = _feat_values.value_counts().sort_index()
+                if len(_value_counts) <= 4:
+                    return str(_value_counts.to_dict())
+                _first: str = str(_value_counts[:2].to_dict())
+                _last: str = str(_value_counts[-2:].to_dict())
+                return _first[:-1] + ", ..., " + _last[1:]
+
+            for name, split in self.splits.items():
+                summary["splits"][name] = []
+                if isinstance(split.y, pd.Series):
+                    col_info = {"name": name, "type": "target", "dtype": str(split.y.dtype)}
+                    if self.metadata.task.type.classification():
+                        col_info["details"] = f"classes={_cats_to_str(split.y)}"
+                    else:
+                        col_info["details"] = f"min={split.y.min()};max={split.y.max()}"
+                    summary["splits"][name].append(col_info)
+                for feat_name, feat_dtype in zip(split.x.columns, split.x.dtypes):
+                    feat_values: pd.Series = split.x[feat_name]
+                    col_info = {"name": feat_name, "type": "feature", "dtype": str(feat_dtype)}
+                    if is_categorical_dtype(feat_dtype):
+                        col_info["details"] = f"categories={_cats_to_str(feat_values)}"
+                    else:
+                        col_info["details"] = (
+                            f"min={feat_values.min()};median={feat_values.median()};" f"max={feat_values.max()}"
+                        )
+                    summary["splits"][name].append(col_info)
+
+        return summary
 
     def save(self, directory: Path = Path.cwd()) -> None:
         """Save dataset to disk.
