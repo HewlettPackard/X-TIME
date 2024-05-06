@@ -76,7 +76,7 @@ class GesturePhaseSegmentationBuilder(DatasetBuilder):
         assert isinstance(y, pd.Series), f"Expecting y to be of type pd.Series (type = {type(y)})."
 
         # Encode labels
-        y = pd.Series(LabelEncoder().fit_transform(y), index=y.index, name=y.name)
+        y = pd.Series(LabelEncoder().fit_transform(y), index=y.index, name=y.name).astype("int32")
 
         # Remove instances with missing values
         # No need to remove instances with missing values - no such instances.

@@ -28,7 +28,7 @@ from sklearn.utils import Bunch
 from xtime.ml import ClassificationTask, Feature, FeatureType, TaskType
 
 from .dataset import Dataset, DatasetBuilder, DatasetMetadata, DatasetSplit
-from .preprocessing import ChangeColumnsTypeToCategory, CheckColumnsOrder
+from .preprocessing import ChangeColumnsType, ChangeColumnsTypeToCategory, CheckColumnsOrder
 
 __all__ = ["ForestCoverTypeBuilder"]
 
@@ -95,6 +95,8 @@ class ForestCoverTypeBuilder(DatasetBuilder):
                 ("check_cols_order", CheckColumnsOrder([f.name for f in features], label=label)),
                 # Update col types for binary features
                 ("set_category_type", ChangeColumnsTypeToCategory(features)),
+                # Change data type for the label column
+                ("change_label_type", ChangeColumnsType([label], dtype="int32")),
             ]
         )
         data = pipeline.fit_transform(data)

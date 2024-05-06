@@ -99,7 +99,10 @@ class ChurnModellingBuilder(DatasetBuilder):
                 # Drop unique columns ('RowNumber', 'CustomerId') and textual fields (second names - 'Surname')
                 ("drop_cols", DropColumns(["RowNumber", "CustomerId", "Surname"])),
                 # Convert several numerical columns to floating point format
-                ("change_cols_type", ChangeColumnsType(["CreditScore", "Age", "Tenure"], dtype=float)),
+                # Change feature data types
+                ("change_feature_types", ChangeColumnsType(["CreditScore", "Age", "Tenure"], dtype=float)),
+                # Change label data type
+                ("change_label_type", ChangeColumnsType([label], dtype="int32")),
                 # Check columns are in the right order
                 ("check_cols_order", CheckColumnsOrder([f.name for f in features], label=label)),
             ]
