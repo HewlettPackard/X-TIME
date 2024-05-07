@@ -18,6 +18,7 @@ import copy
 import logging
 import os
 import typing as t
+from dataclasses import dataclass
 from pathlib import Path
 from unittest import TestCase
 
@@ -46,6 +47,7 @@ __all__ = [
     "Estimator",
     "get_estimator_registry",
     "get_estimator",
+    "LegacySavedModelInfo",
     "Model",
     "unit_test_train_model",
     "unit_test_check_metrics",
@@ -319,18 +321,128 @@ def get_estimator(name: str) -> t.Type[Estimator]:
     return _registry.get(name)
 
 
+@dataclass
+class LegacySavedModelInfo:
+    """Information about saved model that is used to load the model.
+
+    This will be considered a legacy format once the XTIME project starts to use MLflow model logging feature.
+    """
+
+    model: str = ""
+    """catboost,lightgbm,xgboost,dummy,rf,rf_clf"""
+    task: str = ""
+    """binary_classification,multi_class_classification,regression"""
+
+    def __str__(self) -> str:
+        return f"LegacySavedModelInfo(model={self.model}, task={self.task})"
+
+    def is_valid(self) -> bool:
+        """Return true if combination of model and task can be resolved to a model file name and class type."""
+        return self.model in {"catboost", "lightgbm", "xgboost", "dummy", "rf", "rf_clf"} and self.task in {
+            "binary_classification",
+            "multi_class_classification",
+            "regression",
+        }
+
+    def file_name(self) -> str:
+        """Return model file name."""
+        model_to_file_name: t.Dict[str, str] = {
+            "catboost": "model.bin",
+            "lightgbm": "model.txt",
+            "xgboost": "model.ubj",
+            "dummy": "model.pkl",
+            "rf": "model.pkl",
+            "rf_clf": "model.pkl",
+        }
+        if self.model in model_to_file_name:
+            return model_to_file_name[self.model]
+
+        raise ValueError(f"Unsupported model type (model={self.model}).")
+
+    @staticmethod
+    def get_file_name(model: str) -> str:
+        return LegacySavedModelInfo(model=model).file_name()
+
+    @classmethod
+    def from_path(cls, path: Path) -> t.Optional["LegacySavedModelInfo"]:
+        """Determine saved model details using information from files created by xtime stages."""
+        if path.is_file():
+            path = path.parent
+
+        info = LegacySavedModelInfo()
+
+        if (path / "run_info.yaml").is_file():
+            run_info: t.Dict = IO.load_dict(path / "run_info.yaml")
+            info.model = run_info.get("context", {}).get("model", "")
+
+        if (path / "data_info.yaml").is_file():
+            data_info: t.Dict = IO.load_dict(path / "data_info.yaml")
+            info.task = data_info.get("task", {}).get("type", "")
+
+        if info.is_valid():
+            return info
+
+        logger.warning(
+            "Cannot identify model (path=%s) as legacy saved model (model='%s', task='%s').",
+            path.as_posix(),
+            info.model,
+            info.task,
+        )
+        return None
+
+
+class LegacySavedModelLoader:
+    """Class that can load ML models in legacy format.
+
+    Legacy format is the serialization format before XTIME starts to use MLflow model logging feature.
+    """
+
+    @staticmethod
+    def load_model(path: Path, legacy_saved_model_info: LegacySavedModelInfo) -> t.Any:
+        """Load a model from a given path.
+
+        Args:
+            path: Path to a directory or model file.
+            legacy_saved_model_info: Information about the model to be loaded.
+
+        Returns:
+            ML model. The actual type depends on model name and task (could be XGBClassifier, XGBRegressor,
+            CatBoostClassifier, CatBoostRegressor, lightgbm.Booster and models from scikit-learn library).
+        """
+        model_file: str = legacy_saved_model_info.file_name()
+        if not (path / model_file).is_file():
+            raise FileNotFoundError(f"No model file ('{model_file}') found in '{path}' for {legacy_saved_model_info}.")
+
+        model_name = legacy_saved_model_info.model
+        task_type = TaskType(legacy_saved_model_info.task)
+
+        if model_name == "xgboost":
+            import xgboost
+
+            model = xgboost.XGBClassifier() if task_type.classification() else xgboost.XGBRegressor()
+            model.load_model(path / model_file)
+        elif model_name == "catboost":
+            import catboost
+
+            model = catboost.CatBoostClassifier() if task_type.classification() else catboost.CatBoostRegressor()
+            model.load_model((path / model_file).as_posix())
+        elif model_name == "lightgbm":
+            import lightgbm
+
+            model = lightgbm.Booster(model_file=(path / model_file).as_posix())
+        elif model_name in {"dummy", "rf", "rf_clf"}:
+            import pickle
+
+            with open(path / model_file, "rb") as file:
+                model = pickle.load(file)
+        else:
+            raise NotImplementedError(f"Model loading ({model_name}) has not been implemented yet.")
+
+        return model
+
+
 class Model:
     """Class to load models serialized by estimators."""
-
-    _model_files: t.Dict[str, str] = {
-        "catboost": "model.bin",
-        "lightgbm": "model.txt",
-        "xgboost": "model.ubj",
-        "dummy": "model.pkl",
-        "rf": "model.pkl",
-        "rf_clf": "model.pkl",
-    }
-    """Mapping from a model name to a file name (the `rf_clf` was used in initial versions of this project)."""
 
     @staticmethod
     def get_file_name(model_name: str) -> str:
@@ -342,47 +454,32 @@ class Model:
         Returns:
             A file name for a given model.
         """
-        model_file: t.Optional[str] = Model._model_files.get(model_name, None)
-        if not model_file:
-            raise ValueError(f"Unsupported model type ('{model_name}').")
-        return model_file
+        return LegacySavedModelInfo.get_file_name(model_name)
 
     @staticmethod
-    def load_model(path: Path, model_name: str, task_type: TaskType) -> t.Any:
+    def load_model(path: Path, legacy_saved_model_info: t.Optional[LegacySavedModelInfo] = None) -> t.Any:
         """Load model stored in a given path.
 
         Args:
             path: Directory path where a model is stored (e.g., MLflow artifact path or Ray Tune trial directory).
-            model_name: Model name (xgboost, catboost, etc.).
-            task_type: Task (regression, single/multi-class classification) this model solves.
+            legacy_saved_model_info: When model is a legacy saved model, this info provides information about this
+                model. If it's None, the function will try to figure out this information from the path.
 
         Returns:
             Instance of a model. This will be an instance of a model of a respective framework (e.g.,
                 xgboost.XGBRegressor, catboost.CatBoostClassifier, etc.).
         """
-        model_file: str = Model.get_file_name(model_name)
-        if not (path / model_file).is_file():
-            raise FileNotFoundError(f"No model file ('{model_file}') found in '{path}' for '{model_name}' model.")
+        if legacy_saved_model_info is not None and not legacy_saved_model_info.is_valid():
+            raise ValueError("Provided legacy saved model info is not valid.")
 
-        if model_name == "xgboost":
-            import xgboost
+        if legacy_saved_model_info is not None:
+            return LegacySavedModelLoader.load_model(path, legacy_saved_model_info)
 
-            model = xgboost.XGBClassifier() if task_type.classification() else xgboost.XGBRegressor()
-            model.load_model(path / model_file)
-        elif model_name == "catboost":
-            import catboost
+        legacy_saved_model_info = LegacySavedModelInfo.from_path(path)
+        if legacy_saved_model_info is not None:
+            return LegacySavedModelLoader.load_model(path, legacy_saved_model_info)
 
-            model = catboost.CatBoostClassifier() if task_type.classification() else catboost.CatBoostRegressor
-            model.load_model((path / model_file).as_posix())
-        elif model_name in {"dummy", "rf", "rf_clf"}:
-            import pickle
-
-            with open(path / model_file, "rb") as file:
-                model = pickle.load(file)
-        else:
-            raise NotImplementedError(f"Model loading ({model_name}) has not been implemented yet.")
-
-        return model
+        raise ValueError(f"Cannot load model from '{path}'.")
 
 
 def unit_test_train_model(test_case: TestCase, model_name: str, model_class: t.Any, ds: Dataset) -> t.Dict:
