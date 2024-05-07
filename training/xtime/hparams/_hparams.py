@@ -263,10 +263,26 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
     # Iterate over each parameter and parse it.
     hp_dict = {}
     for idx, param in enumerate(params.split(";")):
+        # Check of this is an empty spec (e.g., `;` at the end such as "params:lr=0.3;batch=128;")
+        param = param.strip()
+        if not param:
+            continue
+        #
         try:
-            name, value = param.split("=")
+            name, value = param.split("=", maxsplit=1)
         except ValueError as err:
-            raise ValueError(f"Invalid parameter in from_list (params={params}, idx={idx}, param={param}).") from err
+            raise ValueError(
+                f"Invalid parameter in from_string (params={params}, idx={idx}, param={param}). Cannot split parameter "
+                "spec (using '=' character) into parameter name and parameter value."
+            ) from err
+
+        name = name.strip()
+        if not name.isidentifier():
+            raise ValueError(
+                f"Invalid parameter in from_string (params={params}, idx={idx}, param={param}). "
+                f"Parameter name ('{name}') is not a valid identifier."
+            )
+        #
         try:
             # Try to evaluate the value, if failed, use as is its string value. Maybe confusing, but simplifies
             # providing string values, e.g., model=xgboost instead of model='xgboost'.

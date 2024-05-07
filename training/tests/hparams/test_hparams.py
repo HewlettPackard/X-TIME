@@ -40,3 +40,17 @@ class TestUtils(TestCase):
         self.assertIsInstance(value, hp.ValueSpec)
         self.assertIs(int, value.dtype)
         self.assertEqual(6, value.default)
+
+    def test_params_protocol(self) -> None:
+        self.assertDictEqual(
+            {"n_streams": 4, "n_estimators": 1, "n_trees": 1},
+            hp.from_string("params:n_streams=4;n_estimators=1;n_trees=1"),
+        )
+        self.assertDictEqual(
+            {"n_streams": 4, "n_estimators": 1, "n_trees": 1},
+            hp.from_string("params:;n_streams=4;n_estimators=1;n_trees=1;"),
+        )
+        with self.assertRaises(ValueError) as assert_raises_context:
+            _ = hp.from_string("n_streams=4;params:n_estimators=1;n_trees=1;")
+        msg = str(assert_raises_context.exception)
+        self.assertTrue(msg.endswith("Parameter name ('params:n_estimators') is not a valid identifier."))
