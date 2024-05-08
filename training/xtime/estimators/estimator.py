@@ -119,12 +119,16 @@ class TrainCallback(Callback):
         ctx: Context,
         run_info_file: t.Optional[str] = None,
         data_info_file: t.Optional[str] = None,
+        model_info_file: t.Optional[str] = None,
+        test_info_file: t.Optional[str] = None,
     ) -> None:
         self.work_dir = Path(work_dir)
         self.hparams = encode(copy.deepcopy(hparams))
         self.context: t.Dict = encode(ctx.metadata.to_json())
         self.run_info_file = run_info_file or "run_info.yaml"
         self.data_info_file = data_info_file or "data_info.yaml"
+        self.model_info_file = model_info_file or "model_info.yaml"
+        self.test_info_file = test_info_file or "test_info.yaml"
 
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         IO.save_yaml(dataset.metadata.to_json(), (self.work_dir / self.data_info_file).as_posix())
@@ -134,6 +138,12 @@ class TrainCallback(Callback):
                 "hparams": self.hparams,
                 "context": self.context,
                 "env": {"cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES", None)},
+                "metadata": {
+                    "run": self.run_info_file,
+                    "data": self.data_info_file,
+                    "model": self.model_info_file,
+                    "test": self.test_info_file,
+                },
             },
             file_path=self.work_dir / self.run_info_file,
             raise_on_error=False,
@@ -141,9 +151,20 @@ class TrainCallback(Callback):
 
     def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         estimator.save_model(self.work_dir)
+        metadata = {
+            "model": {
+                "name": getattr(estimator, "NAME", None),
+                "class": estimator.__class__.__name__,
+                "type": dataset.metadata.task.type.value,
+                "features": [feature.to_json() for feature in dataset.metadata.features],
+            }
+        }
+        if isinstance(dataset.metadata.task, ClassificationTask):
+            metadata["model"]["num_classes"] = dataset.metadata.task.num_classes
+        IO.save_yaml(metadata, self.work_dir / self.model_info_file, raise_on_error=False)
 
     def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
-        IO.save_yaml(encode(metrics), self.work_dir / "test_info.yaml")
+        IO.save_yaml(encode(metrics), self.work_dir / self.test_info_file)
 
 
 class Estimator:
@@ -365,19 +386,29 @@ class LegacySavedModelInfo:
 
     @classmethod
     def from_path(cls, path: Path) -> t.Optional["LegacySavedModelInfo"]:
-        """Determine saved model details using information from files created by xtime stages."""
+        """Determine saved model details using information from files created by xtime stages.
+
+        Files that are read in this function are created by the TrainingCallback class.
+        """
         if path.is_file():
             path = path.parent
 
         info = LegacySavedModelInfo()
 
-        if (path / "run_info.yaml").is_file():
-            run_info: t.Dict = IO.load_dict(path / "run_info.yaml")
-            info.model = run_info.get("context", {}).get("model", "")
+        if (path / "model_info.yaml").is_file():
+            # This is a new file that is not available for past experiments.
+            model_info: t.Dict = IO.load_dict(path / "model_info.yaml")
+            info.model = model_info.get("model", {}).get("name", "")
+            info.task = model_info.get("model", {}).get("type", "")
+        else:
+            # Else, try standard run_info and data_info files.
+            if (path / "run_info.yaml").is_file():
+                run_info: t.Dict = IO.load_dict(path / "run_info.yaml")
+                info.model = run_info.get("context", {}).get("model", "")
 
-        if (path / "data_info.yaml").is_file():
-            data_info: t.Dict = IO.load_dict(path / "data_info.yaml")
-            info.task = data_info.get("task", {}).get("type", "")
+            if (path / "data_info.yaml").is_file():
+                data_info: t.Dict = IO.load_dict(path / "data_info.yaml")
+                info.task = data_info.get("task", {}).get("type", "")
 
         if info.is_valid():
             return info
@@ -442,7 +473,12 @@ class LegacySavedModelLoader:
 
 
 class Model:
-    """Class to load models serialized by estimators."""
+    """Class to load models serialized by estimators.
+
+    TODO sergey: get rid of this class, or replace it with something like TrainRun (needs to be always consistent
+        with the TrainingCallback class that actually writes the data used by this class). The TrainRun can also server
+        as a single entry point to all run metadata.
+    """
 
     @staticmethod
     def get_file_name(model_name: str) -> str:
