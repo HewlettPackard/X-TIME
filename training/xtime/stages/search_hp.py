@@ -56,7 +56,7 @@ def search_hp(
 ) -> str:
     estimator: t.Type[Estimator] = get_estimator(model)
 
-    ray.init()
+    ray.init(include_dashboard=True, dashboard_host="0.0.0.0")
     ray_tune_extensions.add_representers()
     MLflow.create_experiment()
     with mlflow.start_run(description=" ".join(sys.argv)) as active_run:
