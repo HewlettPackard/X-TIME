@@ -20,7 +20,7 @@ from pathlib import Path
 import pandas as pd
 from xgboost import XGBModel
 
-from xtime.estimators.estimator import Model
+from xtime.estimators.estimator import LegacySavedModelInfo, Model
 from xtime.ml import TaskType
 
 __all__ = ["TreeTraversal", "get_model_stats"]
@@ -102,7 +102,7 @@ def get_model_stats(
     if cache is not None and "model" in cache:
         model: XGBModel = cache["model"]
     else:
-        model = Model.load_model(model_dir, "xgboost", task_type)
+        model = Model.load_model(model_dir, LegacySavedModelInfo("xgboost", task_type.value))
     if not isinstance(model, XGBModel):
         raise ValueError(f"Unexpected XGBoost model loaded from '{model_dir}' (type = {type(model)}).")
     if cache is not None and "model" not in cache:

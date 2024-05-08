@@ -19,7 +19,7 @@ from pathlib import Path
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.tree import DecisionTreeClassifier
 
-from xtime.estimators.estimator import Model
+from xtime.estimators.estimator import LegacySavedModelInfo, Model
 from xtime.ml import TaskType
 
 __all__ = ["get_model_stats"]
@@ -35,7 +35,9 @@ def get_model_stats(model_path: Path, task_type: TaskType) -> t.Dict:
     Returns:
         Dictionary with some descriptive statistics of this model.
     """
-    model: t.Union[RandomForestClassifier, RandomForestRegressor] = Model.load_model(model_path, "rf", task_type)
+    model: t.Union[RandomForestClassifier, RandomForestRegressor] = Model.load_model(
+        model_path, LegacySavedModelInfo("rf", task_type.value)
+    )
     if not isinstance(model, (RandomForestClassifier, RandomForestRegressor)):
         raise ValueError(f"Unexpected ScikitLearn model loaded from '{model_path}' (type = {type(model)}).")
 
