@@ -24,6 +24,7 @@ from click.testing import CliRunner, Result
 
 from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
 from xtime.errors import ErrorCode
+from xtime.estimators.estimator import get_expected_available_estimators
 from xtime.main import (
     cli,
     dataset_describe,
@@ -118,4 +119,4 @@ class TestMain(TestCase):
         self.assertEqual(output_lines[0].strip(), "Available models:")
 
         available_models: t.List[str] = sorted((line[2:] for line in output_lines[1:] if line.startswith("- ")))
-        self.assertListEqual(available_models, ["catboost", "dummy", "lightgbm", "rf", "xgboost"])
+        self.assertListEqual(available_models, get_expected_available_estimators())

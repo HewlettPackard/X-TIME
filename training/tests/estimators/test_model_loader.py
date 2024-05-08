@@ -24,7 +24,6 @@ from catboost import CatBoostClassifier, CatBoostRegressor
 from lightgbm import Booster
 from sklearn.datasets import make_classification, make_regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
-from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier, XGBRegressor
 
@@ -179,6 +178,8 @@ class TestModelLoader(TestCase):
         self._test_automated_loading(LightGBMClassifierEstimator, Booster, self.regression_dataset)
 
     def test_scikit_learn_manual_loading(self) -> None:
+        from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
         self._test_manual_loading(DummyEstimator, DummyClassifier, self.classification_dataset, {})
         self._test_manual_loading(DummyEstimator, DummyRegressor, self.regression_dataset, {})
 
@@ -186,8 +187,32 @@ class TestModelLoader(TestCase):
         self._test_manual_loading(RandomForestEstimator, RandomForestRegressor, self.regression_dataset)
 
     def test_scikit_learn_automated_loading(self) -> None:
+        from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
+
         self._test_automated_loading(DummyEstimator, DummyClassifier, self.classification_dataset, {})
         self._test_automated_loading(DummyEstimator, DummyRegressor, self.regression_dataset, {})
 
         self._test_automated_loading(RandomForestEstimator, RandomForestClassifier, self.classification_dataset)
         self._test_automated_loading(RandomForestEstimator, RandomForestRegressor, self.regression_dataset)
+
+    def test_rapids_random_forest_manual_loading(self) -> None:
+        try:
+            from cuml.ensemble import RandomForestClassifier, RandomForestRegressor
+
+            from xtime.estimators._rapids import RandomForestEstimator
+
+            self._test_manual_loading(RandomForestEstimator, RandomForestClassifier, self.classification_dataset)
+            self._test_manual_loading(RandomForestEstimator, RandomForestRegressor, self.regression_dataset)
+        except ImportError:
+            return
+
+    def test_rapids_random_forest_automated_loading(self) -> None:
+        try:
+            from cuml.ensemble import RandomForestClassifier, RandomForestRegressor
+
+            from xtime.estimators._rapids import RandomForestEstimator
+
+            self._test_automated_loading(RandomForestEstimator, RandomForestClassifier, self.classification_dataset)
+            self._test_automated_loading(RandomForestEstimator, RandomForestRegressor, self.regression_dataset)
+        except ImportError:
+            return

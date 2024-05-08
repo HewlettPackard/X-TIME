@@ -19,6 +19,7 @@ from unittest import TestCase
 
 from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
 from xtime.estimators import Estimator, get_estimator_registry
+from xtime.estimators.estimator import get_expected_available_estimators
 
 
 class TestRegistry(TestCase):
@@ -30,7 +31,7 @@ class TestRegistry(TestCase):
         model_registry = get_estimator_registry()
         names = model_registry.keys()
 
-        expected = ["catboost", "dummy", "lightgbm", "rf", "xgboost"]
+        expected = get_expected_available_estimators()
         self.assertIsInstance(names, list)
         self.assertEqual(len(expected), len(names), msg=f"names={names}")
         self.assertListEqual(expected, sorted(names))
