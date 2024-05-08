@@ -52,7 +52,8 @@ detailed and, possibly, more accurate information):
 - `openml` Library required by several datasets hosted on OpenML site.
 - `datasets`: Install packages to ensure all datasets can be loaded (includes [`openml`, `timeseries`]).
 - `models`: Install packages to ensure all models can be loaded (includes [`catboost`, `xgboost`, `lightgbm`]).
-- `all`: Install all extra packages.
+- `rapids-12`: Support for GPU-accelerated ML algorithms (random forest). This is for CUDA 12.x.x and python 3.9 only.
+- `all`: Install all extra packages (except `rapids-12`).
 
 > I have the following note in one of my Jupyter notebooks (do not recall the reason for this): 
 > If on Windows OS, run the following cell. The 2nd command can fail - then go to your python directory and run it. 

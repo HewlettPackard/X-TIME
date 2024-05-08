@@ -15,6 +15,7 @@
 ###
 import abc
 import copy
+import importlib
 import logging
 import os
 import typing as t
@@ -47,6 +48,7 @@ __all__ = [
     "get_estimator_registry",
     "get_estimator",
     "Model",
+    "get_expected_available_estimators",
     "unit_test_train_model",
     "unit_test_check_metrics",
 ]
@@ -228,6 +230,14 @@ class Estimator:
         def _evaluate(x, y, name: str) -> None:
             nonlocal _num_examples
             predicted_probas = self.model.predict_proba(x, **predict_proba_kwargs)  # (n_samples, 2)
+            if isinstance(predicted_probas, pd.DataFrame):
+                # This is the case for (some?) models from RAPIDS library.
+                predicted_probas = predicted_probas.values
+            if not isinstance(predicted_probas, np.ndarray):
+                logger.warning(
+                    "Expecting 'model.predict_proba' to return np.ndarray type. Actual returned type - '%s'.",
+                    type(predicted_probas),
+                )
             predicted_labels = np.argmax(predicted_probas, axis=1)  # (n_samples,)
             metrics[f"{name}_accuracy"] = float(accuracy_score(y, predicted_labels))
             metrics[f"{name}_loss_mean"] = float(log_loss(y, predicted_probas, normalize=True))
@@ -383,6 +393,19 @@ class Model:
             raise NotImplementedError(f"Model loading ({model_name}) has not been implemented yet.")
 
         return model
+
+
+def get_expected_available_estimators() -> t.List[str]:
+    """Return list of estimators in sorted order that are expected to be available in this system."""
+    libraries = {"catboost": ["catboost"], "lightgbm": ["lightgbm"], "cuml": ["rapids-rf"], "xgboost": ["xgboost"]}
+    estimators = ["dummy", "rf"]  # These must always be available (scikit-learn - mandatory dependency).
+    for lib_name, lib_estimators in libraries.items():
+        try:
+            _ = importlib.import_module(lib_name)
+            estimators.extend(lib_estimators)
+        except ImportError:
+            ...
+    return sorted(estimators)
 
 
 def unit_test_train_model(test_case: TestCase, model_name: str, model_class: t.Any, ds: Dataset) -> t.Dict:
