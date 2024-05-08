@@ -187,6 +187,8 @@ class Estimator:
         """
         if ctx.dataset is None:
             ctx.dataset = Dataset.create(ctx.metadata.dataset)
+        else:
+            logger.info("Not loading dataset - it has already been loaded.")
         dataset: Dataset = ctx.dataset
 
         if ctx.callbacks:

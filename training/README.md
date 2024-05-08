@@ -270,7 +270,10 @@ Other variables specific to some datasets:
   more details). Usage example: `export XTIME_DISABLE_PATCH_MINIO=1`. When this patching is not disabled, the `xtime`
   looks for proxy server using the following ordered list of environment variables: `https_proxy`, `HTTPS_PROXY`, 
   `http_proxy`, `HTTP_PROXY`. The fist non-empty value will be used.
-
+- `XTIME_SEARCH_HP_PRE_LOAD_DATASET` When running hyperparameter search experiments (`search_hp`), it is possible to 
+  preload the dataset before starting the search. Ray object store is used to distributed the dataset to workers.  
+  Usage example: `export XTIME_SEARCH_HP_PRE_LOAD_DATASET=1`.
+  
 
 # GPU support
 Gradient boosting tree estimators (CatBoost, LightGBM and XGBoost) will use GPUs when `CUDA_VISIBLE_DEVICES` variable 

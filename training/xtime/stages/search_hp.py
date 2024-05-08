@@ -78,6 +78,9 @@ def search_hp(
         run_id: str = active_run.info.run_id
 
         ctx = Context(Metadata(dataset=dataset, model=model, run_type=RunType.HPO), dataset=Dataset.create(dataset))
+        if os.environ.get("XTIME_SEARCH_HP_PRE_LOAD_DATASET", 0) == "1":
+            logger.info("RayTuneDriver: pre-loading dataset (will use Ray Tune object store).")
+            ctx.dataset = Dataset.create(ctx.metadata.dataset)
 
         fit_params = fit_params or ""
         if fit_params:
