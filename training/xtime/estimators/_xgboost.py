@@ -18,7 +18,12 @@ import logging
 import typing as t
 from pathlib import Path
 
-from xgboost.sklearn import XGBClassifier, XGBModel, XGBRegressor
+try:
+    from xgboost.sklearn import XGBClassifier, XGBModel, XGBRegressor
+except ImportError:
+    from xtime.errors import EstimatorError
+
+    raise EstimatorError.library_not_installed("XGBoostEstimator", "xgboost", ["xgboost"])
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
@@ -26,6 +31,8 @@ from xtime.ml import TaskType
 
 from ..errors import DatasetError
 from .estimator import Estimator
+
+__all__ = ["XGBoostEstimator"]
 
 logger = logging.getLogger(__name__)
 

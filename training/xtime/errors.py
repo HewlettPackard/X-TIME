@@ -74,6 +74,16 @@ class EstimatorError(XTimeError):
         error._error_code = ErrorCode.ESTIMATOR_MISSING_PREREQUISITES_ERROR
         return error
 
+    @classmethod
+    def library_not_installed(cls, estimator: str, library: str, dep_groups: t.List[str]) -> "EstimatorError":
+        return EstimatorError.missing_prerequisites(
+            f"{estimator} estimator is not available because `{library}` library is not installed. "
+            f"This library is optional in XTIME and should be installed by specifying one of the following optional "
+            f"(extra) dependencies: `{dep_groups}` (select the one suitable for your system). "
+            f"Poetry example: `poetry install --extras {dep_groups[0]}`. More details are here: "
+            "https://github.com/HewlettPackard/X-TIME/tree/main/training."
+        )
+
 
 class DatasetError(XTimeError):
     def __init__(self, message: str) -> None:

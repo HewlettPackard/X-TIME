@@ -18,15 +18,14 @@ import copy
 import typing as t
 from pathlib import Path
 
+from xtime.errors import DatasetError
+
 try:
     import catboost as cb
 except ImportError:
-    from xtime.errors import DatasetError, EstimatorError
+    from xtime.errors import EstimatorError
 
-    raise EstimatorError.missing_prerequisites(
-        "CatBoost estimator is not available because `catboost` library is not installed. This library is optional in "
-        "this project and should be installed by specifying the `catboost` optional (extra) dependency."
-    )
+    raise EstimatorError.library_not_installed("CatboostEstimator", "catboost", ["catboost"])
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
@@ -34,6 +33,8 @@ from xtime.io import IO
 from xtime.ml import TaskType
 
 from .estimator import Estimator
+
+__all__ = ["CatboostEstimator"]
 
 
 class CatboostEstimator(Estimator):
