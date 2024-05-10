@@ -20,8 +20,14 @@ import typing as t
 from pathlib import Path
 
 import pandas as pd
-from cuml.ensemble import RandomForestClassifier, RandomForestRegressor
-from cuml.ensemble.randomforest_common import BaseRandomForestModel
+
+try:
+    from cuml.ensemble import RandomForestClassifier, RandomForestRegressor
+    from cuml.ensemble.randomforest_common import BaseRandomForestModel
+except ImportError:
+    from xtime.errors import EstimatorError
+
+    raise EstimatorError.library_not_installed("RandomForestEstimator", "cuml", ["rapids-12"])
 
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.errors import DatasetError

@@ -18,7 +18,12 @@ import copy
 import typing as t
 from pathlib import Path
 
-from lightgbm.sklearn import LGBMClassifier, LGBMModel, LGBMRegressor
+try:
+    from lightgbm.sklearn import LGBMClassifier, LGBMModel, LGBMRegressor
+except ImportError:
+    from xtime.errors import EstimatorError
+
+    raise EstimatorError.library_not_installed("LightGBMClassifierEstimator", "lightgbm", ["lightgbm"])
 
 from xtime.contrib.tune_ext import gpu_available
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
@@ -26,6 +31,8 @@ from xtime.ml import ClassificationTask, TaskType
 
 from ..errors import DatasetError
 from .estimator import Estimator
+
+__all__ = ["LightGBMClassifierEstimator"]
 
 
 class LightGBMClassifierEstimator(Estimator):
