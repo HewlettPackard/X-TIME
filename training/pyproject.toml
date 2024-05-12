@@ -7,12 +7,17 @@ readme = "README.md"
 packages = [{include = "xtime"}]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = ">=3.9,<3.12"      # With `^3.9` dependency resolution fails.
 llvmlite = ">0.34.0"        # Without this, in Windows OS poetry selects 0.34 that does not have pre-built packages.
 scikit-learn = "1.2.2"      # core dependency
 mlflow = "2.2.2"            # core dependency
-ray = { version = "2.3.1", extras = ["tune", "default"] }   # core dependency
-numpy = "1.23.5"            # core dependency
+ray = [                     # core dependency
+    { version = "2.3.1", extras = ["tune", "default"], python = "<3.11" },
+    { version = "2.9.0", extras = ["tune", "default"], python = ">=3.11" }
+]
+numpy = [                   # core dependency
+    { version = "1.23.5", python = "<3.12" }
+]
 pandas = "1.5.3"            # core dependency (need to fix the code to work with pandas 2.0.0)
 pydantic = "<2"             # indirect dependency (why here: https://github.com/aws/aws-sdk-pandas/issues/2379)
 pyaml = "21.10.1"           # core dependency
@@ -30,7 +35,10 @@ coloredlogs = "15.0.1"      # command line interface
 # If no `--all-extras` / `--extras` provided, the respective installed packages will be uninstalled.
 openml = { version = "0.13.1", optional = true }   # Prerequisite dependency for OpenML datasets.
 tsfresh = { version = "0.20.2", optional = true }  # Prerequisite dependency for time series data sets.
-catboost = { version = "1.1.1", optional = true }  # Gradient boosting trees - CatBoost library.
+catboost = [                                       # Gradient boosting trees - CatBoost library.
+    { version = "1.1.1", optional = true, python = "<3.11" },
+    { version = "1.2.5", optional = true, python = ">=3.11" }
+]
 lightgbm = { version = "3.3.5", optional = true }  # Gradient boosting trees - LightGBM library.
 xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - XGBoost library.
 
@@ -48,7 +56,6 @@ pylibraft-cu12 = { url = "https://pypi.nvidia.com/pylibraft-cu12/pylibraft_cu12-
 
 # cudf-cu12 = { version = "23.8.0", optional = true,  source="nvidia"}
 # cuml-cu12 = { version = "23.8.0", optional = true,  source="nvidia"}
-
 
 [tool.poetry.group.dev.dependencies]
 pyre-check = "0.9.19"          # Type checking tool (`pyre --search-path $(python -c 'import site; print(site.getsitepackages()[0])') check`)
@@ -76,12 +83,10 @@ rapids-12 = ["rmm-cu12", "cudf-cu12", "dask-cudf-cu12", "cuml-cu12", "raft-dask-
 
 all = ["openml", "tsfresh", "catboost", "lightgbm", "xgboost"]
 
-
 # [[tool.poetry.source]]
 # name = "nvidia"
 # url = "https://pypi.nvidia.com"
 # priority = "explicit"
-
 
 [tool.ruff]
 line-length = 120
@@ -89,14 +94,11 @@ indent-width = 4
 target-version = 'py39'
 extend-include = ["*.ipynb"]
 
-
 [tool.ruff.format]
 indent-style = "space"
 
-
 [tool.ruff.lint]
 extend-select = ["I"]  # I - isort
-
 
 [tool.pytest.ini_options]
 markers = [
