@@ -1,10 +1,10 @@
-name: xtime-training
+name: xtime-training-3.12
 channels:
   - conda-forge
 dependencies:
-  - python=3.9.*
+  - python=3.12.*
   - pip
-  - poetry=1.7.1
+  - poetry=1.8.3
 variables:
   # Poetry may fail without this.
   PYTHONIOENCODING: utf8
