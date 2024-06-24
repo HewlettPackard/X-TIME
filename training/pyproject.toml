@@ -1,10 +1,11 @@
 [tool.poetry]
 name = "xtime-training"
-version = "0.1.0"
+version = "0.0.0-post.92+8f0ea3e.dirty"
 description = ""
 authors = ["Hewlett Packard Labs"]
 readme = "README.md"
 packages = [{include = "xtime"}]
+include = ["xtime/_version.py"]     # https://python-poetry.org/docs/pyproject/#include-and-exclude
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.12"      # With `^3.9` dependency resolution fails.
@@ -112,6 +113,23 @@ markers = [
     "cli: marks tests as Command Line Interface (CLI) unit tests (deselect with '-m \"not cli\"')"
 ]
 
+[tool.poetry-dynamic-versioning]
+enable = true
+pattern-prefix = "training-"  # Tags should be `training-v0.1.0`, `training-v0.1.0-rc.1` etc.
+dirty = true
+ignore-untracked = true
+style = "semver"
+
+# sergey Is this really needed? When installing, the version info is available via package metadata. During development,
+# it can be infferred automaticalyl by looking at git history and project details. This can probably be useful when this
+# project is used as is (without installing it) by adjusting python paths?
+[tool.poetry-dynamic-versioning.files."xtime/_version.py"]
+persistent-substitution = true
+initial-content = """
+  # These version placeholders will be replaced later during substitution.
+  __version__ = "0.0.0"
+"""
+
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
+build-backend = "poetry_dynamic_versioning.backend"  # This is a thin wrapper around `poetry.core.masonry.api`.
