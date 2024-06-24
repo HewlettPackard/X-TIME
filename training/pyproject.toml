@@ -15,6 +15,11 @@ ray = [                     # core dependency
     { version = "2.3.1", extras = ["tune", "default"], python = "<3.11" },
     { version = "2.9.0", extras = ["tune", "default"], python = ">=3.11" }
 ]
+# Older versions of ray are not compatible with the latest versions of `setuptools`.
+# ImportError: cannot import name 'packaging' from 'pkg_resources'.
+# https://stackoverflow.com/questions/78604018/importerror-cannot-import-name-packaging-from-pkg-resources-when-trying-to
+setuptools = {version = "<70.0", python = "<3.11"}
+
 numpy = [                   # core dependency
     { version = "1.23.5", python = "<3.12" }
 ]
