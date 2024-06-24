@@ -27,6 +27,9 @@ run_context.yaml
 dist/
 .pyre/
 
+# Dynamic versioning
+training/xtime/_version.py
+
 # cycle_accurate folder
 ## autogen.sh
 cycle_accurate/src/libltdl/
