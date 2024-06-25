@@ -19,6 +19,7 @@ import typing as t
 from pathlib import Path
 
 import nox
+import tomlkit
 
 XTIME_NOX_PYTHON_VERSIONS = ["3.9", "3.10", "3.11"]
 """The list of python versions to run nox sessions with. Can be overridden by setting the environment variable."""
@@ -66,3 +67,12 @@ def unit_tests(session: nox.Session, deps: str) -> None:
 
     session.install(*install_args)
     session.run("pytest", "-v", *session.posargs)
+
+
+@nox.session()
+def test_pyproject_toml(session: nox.Session) -> None:
+    """Run various checks on pyproject.toml."""
+    pyproject = tomlkit.parse((Path(__file__).parent / "pyproject.toml").read_bytes().decode("utf-8"))
+    version = pyproject["tool"]["poetry"]["version"]
+    if version != "0.0.0":
+        raise ValueError(f"Invalid project version ({version}). Expected value is '0.0.0'.")

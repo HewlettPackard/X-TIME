@@ -1,6 +1,8 @@
 [tool.poetry]
 name = "xtime-training"
-version = "0.0.0-post.92+8f0ea3e.dirty"
+# This is a "placeholder" version - do not change. Actual version is set / determined by poetry dynamic versioning
+# plugin on the fly. Also see `xtime.__version__` variable in `xtime.__init__`.
+version = "0.0.0"
 description = ""
 authors = ["Hewlett Packard Labs"]
 readme = "README.md"
