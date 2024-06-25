@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "xtime-training"
-version = "0.0.0-post.92+8f0ea3e.dirty"
+version = "0.0.0"
 description = ""
 authors = ["Hewlett Packard Labs"]
 readme = "README.md"
