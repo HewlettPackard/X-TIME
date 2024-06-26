@@ -127,7 +127,16 @@ class IO(object):
             return json.load(stream)
 
     @staticmethod
-    def load_dict(file_path: PathLike) -> t.Dict:
+    def load_dict(file_path: PathLike, expected_keys: t.Optional[t.Iterable] = None) -> t.Dict:
+        """Load dictionary from a file.
+
+        Args:
+            file_path: Path to a file. Multiple formats are supported including yaml (*.[yaml,yml]) and json (*.json).
+            expected_keys: If not none, check that these keys are present in the dictionary. If not present, raise an
+                error.
+        Returns:
+            Python dictionary.
+        """
         file_path = to_path(file_path)
         _dict: t.Optional[t.Union] = None
         if file_path.suffix in (".yaml", ".yml"):
@@ -136,6 +145,12 @@ class IO(object):
             _dict = IO.load_json(file_path)
         if not isinstance(_dict, t.Dict):
             raise ValueError(f"File content is not a dict (file_path={file_path}, content_type={type(_dict)})")
+
+        if expected_keys is not None:
+            missing_keys = [key for key in expected_keys if key not in _dict]
+            if missing_keys:
+                raise ValueError(f"Missing dictionary keys ({missing_keys}) in file ({file_path}).")
+
         return _dict
 
     @staticmethod
