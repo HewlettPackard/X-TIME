@@ -50,20 +50,6 @@ catboost = [                                       # Gradient boosting trees - C
 lightgbm = { version = "3.3.5", optional = true }  # Gradient boosting trees - LightGBM library.
 xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - XGBoost library.
 
-# RAPIDS (CUDA 12) - not included in `all` extra dependencies, .e.g, use [all,rapids-12]
-#   todo: conflicts - latest versions need pandas 2.x
-#   todo: conflicts - mlflow 2.2.2 needs pyarrow (>=4.0.0,<12)
-# Why this instead of commented below? Answer - https://github.com/rapidsai/cuml/issues/4493
-rmm-cu12 = { url = "https://pypi.nvidia.com/rmm-cu12/rmm_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-cudf-cu12 = { url = "https://pypi.nvidia.com/cudf-cu12/cudf_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-dask-cudf-cu12 = { url = "https://pypi.nvidia.com/dask-cudf-cu12/dask_cudf_cu12-23.8.0-py3-none-any.whl", python = "3.9", optional = true}
-cuml-cu12 = { url = "https://pypi.nvidia.com/cuml-cu12/cuml_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-raft-dask-cu12 = { url = "https://pypi.nvidia.com/raft-dask-cu12/raft_dask_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-ucx-py-cu12 = { url = "https://pypi.nvidia.com/ucx-py-cu12/ucx_py_cu12-0.33.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-pylibraft-cu12 = { url = "https://pypi.nvidia.com/pylibraft-cu12/pylibraft_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", python = "3.9", optional = true}
-
-# cudf-cu12 = { version = "23.8.0", optional = true,  source="nvidia"}
-# cuml-cu12 = { version = "23.8.0", optional = true,  source="nvidia"}
 
 [tool.poetry.group.dev.dependencies]
 pyre-check = "0.9.19"          # Type checking tool (`pyre --search-path $(python -c 'import site; print(site.getsitepackages()[0])') check`)
@@ -87,14 +73,8 @@ xgboost = ["xgboost"]
 datasets = ["openml", "tsfresh"]
 models = ["catboost", "lightgbm", "xgboost"]
 
-rapids-12 = ["rmm-cu12", "cudf-cu12", "dask-cudf-cu12", "cuml-cu12", "raft-dask-cu12", "ucx-py-cu12", "pylibraft-cu12"]
-
 all = ["openml", "tsfresh", "catboost", "lightgbm", "xgboost"]
 
-# [[tool.poetry.source]]
-# name = "nvidia"
-# url = "https://pypi.nvidia.com"
-# priority = "explicit"
 
 [tool.ruff]
 line-length = 120

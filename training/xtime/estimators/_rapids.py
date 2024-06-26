@@ -27,7 +27,14 @@ try:
 except ImportError:
     from xtime.errors import EstimatorError
 
-    raise EstimatorError.library_not_installed("RandomForestEstimator", "cuml", ["rapids-12"])
+    raise EstimatorError.missing_prerequisites(
+        "CuML RandomForest{Classifier,Regressor} estimators are not available because `cuml` libraries are not "
+        "installed. Due to dependency issues, this estimator is only available for pyhon 3.9.x environments with "
+        "CUDA 12.x. Please, install version 23.8.0 of the following libraries from here (https://pypi.nvidia.com): "
+        "rmm-cu12, cudf-cu12, dask-cudf-cu12, cuml-cu12, raft-dask-cu12, ucx-py-cu12 and pylibraft-cu12. "
+        "For exact install commands, please look at 'Machine Learning models' section in the readme file: "
+        "https://github.com/HewlettPackard/X-TIME/blob/main/training/README.md#machine-learning-models"
+    )
 
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
 from xtime.errors import DatasetError

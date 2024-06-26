@@ -107,6 +107,30 @@ As of 2023.03.28, the following models are present (`python -m xtime.main models
 - xgboost
 ```
 
+## CuML random forest models
+In addition to these models, the `xtime.training` project supports random forest models from NVIDIA's 
+[cuml](https://docs.rapids.ai/api/cuml/stable/) library. Due to dependency issues, this library is not installed by
+default and is not available as an extra dependency (so it can not be installed similar other libraries such as 
+CatBoost). To enable cuml models (that have `rapids-rf` name), the following conditions must be met (this is what
+we tested this library with):
+
+- Python 3.9.x runtime.
+- NVIDIA GPU with CUDA 12.x runtime.
+
+We tested 23.8.0 version of cuml libraries that are available from NVIDIA's [PyPI](https://pypi.nvidia.com). Run the 
+following command in the `xtime.training` python environment to install these libraries:
+```shell
+pip install https://pypi.nvidia.com/rmm-cu12/rmm_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl \
+            https://pypi.nvidia.com/cudf-cu12/cudf_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl \
+            https://pypi.nvidia.com/dask-cudf-cu12/dask_cudf_cu12-23.8.0-py3-none-any.whl \
+            https://pypi.nvidia.com/cuml-cu12/cuml_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl \
+            https://pypi.nvidia.com/raft-dask-cu12/raft_dask_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl \
+            https://pypi.nvidia.com/ucx-py-cu12/ucx_py_cu12-0.33.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl \
+            https://pypi.nvidia.com/pylibraft-cu12/pylibraft_cu12-23.8.0-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl
+```
+Once done, rerun the `python -m xtime.main models list` command. You should now see the `rapids-rf` model in the list.
+
+
 # Hyperparameters
 Hyperparameters (HPs) are specified with the command line arguments `--params` option (as opposed to datasets and 
 models that are positional arguments). By default, no hyperparameters are used. This means, that ML models will use
