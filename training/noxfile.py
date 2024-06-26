@@ -37,7 +37,12 @@ def unit_tests(session: nox.Session, deps: str) -> None:
     """Run XTIME training unit tests.
 
     The `posargs` are passed through to pytest (e.g., -m datasets). Current working directory - location of the
-    `noxfile.py`.
+    `noxfile.py`. On a command line, these additional args should follow after `--`. For example:
+    ```
+    nox -s unit-3.11(deps='pinned') -- -n 8
+    ```
+    where:
+        `-n NUM`: number of parallel unit tests to run (with `pytest-xdist`)
 
     Args:
         session: Current nox session.
@@ -47,7 +52,7 @@ def unit_tests(session: nox.Session, deps: str) -> None:
             must be available externally.
     """
     # Install this project and pytest (with `pip install`).
-    install_args: t.List[str] = [".[all]", "pytest"]
+    install_args: t.List[str] = [".[all]", "pytest", "pytest-xdist"]
 
     # If pinned deps to be used, export constraints from `poetry.lock` file using `poetry`.
     if deps == "pinned":
