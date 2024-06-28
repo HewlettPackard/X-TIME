@@ -116,7 +116,11 @@ class Analysis(object):
 
         Args:
             run: MLflow run ID that must correspond to Ray Tune experiment.
-            **kwargs: Additional (optional arguments).
+            **kwargs: Additional (optional arguments):
+                - `backup_trial_dir_resolver` Optional callback function to resolve actual directories containing
+                    trial data. This is a temporary solution to handle the case when MLflow artifacts are moved to
+                    someplace else.
+                - `skip_model_stats` If true, do not compute model stats.
 
         Returns:
             List of dictionaries where each dictionary describes one ray tune trial. it will contain information about
@@ -136,12 +140,17 @@ class Analysis(object):
         task: Task = Task.from_dataset_info(IO.load_yaml(artifact_path / "dataset_info.yaml"))
         trial_dirs: t.List[Path] = [_dir for _dir in (artifact_path / "ray_tune").iterdir() if _dir.is_dir()]
 
-        if mlflow_run.data.tags["model"] == "xgboost":
-            from xtime.contrib.xgboost_ext import get_model_stats
-        elif mlflow_run.data.tags["model"] in ("rf", "rf_clf"):
-            from xtime.contrib.sklearn_ext import get_model_stats
+        if kwargs.get("skip_model_stats", False) is True:
+
+            def get_model_stats(*_args, **_kwargs) -> t.Dict:
+                return {}
         else:
-            raise ValueError(f"Unsupported model ({mlflow_run.data.tags['model']})")
+            if mlflow_run.data.tags["model"] == "xgboost":
+                from xtime.contrib.xgboost_ext import get_model_stats
+            elif mlflow_run.data.tags["model"] in ("rf", "rf_clf"):
+                from xtime.contrib.sklearn_ext import get_model_stats
+            else:
+                raise ValueError(f"Unsupported model ({mlflow_run.data.tags['model']})")
 
         for trial_dir in tqdm(
             trial_dirs, total=len(trial_dirs), desc="Hyperparameter search trials", unit="trials", leave=False
@@ -154,7 +163,8 @@ class Analysis(object):
             trial_stats = {
                 "model_file": (resolved_trial_dir / model_file).as_posix(),
                 "model_name": mlflow_run.data.tags["model"],
-                "dataset_name": mlflow_run.data.tags["problem"],
+                "dataset_name": mlflow_run.data.tags["dataset_name"],
+                "dataset_version": mlflow_run.data.tags["dataset_version"],
                 "tune_root_path": (artifact_path / "ray_tune").as_posix(),
                 "tune_trial_path": resolved_trial_dir.as_posix(),
                 "mlflow_run_id": mlflow_run_id,
@@ -267,6 +277,8 @@ class Analysis(object):
                 - params_path: Local path to
                 - model: Model name (catboost, xgboost)
         """
+        from xtime.estimators.estimator import LegacySavedModelInfo
+
         # Extract MLflow run ID from `uri`
         mlflow_run_id = mlflow_uri[10:] if mlflow_uri.startswith("mlflow:///") else mlflow_uri
         # Get MLflow run using run ID
@@ -287,13 +299,7 @@ class Analysis(object):
         best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
         # Create return object
         model = mlflow_run.data.tags["model"]
-        models = {
-            "xgboost": "model.ubj",
-            "light_gbm_clf": "model.txt",
-            "catboost": "model.bin",
-            "rf_clf": "model.pkl",
-            "rf": "model.pkl",
-        }
+        model_file_name: str = LegacySavedModelInfo(model).file_name()
         best_trial_info = {
             "mlflow_run_id": mlflow_run_id,  # MLflow run ID
             "model": model,  # Model name (xgboost, light_gbm_clf, catboost, rf_clf)
@@ -308,8 +314,8 @@ class Analysis(object):
             )
             if (Path(best_trial.logdir) / "params.json").is_file():
                 best_trial_info["params_file"] = "params.json"
-            if (Path(best_trial.logdir) / models[model]).is_file():
-                best_trial_info["model_file"] = models[model]
+            if (Path(best_trial.logdir) / model_file_name).is_file():
+                best_trial_info["model_file"] = model_file_name
         return best_trial_info
 
     @staticmethod
