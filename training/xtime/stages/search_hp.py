@@ -56,7 +56,14 @@ def search_hp(
 ) -> str:
     estimator: t.Type[Estimator] = get_estimator(model)
 
-    ray.init(include_dashboard=True, dashboard_host="0.0.0.0")
+    ray_init_params = {"include_dashboard": True, "dashboard_host": "0.0.0.0"}
+    if "XTIME_NOX_TEST" in os.environ:
+        # FIXME: When running this as part of NOX tests, the following exception is raised: "OSError: AF_UNIX path
+        #        length cannot exceed 107 bytes". Does not work for Windows (https://github.com/ray-project/ray/issues/7724)
+        #
+        ray_init_params = {"_temp_dir": "/tmp/ray"}
+    ray.init(**ray_init_params)
+
     ray_tune_extensions.add_representers()
     MLflow.create_experiment()
     with mlflow.start_run(description=" ".join(sys.argv)) as active_run:
