@@ -147,12 +147,15 @@ class MLflow(object):
         return hparams.from_string(os.environ.get("MLFLOW_TAGS", None))
 
     @staticmethod
-    def get_artifact_path(run: t.Optional[Run] = None, ensure_exists: bool = True) -> Path:
+    def get_artifact_path(
+        run: t.Optional[Run] = None, ensure_exists: bool = True, raise_if_not_exist: bool = False
+    ) -> Path:
         """Return path to artifact directory for given MLflow run.
 
         Args:
             run: MLflow run or none. If none, currently active MLflow run will be used.
             ensure_exists: If true and path does not exist, it will be created.
+            raise_if_not_exist: If true, and artifact directory does not exist, raise an error.
 
         Returns:
             Path to artifact directory (that may or may not exist depending on this run and method parameters).
@@ -166,6 +169,10 @@ class MLflow(object):
         local_dir = Path(local_file_uri_to_path(artifact_uri))
         if ensure_exists:
             local_dir.mkdir(parents=True, exist_ok=True)
+        if raise_if_not_exist and not local_dir.is_dir():
+            raise FileNotFoundError(
+                f"MLflow run artifact path ({local_dir.as_posix()}) does not exist or not directory."
+            )
         return local_dir
 
     @staticmethod
