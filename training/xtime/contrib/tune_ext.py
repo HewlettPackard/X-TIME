@@ -240,8 +240,9 @@ class Analysis(object):
             summary["best_run"] = {}
             best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
             if best_trial is not None:
-                best_params = IO.load_json((Path(best_trial.logdir) / "params.json").as_posix())
-                best_results = IO.load_json((Path(best_trial.logdir) / "result.json").as_posix())
+                trial_log_dir: t.Optional[str] = _trial_log_dir(best_trial)
+                best_params = IO.load_json((Path(trial_log_dir) / "params.json").as_posix())
+                best_results = IO.load_json((Path(trial_log_dir) / "result.json").as_posix())
                 best_results = {k: best_results[k] for k in perf_metrics if k in best_results}
                 summary["best_run"] = {"perf_metric": perf_metric, "parameters": best_params, "results": best_results}
 
@@ -306,15 +307,16 @@ class Analysis(object):
             "dataset_info_file": (artifact_path / "dataset_info.yaml").as_posix(),  # Info about dataset
         }
         if best_trial is not None:
+            trial_log_dir: t.Optional[str] = _trial_log_dir(best_trial)
             best_trial_info.update(
                 {
                     "tune_trial_id": best_trial.trial_id,  # Ray Tune Run ID
-                    "trial_path": best_trial.logdir,  # Local path to ray tune trial directory
+                    "trial_path": trial_log_dir,  # Local path to ray tune trial directory
                 }
             )
-            if (Path(best_trial.logdir) / "params.json").is_file():
+            if (Path(trial_log_dir) / "params.json").is_file():
                 best_trial_info["params_file"] = "params.json"
-            if (Path(best_trial.logdir) / model_file_name).is_file():
+            if (Path(trial_log_dir) / model_file_name).is_file():
                 best_trial_info["model_file"] = model_file_name
         return best_trial_info
 
@@ -362,20 +364,21 @@ class Analysis(object):
             for trial in trials:
                 if trial.status != Trial.TERMINATED:
                     continue
+                trial_log_dir: t.Optional[str] = _trial_log_dir(trial)
                 result = {
                     "dataset": run.data.params["problem"],
                     "model": run.data.params["model"],
-                    "trial_dir": trial.logdir,
+                    "trial_dir": trial_log_dir,
                     "mlflow_run_id": run.info.run_id,
                     "mlflow_experiment_id": run.info.experiment_id,
                     "trial_id": trial.trial_id,
                 }
                 result.update({k: trial.last_result[k] for k in metrics})
 
-                models = list(Path(trial.logdir).glob("model[.]*"))
+                models = list(Path(trial_log_dir).glob("model[.]*"))
                 if len(models) != 1:
                     raise RuntimeError(
-                        f"No models found in {trial.logdir} (experiment_id={run.info.experiment_id}, "
+                        f"No models found in {trial_log_dir} (experiment_id={run.info.experiment_id}, "
                         f"run_id={run.info.run_id}, trial_id={trial.trial_id})"
                     )
                 result["model"] = models[0].name
@@ -389,6 +392,25 @@ def _check_mode(mode: str) -> str:
     if mode not in ("min", "max"):
         raise ValueError(f"Invalid mode ({mode}). Expecting one of (`min`, `max`).")
     return mode
+
+
+def _trial_log_dir(trial: Trial) -> t.Optional[str]:
+    """Return (local?) trial directory.
+
+    Why it is here? See the implementation:
+        https://github.com/ray-project/ray/blob/ray-2.9.0/python/ray/tune/experiment/trial.py
+    At some version the `Trial.logdir` starts to raise the following error: "Use `local_path` instead of `logdir`."
+
+    Args:
+        trial: Ray Tune trial.
+    Returns:
+        Directory with outputs for this trial.
+    """
+    # TODO sergey figure out the difference between local (staging) and other paths. The local_path seems to be
+    #      available only when active session exists.
+    if hasattr(trial, "path"):
+        return trial.path
+    return trial.logdir
 
 
 RandomVarDomain = t.TypeVar("RandomVarDomain", bound=sample.Domain)

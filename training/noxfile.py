@@ -22,7 +22,7 @@ from pathlib import Path
 import nox
 import tomlkit
 
-XTIME_NOX_PYTHON_VERSIONS = ["3.9", "3.10", "3.11"]
+XTIME_NOX_PYTHON_VERSIONS = ["3.9", "3.10", "3.11", "3.12"]
 """The list of python versions to run nox sessions with. Can be overridden by setting the environment variable."""
 if "XTIME_NOX_PYTHON_VERSIONS" in os.environ:
     XTIME_NOX_PYTHON_VERSIONS = os.environ["XTIME_NOX_PYTHON_VERSIONS"].split(",")
@@ -75,7 +75,7 @@ def unit_tests(session: nox.Session, deps: str) -> None:
     session.run("pytest", "-v", *session.posargs)
 
 
-@nox.session()
+@nox.session(python=XTIME_NOX_PYTHON_VERSIONS)
 @nox.parametrize("model", ["xgboost", "catboost", "lightgbm"])
 def model_train_test(session: nox.Session, model: str) -> None:
     """Train a model and validate the output of the training stage.
@@ -124,7 +124,7 @@ def model_train_test(session: nox.Session, model: str) -> None:
     session.run("python", validate_file.as_posix(), env=env_vars)
 
 
-@nox.session()
+@nox.session(python=XTIME_NOX_PYTHON_VERSIONS)
 @nox.parametrize("model", ["xgboost", "catboost", "lightgbm"])
 def model_search_hp_test(session: nox.Session, model: str) -> None:
     """Run hyperparameter search stage and validate its output.
@@ -223,7 +223,7 @@ def _validate_search_hp_run() -> None:
     # Validate all files and directories exist
     expected_files = ["best_trial.yaml", "dataset_info.yaml", "run_inputs.yaml", "summary.yaml"]
     missing_files = [f for f in expected_files if not (artifact_path / f).is_file()]
-    assert not missing_files, f"Missing files in the run artifact path: {missing_files}."
+    assert not missing_files, f"Missing files ({missing_files}) in the run artifact path ({artifact_path})."
     assert (artifact_path / "ray_tune").is_dir(), f"Missing `ray_tune` directory in {artifact_path}."
 
     # Validate `best_trial.yaml` file.
@@ -251,7 +251,9 @@ def _validate_search_hp_run() -> None:
 
     # Validate ray tune trials using ray tune API
     trial_stats: t.List[t.Dict] = Analysis.get_trial_stats(run.info.run_id, skip_model_stats=True)
-    assert len(trial_stats) == num_search_trials, "Number of trials do not match."
+    assert (
+        len(trial_stats) == num_search_trials
+    ), f"Number of trials do not match ({len(trial_stats)} != {num_search_trials})."
 
     summary_from_api: t.Dict = Analysis.get_summary(run.info.run_id)
     assert all(k in summary_from_file for k in summary_from_api.keys()), "Summary from API does not contain all keys."
@@ -379,7 +381,7 @@ def _validate_xtime_train_run(train_dir: Path, model_name: str) -> None:
         saved_model_info.file_name()
     ]
     missing_files = [f for f in expected_files if not (train_dir / f).is_file()]
-    assert not missing_files, f"Missing files in the run artifact path: {missing_files}."
+    assert not missing_files, f"Missing files ({missing_files}) in the run artifact path ({train_dir})."
 
     _ = IO.load_dict(train_dir / "data_info.yaml", expected_keys={"features", "name", "properties", "task", "version"})
 

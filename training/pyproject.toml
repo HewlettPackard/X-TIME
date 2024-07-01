@@ -10,29 +10,47 @@ packages = [{include = "xtime"}]
 include = ["xtime/_version.py"]     # https://python-poetry.org/docs/pyproject/#include-and-exclude
 
 [tool.poetry.dependencies]
-python = ">=3.9,<3.12"      # With `^3.9` dependency resolution fails.
-llvmlite = ">0.34.0"        # Without this, in Windows OS poetry selects 0.34 that does not have pre-built packages.
-scikit-learn = "1.2.2"      # core dependency
-mlflow = "2.2.2"            # core dependency
+python = ">=3.9,<3.13"      # With `^3.9` dependency resolution fails.
+llvmlite = ">0.42.0"        # Without this, in Windows OS poetry selects 0.34 that does not have pre-built packages.
+scikit-learn = [            # core dependency
+    { version = "1.2.2", python = "<3.12" },
+    { version = "1.5.0", python = ">=3.12" }
+]
+mlflow = [                  # core dependency
+    { version = "2.2.0", python = "<3.12" },
+    { version = "2.13.0", python = ">=3.12" }
+]
 ray = [                     # core dependency
     { version = "2.3.1", extras = ["tune", "default"], python = "<3.11" },
-    { version = "2.9.0", extras = ["tune", "default"], python = ">=3.11" }
+    { version = "2.9.0", extras = ["tune", "default"], python = ">=3.11,<3.12" },
+    { url = "https://s3-us-west-2.amazonaws.com/ray-wheels/latest/ray-3.0.0.dev0-cp312-cp312-manylinux2014_x86_64.whl",  extras = ["tune", "default"], python = ">=3.12" }
 ]
 # Older versions of ray are not compatible with the latest versions of `setuptools`.
 # ImportError: cannot import name 'packaging' from 'pkg_resources'.
 # https://stackoverflow.com/questions/78604018/importerror-cannot-import-name-packaging-from-pkg-resources-when-trying-to
-setuptools = {version = "<70.0", python = "<3.11"}
+setuptools = {version = "<70.0"}
 
 numpy = [                   # core dependency
-    { version = "1.23.5", python = "<3.12" }
+    { version = "1.23.5", python = "<3.12" },
+    { version = "1.26.4", python = ">=3.12" }
 ]
-pandas = "1.5.3"            # core dependency (need to fix the code to work with pandas 2.0.0)
-pydantic = "<2"             # indirect dependency (why here: https://github.com/aws/aws-sdk-pandas/issues/2379)
-pyaml = "21.10.1"           # core dependency
-requests = "2.28.2"         # core dependency
-tinydb = "4.7.1"            # core dependency
-prettytable = "3.6.0"       # command line interface
+pandas = [                  # core dependency (need to fix the code to work with pandas 2.0.0)
+    { version = "1.5.3", python = "<3.12" },
+    { version = "2.2.2", python = ">=3.12" }
+]
+pydantic = [                # indirect dependency (why here: https://github.com/aws/aws-sdk-pandas/issues/2379)
+    { version = "<2", python = "<3.12" },
+    { version = "2.7.4", python = ">=3.12" }
+]
+pyaml = [                   # core dependency
+    { version = "21.10.1", python = "<3.12" },
+    { version = "24.4.0", python = ">=3.12" }
+]
+requests = "2.32.3"         # core dependency
+tinydb = "4.8.0"            # core dependency
+prettytable = "3.10.0"      # command line interface
 coloredlogs = "15.0.1"      # command line interface
+tqdm = ">=4,<5"
 
 # When adding/removing/changing optional dependencies:
 #   1. Update README.md file (search for `Extra dependencies`).
@@ -41,13 +59,17 @@ coloredlogs = "15.0.1"      # command line interface
 #   1. `poetry install --all-extras`  install all extra dependencies.
 #   2. `poetry install --extras xgboost`
 # If no `--all-extras` / `--extras` provided, the respective installed packages will be uninstalled.
-openml = { version = "0.13.1", optional = true }   # Prerequisite dependency for OpenML datasets.
+# openml = { version = "0.13.1", optional = true }   # Prerequisite dependency for OpenML datasets.
+openml = { version = "0.14.2", optional = true }   # Prerequisite dependency for OpenML datasets.
 tsfresh = { version = "0.20.2", optional = true }  # Prerequisite dependency for time series data sets.
 catboost = [                                       # Gradient boosting trees - CatBoost library.
     { version = "1.1.1", optional = true, python = "<3.11" },
     { version = "1.2.5", optional = true, python = ">=3.11" }
 ]
-lightgbm = { version = "3.3.5", optional = true }  # Gradient boosting trees - LightGBM library.
+lightgbm = [                                       # Gradient boosting trees - LightGBM library.
+    { version = "3.3.5", optional = true, python = "<3.12" },
+    { version = "4.3.0", optional = true, python = ">=3.12" }
+]
 xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - XGBoost library.
 
 

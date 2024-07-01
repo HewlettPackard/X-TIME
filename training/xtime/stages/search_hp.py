@@ -54,6 +54,7 @@ def search_hp(
     gpu: float = 0,
     fit_params: str = "",
 ) -> str:
+    print("[search_hp] ray_version:", ray.__version__)
     estimator: t.Type[Estimator] = get_estimator(model)
 
     ray_init_params = {"include_dashboard": True, "dashboard_host": "0.0.0.0"}
@@ -125,12 +126,16 @@ def search_hp(
             algorithm,
         )
         assert tune_config.metric is not None and tune_config.mode is not None, "Internal error (metric not specified)."
-        run_config = RunConfig(
-            name="ray_tune",
-            local_dir=artifact_path.as_posix(),
-            log_to_file=True,
-            callbacks=[RayTuneDriverToMLflowLoggerCallback(tune_config.metric, tune_config.mode)],
-        )
+        run_config_params = {
+            "name": "ray_tune",
+            "local_dir": artifact_path.as_posix(),
+            "log_to_file": True,
+            "callbacks": [RayTuneDriverToMLflowLoggerCallback(tune_config.metric, tune_config.mode)],
+        }
+        if _supports_storage_path():
+            run_config_params["storage_path"] = run_config_params.pop("local_dir")
+            run_config_params["sync_config"] = ray.train.SyncConfig(sync_artifacts=True)
+        run_config = RunConfig(**run_config_params)
 
         objective_fn = tune.with_parameters(estimator.fit, ctx=ctx)
         if gpu > 0:
@@ -206,7 +211,7 @@ def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
             logger.warning(
                 "Expected metrics not found in best trial (log_dir=%s): dataset=%s, task=%s, expected_metrics=%s, "
                 "missing_metrics=%s.",
-                best_result.log_dir,
+                _get_log_dir(best_result),
                 ctx.dataset.metadata.name,
                 ctx.dataset.metadata.task.type,
                 expected_metrics,
@@ -223,9 +228,9 @@ def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: t.Dict,
     local_path: str = ""
     trial_uri: str = ""
 
-    if best_result.log_dir is not None:
-        log_dir: Path = best_result.log_dir
-        _relative_path = Path(log_dir).relative_to(local_dir).as_posix()
+    log_dir: t.Optional[Path] = _get_log_dir(best_result)
+    if log_dir is not None:
+        _relative_path = log_dir.relative_to(local_dir).as_posix()
         local_path = log_dir.as_posix()
         trial_uri = f"mlflow:///{active_run.info.run_id}/{_relative_path}"
 
@@ -245,5 +250,42 @@ def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: t.Dict,
     )
 
 
+def _get_log_dir(result: Result) -> t.Optional[Path]:
+    if hasattr(result, "log_dir"):
+        # Prior to 2.7.0 (https://github.com/ray-project/ray/blob/ray-2.6.3/python/ray/air/result.py)
+        log_dir: t.Optional[Path] = result.log_dir
+    elif hasattr(result, "path"):
+        # 2.7.0 and above (https://github.com/ray-project/ray/blob/ray-2.7.0/python/ray/air/result.py)
+        # TODO sergey this can theoretically point to a remote FS such as S3.
+        log_dir: t.Optional[Path] = Path(result.path) if result.path is not None else None
+    else:
+        raise NotImplementedError(
+            "Do not know how to get logging dir using `ray.air.result.Result` instance. Ray version "
+            f"is {ray.__version__}. Use this URL and adjust ray version: "
+            "`https://github.com/ray-project/ray/blob/ray-2.7.0/python/ray/air/result.py`."
+        )
+    return log_dir
+
+
 def _save_summary(local_dir: Path, active_run: ActiveRun) -> None:
     IO.save_to_file(Analysis.get_summary(active_run.info.run_id), (local_dir / "summary.yaml").as_posix())
+
+
+def _supports_storage_path() -> bool:
+    """Return true if Ray's RunConfig supports `storage_path` parameter.
+
+    This is probably a temporary implementation. A more generic one should be implemented using version comparison. More
+    details here:
+        https://docs.ray.io/en/latest/train/user-guides/persistent-storage.html#setting-the-local-staging-directory
+
+    Returns:
+        True if ray version is >= 2.10
+    """
+    assert isinstance(
+        ray.__version__, str
+    ), f"Expecting ray version to be string (type={type(ray.__version__)}, version={ray.__version__})."
+    version_components = ray.__version__.split(".")
+    major, minor = int(version_components[0]), int(version_components[1])
+    if (major == 2 and minor >= 10) or major >= 3:
+        return True
+    return False
