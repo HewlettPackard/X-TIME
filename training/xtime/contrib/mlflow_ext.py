@@ -128,9 +128,17 @@ class MLflow(object):
         if client is None:
             client = MlflowClient()
 
-        from mlflow.tracking import _EXPERIMENT_NAME_ENV_VAR
+        # TODO sergey: simplify this block once MLflow version for all supported python versions is 2.5.0 or above
+        try:
+            # MLflow version < 2.5.0
+            from mlflow.tracking import _EXPERIMENT_NAME_ENV_VAR as MLFLOW_EXPERIMENT_NAME
 
-        name = os.environ.get(_EXPERIMENT_NAME_ENV_VAR, None)
+            name = os.environ.get(MLFLOW_EXPERIMENT_NAME, None)
+        except ImportError:
+            # MLflow version >= 2.5.0
+
+            name = mlflow.environment_variables.MLFLOW_EXPERIMENT_NAME.get()
+
         if name and client.get_experiment_by_name(name) is None:
             mlflow.create_experiment(name)
 

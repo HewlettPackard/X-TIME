@@ -26,6 +26,7 @@ from unittest import TestCase
 import mlflow
 import numpy as np
 import pandas as pd
+from ray.air import session as ray_session
 from sklearn.metrics import (
     accuracy_score,
     f1_score,
@@ -191,6 +192,18 @@ class Estimator:
             ctx.dataset = Dataset.create(ctx.metadata.dataset)
         else:
             logger.info("Not loading dataset - it has already been loaded.")
+            # TODO sergey Study how object store works with pandas data frames (zero-copy?). With python 3.12 where we
+            #      upgraded version of many libraries (ray, scikit-learn, lightgbm and others) something does not work,
+            #      and this seems to be related to the fact how ray makes these data frames available in its workers
+            #      given that they are originally placed into the data store. This only manifests itself when
+            #      `lightgbm` classifiers are used.
+            if ray_session._get_session() is not None and getattr(cls, "NAME", None) == "lightgbm":
+                # we are in Ray Session
+                logger.warning(
+                    "In active ray session and model is LightGBM. The dataset's deep copy will be created. This needs "
+                    "to be debugged - see the TODO comment in the source code."
+                )
+                ctx.dataset = copy.deepcopy(ctx.dataset)
         dataset: Dataset = ctx.dataset
 
         if ctx.callbacks:
@@ -254,6 +267,14 @@ class Estimator:
 
         def _evaluate(x, y, name: str) -> None:
             nonlocal _num_examples
+
+            if isinstance(y, pd.Series):
+                y = y.values
+            if not isinstance(y, np.ndarray):
+                logger.warning(
+                    "Expecting y (true labels) to be of type numpy ndarray, but actual type - '%s'.", type(y)
+                )
+
             predicted_probas = self.model.predict_proba(x, **predict_proba_kwargs)  # (n_samples, 2)
             if isinstance(predicted_probas, pd.DataFrame):
                 # This is the case for (some?) models from RAPIDS library.
