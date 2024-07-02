@@ -1,0 +1,40 @@
+# Enabled only for xtime.training subproject now.
+files: ^training/
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.5.0
+    hooks:
+      - id: ruff
+        # replaces Flake8, isort, pydocstyle, pyupgrade
+        name: Checking code with ruff (linter)
+        language: python
+        types: [file, text, python]
+        entry: ruff check
+        args: [ "--fix" ]
+      - id: ruff-format
+        # replaces Black code formatter
+        name: Run the ruff formatter
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-added-large-files
+        # Prevent giant files from being committed (default=500kB).
+      - id: check-case-conflict
+        # Check for files with names that would conflict on a case-insensitive
+        # filesystem like MacOS HFS+ or Windows FAT.
+      - id: check-executables-have-shebangs
+        # Checks that non-binary executables have a proper shebang.
+      - id: check-json
+        # Attempts to load all json files to verify syntax
+      - id: check-shebang-scripts-are-executable
+        # Checks that scripts with shebangs are executable.
+      - id: check-toml
+        # Attempts to load all TOML files to verify syntax.
+      - id: check-yaml
+        # Attempts to load all yaml files to verify syntax.
+      - id: name-tests-test
+        args: [ "--pytest-test-first" ]
+        # Verifies that test files are named correctly (ensure tests match test_.*\.py).
+      - id: no-commit-to-branch
+        # Protect specific branches from direct checkins. Both main and master are
+        # protected by default if no branch argument is set.

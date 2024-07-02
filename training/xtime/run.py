@@ -78,4 +78,5 @@ class Context:
 
     metadata: Metadata
     dataset: t.Optional[Dataset] = None
-    callbacks: t.Optional[t.List["Callback"]] = None
+    # FIXME sergey: this needs to be fixed.
+    callbacks: t.Optional[t.List["Callback"]] = None  # noqa: F821
