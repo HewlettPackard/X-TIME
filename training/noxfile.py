@@ -27,9 +27,24 @@ XTIME_NOX_PYTHON_VERSIONS = ["3.9", "3.10", "3.11", "3.12"]
 if "XTIME_NOX_PYTHON_VERSIONS" in os.environ:
     XTIME_NOX_PYTHON_VERSIONS = os.environ["XTIME_NOX_PYTHON_VERSIONS"].split(",")
 
-
 # Prevent Python from writing bytecode
 os.environ["PYTHONDONTWRITEBYTECODE"] = "1"
+
+SOURCES = ["./xtime", "./tests", "./noxfile.py"]
+"""Source paths of the project to run linters and static code analyzers."""
+
+
+@nox.session(python=False)
+def lint(session: nox.Session) -> None:
+    """Run `ruff checks` on the project.
+
+    Useful options: -v (verbose output)
+
+    Args:
+        session: Current nox session.
+    """
+    session.run("ruff", "--version", external=True)
+    session.run("ruff", "check", *SOURCES, *session.posargs, external=True)
 
 
 @nox.session(python=XTIME_NOX_PYTHON_VERSIONS, name="unit")
