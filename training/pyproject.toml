@@ -119,10 +119,11 @@ markers = [
 
 [tool.poetry-dynamic-versioning]
 enable = true
-pattern-prefix = "training-"  # Tags should be `training-v0.1.0`, `training-v0.1.0-rc.1` etc.
+pattern-prefix = "training-"  # Tags should be `training-v0.1.0`, `training-v0.1.0.rc1` etc.
 dirty = true
 ignore-untracked = true
-style = "semver"
+style = "pep440"
+
 
 # sergey Is this really needed? When installing, the version info is available via package metadata. During development,
 # it can be infferred automaticalyl by looking at git history and project details. This can probably be useful when this
