@@ -69,6 +69,9 @@ Install Maturin:
 ```sh
 pip install maturin
 ```
+```sh
+pip install -U pip
+```
 
 Build the project:
 
@@ -96,7 +99,7 @@ Example:
 
 ```python
 from sklearn.datasets import make_classification
-from sklearn.ensemble import RandomForestClassifier
+import xgboost
 
 from xtimec import XTimeModel
 
@@ -104,12 +107,13 @@ from xtimec import XTimeModel
 X, y = make_classification(n_samples=100, n_informative=5, n_classes=2)
 
 # train a model
-model = RandomForestClassifier()
+model = xgboost.XGBClassifier(max_depth=3, n_estimators=5, max_bin=256)
 model.fit(X, y)
+booster = model.get_booster()
 
 # represent the model encoded for an analog CAM
 # alternatively `from_xgboost`, `from_catboost` etc.
-xmodel = XTimeModel.from_sklearn(model)
+xmodel = xtimec.XTimeModel.from_xgboost(booster)
 
 # >>> xmodel.cam
 #   np.array([[...]])
