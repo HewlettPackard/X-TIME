@@ -13,11 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import functools
 import logging
 import typing as t
 
 __all__ = [
     "maybe_suggest_debug_level",
+    "ignore_exceptions",
     "ErrorCode",
     "XTimeError",
     "ConfigurationError",
@@ -37,6 +39,30 @@ def maybe_suggest_debug_level(logger: t.Optional[logging.Logger] = None, prefix:
 
 def exception_if_debug(error: Exception, logger: logging.Logger) -> t.Optional[Exception]:
     return error if logger.isEnabledFor(logging.DEBUG) else None
+
+
+def ignore_exceptions(default_value: t.Any = None):
+    """Function decorator that can be used to supress all exceptions raised by the decorated function.
+
+    Args:
+        default_value: The value to return when an exception is caught.
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                logging.error(
+                    f"Exception occurred in {func.__name__}: {e}. It was caught by the `ignore_exceptions` function "
+                    "decorator. This exception will be ignored."
+                )
+                return default_value
+
+        return wrapper
+
+    return decorator
 
 
 class ErrorCode:

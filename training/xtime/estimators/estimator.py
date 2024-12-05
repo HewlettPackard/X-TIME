@@ -26,12 +26,16 @@ from unittest import TestCase
 import mlflow
 import numpy as np
 import pandas as pd
+from matplotlib import pyplot as plt
 from ray.air import session as ray_session
 from sklearn.metrics import (
+    PrecisionRecallDisplay,
     accuracy_score,
+    average_precision_score,
     f1_score,
     log_loss,
     mean_squared_error,
+    precision_recall_curve,
     precision_score,
     r2_score,
     recall_score,
@@ -40,6 +44,7 @@ from sklearn.metrics import (
 
 from xtime.contrib.mlflow_ext import MLflow
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
+from xtime.errors import ignore_exceptions
 from xtime.io import IO, encode
 from xtime.ml import ClassificationTask, Task, TaskType
 from xtime.registry import ClassRegistry
@@ -265,7 +270,7 @@ class Estimator:
         ), "Invalid task type (expecting `ClassificationTask` task)."
         task: ClassificationTask = dataset.metadata.task
 
-        def _evaluate(x, y, name: str) -> None:
+        def _evaluate(x, y: t.Union[np.ndarray, pd.Series], name: str) -> None:
             nonlocal _num_examples
 
             if isinstance(y, pd.Series):
@@ -275,7 +280,8 @@ class Estimator:
                     "Expecting y (true labels) to be of type numpy ndarray, but actual type - '%s'.", type(y)
                 )
 
-            predicted_probas = self.model.predict_proba(x, **predict_proba_kwargs)  # (n_samples, 2)
+            # (n_samples, 2)
+            predicted_probas: t.Union[np.ndarray, pd.DataFrame] = self.model.predict_proba(x, **predict_proba_kwargs)
             if isinstance(predicted_probas, pd.DataFrame):
                 # This is the case for (some?) models from RAPIDS library.
                 predicted_probas = predicted_probas.values
@@ -294,6 +300,7 @@ class Estimator:
                 metrics[f"{name}_f1"] = float(f1_score(y, predicted_labels))
                 metrics[f"{name}_precision"] = float(precision_score(y, predicted_labels))
                 metrics[f"{name}_recall"] = float(recall_score(y, predicted_labels))
+                compute_and_save_precision_recall_curve(name, y, predicted_probas)
 
             _num_examples += len(y)
             metrics["dataset_loss_total"] += metrics[f"{name}_loss_total"]
@@ -603,3 +610,54 @@ def unit_test_check_metrics(test_case: TestCase, task: Task, metrics: t.Dict) ->
         test_case.assertIn(metric, metrics)
         test_case.assertIsInstance(metrics[metric], float)
         test_case.assertTrue(metrics[metric] >= 0)
+
+
+@ignore_exceptions()
+def compute_and_save_precision_recall_curve(
+    split_name: str, true_labels: np.ndarray, predicted_scores: np.ndarray
+) -> None:
+    """Compute and save (csv and png) precision-recall curve.
+
+    Args:
+        true_labels (np.ndarray): Array of true labels.
+        predicted_scores (np.ndarray): Array of predicted scores (shape - [num_examples, num_classes]).
+    """
+    # Compute precision, recall and thresholds
+    precision, recall, thresholds = precision_recall_curve(true_labels, predicted_scores[:, 1])
+
+    # Save as YAML file.
+    IO.save_yaml(
+        {"precision": precision.tolist(), "recall": recall.tolist(), "threshold": thresholds.tolist()},
+        IO.work_dir() / f"{split_name}_precision_recall.yaml",
+    )
+
+    # Save as PNG file.
+    fig, precisoion_ax = plt.subplots()
+    viz = PrecisionRecallDisplay(precision=precision, recall=recall)
+    _ = viz.plot(ax=precisoion_ax)
+
+    thresholds_ax = precisoion_ax.twinx()
+    pt_curve = thresholds_ax.scatter(recall[0:-1], thresholds, label="threhsold", c="g", s=1)
+
+    average_precision = average_precision_score(true_labels, predicted_scores[:, 1])
+    precisoion_ax.legend([viz.line_, pt_curve], [f"precision (ap={average_precision:.3})", "threshold"])
+
+    major_ticks = np.arange(0.1, 1.1, 0.1).tolist()
+    minor_ticks = np.arange(0.05, 1.05, 0.1).tolist()
+
+    precisoion_ax.set_xticks(major_ticks)
+    precisoion_ax.set_xticks(minor_ticks, minor=True)
+    precisoion_ax.set_yticks(major_ticks)
+    precisoion_ax.set_yticks(minor_ticks, minor=True)
+    precisoion_ax.set_xlim([0.00, 1.05])
+    precisoion_ax.set_ylim([0.00, 1.05])
+    precisoion_ax.grid(visible=True, which="major", linestyle="-", axis="both")
+    precisoion_ax.grid(visible=True, which="minor", linestyle="--", axis="both")
+
+    thresholds_ax.set_yticks(major_ticks)
+    thresholds_ax.set_yticks(minor_ticks, minor=True)
+    thresholds_ax.set_ylabel("Threshold", color="g")
+    thresholds_ax.set_ylim([0.00, 1.05])
+
+    plt.savefig(IO.work_dir() / f"{split_name}_precision_recall.png", bbox_inches="tight")
+    plt.close()
