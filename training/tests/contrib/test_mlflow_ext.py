@@ -13,7 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-from unittest import TestCase
+import os
+from unittest import TestCase, mock
 
 from xtime.contrib.mlflow_ext import MLflow
 
@@ -26,3 +27,12 @@ class TestMLflow(TestCase):
         self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:{run_id}"))
         self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:/{run_id}"))
         self.assertEqual(run_id, MLflow.get_run_id(f"mlflow:///{run_id}"))
+
+    @mock.patch.dict(os.environ)
+    def test_get_run_name_none(self) -> None:
+        _ = os.environ.pop("MLFLOW_RUN_NAME", None)
+        self.assertIsNone(MLflow.get_run_name())
+
+    @mock.patch.dict(os.environ, {"MLFLOW_RUN_NAME": "  run_1645 "})
+    def test_get_run_name_run_1645(self) -> None:
+        self.assertEqual("run_1645", MLflow.get_run_name())

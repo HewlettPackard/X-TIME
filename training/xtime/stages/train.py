@@ -38,7 +38,7 @@ def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
     """
     ray_tune_extensions.add_representers()
     MLflow.create_experiment()
-    with mlflow.start_run(description=" ".join(sys.argv)) as active_run:
+    with mlflow.start_run(description=" ".join(sys.argv), run_name=MLflow.get_run_name()) as active_run:
         # This MLflow run tracks model training.
         MLflow.init_run(active_run)
         IO.save_yaml(

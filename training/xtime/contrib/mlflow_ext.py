@@ -247,3 +247,14 @@ class MLflow(object):
         if not matches or matches[0] != run_id:
             logger.warning("Probably invalid MLflow URL (%s). Run ID was resolved to '%s'.", url, run_id)
         return run_id
+
+    @staticmethod
+    def get_run_name() -> t.Optional[str]:
+        """Return MLflow run name from environment variable.
+        Returns:
+            Run name (string) or None if not set.
+        """
+        run_name: t.Optional[str] = os.environ.get("MLFLOW_RUN_NAME", None)
+        if isinstance(run_name, str):
+            run_name = run_name.strip()
+        return run_name
