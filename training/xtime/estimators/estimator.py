@@ -29,9 +29,7 @@ import pandas as pd
 from matplotlib import pyplot as plt
 from ray.air import session as ray_session
 from sklearn.metrics import (
-    PrecisionRecallDisplay,
     accuracy_score,
-    average_precision_score,
     f1_score,
     log_loss,
     mean_squared_error,
@@ -634,40 +632,41 @@ def compute_and_save_precision_recall_curve(
     """
     # Compute precision, recall and thresholds
     precision, recall, thresholds = precision_recall_curve(true_labels, predicted_scores[:, 1])
+    base_file_name: str = f"{split_name}_precision_recall"
 
     # Save as YAML file.
     IO.save_yaml(
         {"precision": precision.tolist(), "recall": recall.tolist(), "threshold": thresholds.tolist()},
-        IO.work_dir() / f"{split_name}_precision_recall.yaml",
+        IO.work_dir() / f"{base_file_name}.yaml",
     )
 
     # Save as PNG file.
     fig, precisoion_ax = plt.subplots()
-    viz = PrecisionRecallDisplay(precision=precision, recall=recall)
-    _ = viz.plot(ax=precisoion_ax)
-
-    thresholds_ax = precisoion_ax.twinx()
-    pt_curve = thresholds_ax.scatter(recall[0:-1], thresholds, label="threhsold", c="g", s=1)
-
-    average_precision = average_precision_score(true_labels, predicted_scores[:, 1])
-    precisoion_ax.legend([viz.line_, pt_curve], [f"precision (ap={average_precision:.3})", "threshold"])
-
     major_ticks = np.arange(0.1, 1.1, 0.1).tolist()
     minor_ticks = np.arange(0.05, 1.05, 0.1).tolist()
 
-    precisoion_ax.set_xticks(major_ticks)
+    # In newer versions this will update axes parameters (xlabel, xlim, ylim and maybe others) that results in different
+    # output charts on different systems. To avoid correcting it, this is commented.
+    # from sklearn.metrics import PrecisionRecallDisplay
+    # viz = PrecisionRecallDisplay(precision=precision, recall=recall)
+    # _ = viz.plot(ax=precisoion_ax)
+
+    # Instead, it is done here which is ~ consistent with PrecisionRecallDisplay.plot.
+    (pr_curve,) = precisoion_ax.plot(recall, precision, drawstyle="steps-post", color="b")
+    precisoion_ax.set(xlim=[0.00, 1.05], ylim=[0.00, 1.05], xlabel="Recall", xticks=major_ticks, yticks=major_ticks)
+    precisoion_ax.set_ylabel("Precision", color="b")
     precisoion_ax.set_xticks(minor_ticks, minor=True)
-    precisoion_ax.set_yticks(major_ticks)
     precisoion_ax.set_yticks(minor_ticks, minor=True)
-    precisoion_ax.set_xlim([0.00, 1.05])
-    precisoion_ax.set_ylim([0.00, 1.05])
     precisoion_ax.grid(visible=True, which="major", linestyle="-", axis="both")
     precisoion_ax.grid(visible=True, which="minor", linestyle="--", axis="both")
 
-    thresholds_ax.set_yticks(major_ticks)
+    thresholds_ax = precisoion_ax.twinx()
+    pt_curve = thresholds_ax.scatter(recall[0:-1], thresholds, label="threhsold", c="g", s=1)
+    thresholds_ax.set(yticks=major_ticks, ylim=[0.00, 1.05])
     thresholds_ax.set_yticks(minor_ticks, minor=True)
     thresholds_ax.set_ylabel("Threshold", color="g")
-    thresholds_ax.set_ylim([0.00, 1.05])
 
-    plt.savefig(IO.work_dir() / f"{split_name}_precision_recall.png", bbox_inches="tight")
-    plt.close()
+    precisoion_ax.legend([pr_curve, pt_curve], ["precision", "threshold"])
+
+    fig.savefig(IO.work_dir() / f"{base_file_name}.png", bbox_inches="tight")
+    plt.close(fig)
