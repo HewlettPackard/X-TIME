@@ -202,13 +202,23 @@ class Estimator:
             #      and this seems to be related to the fact how ray makes these data frames available in its workers
             #      given that they are originally placed into the data store. This only manifests itself when
             #      `lightgbm` classifiers are used.
-            if ray_session._get_session() is not None and getattr(cls, "NAME", None) == "lightgbm":
-                # we are in Ray Session
-                logger.warning(
-                    "In active ray session and model is LightGBM. The dataset's deep copy will be created. This needs "
-                    "to be debugged - see the TODO comment in the source code."
-                )
-                ctx.dataset = copy.deepcopy(ctx.dataset)
+            if getattr(cls, "NAME", None) == "lightgbm":
+                if hasattr(ray_session, "_get_session"):
+                    get_session: t.Callable = getattr(ray_session, "_get_session")
+                elif hasattr(ray_session, "get_session"):
+                    get_session = getattr(ray_session, "_get_session")
+                else:
+
+                    def get_session() -> None:
+                        return None
+
+                if get_session() is not None:
+                    # we are in Ray Session
+                    logger.warning(
+                        "In active ray session and model is LightGBM. The dataset's deep copy will be created. "
+                        "This needs to be debugged - see the TODO comment in the source code."
+                    )
+                    ctx.dataset = copy.deepcopy(ctx.dataset)
         dataset: Dataset = ctx.dataset
 
         if ctx.callbacks:
