@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
+import pickle
 import sys
 import typing as t
 from pathlib import Path
@@ -29,17 +30,49 @@ from xtime.errors import DatasetError
 
 
 class TestDataset(TestCase):
+    def _check_serialized_dataset_structure(self, directory: Path, splits: t.List[str]) -> None:
+        """Check serialized dataset structure.
+
+        Args:
+            directory: Path to the directory where dataset was serialized.
+            splits: List of expected splits (e.g., ["train", "test"]).
+        """
+        self.assertTrue((directory / "metadata.yaml").exists(), "Dataset metadata yaml file does not exist.")
+        for split_name in splits:
+            self.assertTrue(
+                (directory / f"{split_name}.pickle").exists(), f"Dataset split ({split_name}) file does not exist."
+            )
+
+        pickle_files = list(directory.glob("*.pickle"))
+        self.assertEqual(len(splits), len(pickle_files), "Unexpected split files present.")
+
     @with_temp_work_dir
     def test_save_load(self) -> None:
         ds: Dataset = Dataset.create("churn_modelling:default")
         self.assertEqual(ds.metadata.name, "churn_modelling")
         self.assertEqual(ds.metadata.version, "default")
 
-        ds.save(Path.cwd())
-        loaded_ds: Dataset = Dataset.load(Path.cwd())
+        cwd: Path = Path.cwd()
+
+        ds.save(cwd)
+        self._check_serialized_dataset_structure(cwd, ["train", "test"])
+
+        loaded_ds: Dataset = Dataset.load(cwd)
 
         self.assertDictEqual(ds.metadata.to_json(), loaded_ds.metadata.to_json())
         self.assertEqual(sorted(list(ds.splits.keys())), sorted(list(loaded_ds.splits.keys())))
+
+        # Check that overwrite parameter works
+        with self.assertRaises(FileExistsError):
+            ds.save(cwd)  # Default value must be False.
+        with self.assertRaises(FileExistsError):
+            ds.save(cwd, overwrite=False)  # Explicitly instruct not to overwrite.
+
+        # Overwrite existing dataset
+        with open(cwd / "eval.pickle", "wb") as _file:
+            pickle.dump({"x": [1, 2, 3], "y": [1, 2, 3]}, _file)
+        ds.save(cwd, overwrite=True)  # This should not raise the FileExistsError exception.
+        self._check_serialized_dataset_structure(cwd, ["train", "test"])
 
         # TODO: add unit tests for features and targets
 
