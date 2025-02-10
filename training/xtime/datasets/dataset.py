@@ -226,11 +226,13 @@ class Dataset:
 
         return summary
 
-    def save(self, directory: Path = Path.cwd()) -> None:
+    def save(self, directory: Path = Path.cwd(), overwrite: bool = False) -> None:
         """Save dataset to disk.
 
         Args:
             directory: Directory where to save the dataset.
+            overwrite: If true, overwrite existing files. If true, and files (metadata.yaml and/or pickle files) exist,
+                they **all** will be removed.
         """
         import pickle
 
@@ -238,6 +240,34 @@ class Dataset:
 
         directory = directory.absolute()
         directory.mkdir(parents=True, exist_ok=True)
+
+        # Check if files already exist - in current implementation this may impact subsequent dataset loading calls.
+        metadata_file_exists: bool = (directory / "metadata.yaml").is_file()
+        pickle_files = list(directory.glob("*.pickle"))
+        if metadata_file_exists or pickle_files:
+            msg: str = f"Dataset may already be present in '{directory}'."
+            if metadata_file_exists:
+                msg += " Metadata file (metadata.yaml) has been found."
+            if pickle_files:
+                msg += f" Pickle files ({[f.name for f in pickle_files]}) have been found."
+
+            if not overwrite:
+                msg += (
+                    " Remove these files first, or call the `save` method with `overwrite=True` "
+                    "to remove these files automatically. "
+                )
+                raise FileExistsError(msg)
+
+            msg += (
+                " Since overwrite is True, I will remove existing existing file (s) since they **will** impact "
+                "the subsequent dataset loading calls."
+            )
+            logger.warning(msg)
+
+            if metadata_file_exists:
+                (directory / "metadata.yaml").unlink()
+            for pickle_file in pickle_files:
+                pickle_file.unlink()
 
         def _save_split(_ds: DatasetSplit, _split_name: str) -> None:
             _file_path = directory / f"{_split_name}.pickle"
