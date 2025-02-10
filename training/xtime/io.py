@@ -165,7 +165,6 @@ class IO(object):
                 data,
                 _object_to_debug_str(data),
             )
-            logger.debug("", _object_to_debug_str(data))
             if raise_on_error:
                 raise
 
