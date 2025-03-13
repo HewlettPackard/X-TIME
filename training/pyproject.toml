@@ -75,7 +75,7 @@ xgboost = { version = "2.0.3", optional = true }   # Gradient boosting trees - X
 
 [tool.poetry.group.dev.dependencies]
 pyre-check = "0.9.22"          # Type checking tool (`pyre --search-path $(python -c 'import site; print(site.getsitepackages()[0])') check`)
-ruff = "0.5.0"                 # Replace black, isort, flake with `ruff check [--fix]` and `ruff format`
+ruff = "0.9.10"                # Replace black, isort, flake with `ruff check [--fix]` and `ruff format`
 pytest = "8.2.2"               # Running unit tests (`pytest ./tests` instead of `python -m unittest`)
 pytest-xdist = "3.6.1"         # Parallel `pytest` (`python -m pytest -n auto ./tests`)
 
