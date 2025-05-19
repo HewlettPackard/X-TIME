@@ -304,7 +304,7 @@ class Estimator:
             metrics[f"{name}_loss_total"] = float(metrics["train_loss_mean"] * len(y))
 
             if task.num_classes == 2:
-                metrics[f"{name}_auc"] = float(roc_auc_score(y, predicted_probas[:, 1]))  # clas-1 probabilities
+                metrics[f"{name}_auc"] = float(roc_auc_score(y, predicted_probas[:, 1]))  # class-1 probabilities
                 metrics[f"{name}_f1"] = float(f1_score(y, predicted_labels))
                 metrics[f"{name}_precision"] = float(precision_score(y, predicted_labels))
                 metrics[f"{name}_recall"] = float(recall_score(y, predicted_labels))
@@ -641,7 +641,7 @@ def compute_and_save_precision_recall_curve(
     )
 
     # Save as PNG file.
-    fig, precisoion_ax = plt.subplots()
+    fig, precision_ax = plt.subplots()
     major_ticks = np.arange(0.1, 1.1, 0.1).tolist()
     minor_ticks = np.arange(0.05, 1.05, 0.1).tolist()
 
@@ -649,24 +649,24 @@ def compute_and_save_precision_recall_curve(
     # output charts on different systems. To avoid correcting it, this is commented.
     # from sklearn.metrics import PrecisionRecallDisplay
     # viz = PrecisionRecallDisplay(precision=precision, recall=recall)
-    # _ = viz.plot(ax=precisoion_ax)
+    # _ = viz.plot(ax=precision_ax)
 
     # Instead, it is done here which is ~ consistent with PrecisionRecallDisplay.plot.
-    (pr_curve,) = precisoion_ax.plot(recall, precision, drawstyle="steps-post", color="b")
-    precisoion_ax.set(xlim=[0.00, 1.05], ylim=[0.00, 1.05], xlabel="Recall", xticks=major_ticks, yticks=major_ticks)
-    precisoion_ax.set_ylabel("Precision", color="b")
-    precisoion_ax.set_xticks(minor_ticks, minor=True)
-    precisoion_ax.set_yticks(minor_ticks, minor=True)
-    precisoion_ax.grid(visible=True, which="major", linestyle="-", axis="both")
-    precisoion_ax.grid(visible=True, which="minor", linestyle="--", axis="both")
+    (pr_curve,) = precision_ax.plot(recall, precision, drawstyle="steps-post", color="b")
+    precision_ax.set(xlim=[0.00, 1.05], ylim=[0.00, 1.05], xlabel="Recall", xticks=major_ticks, yticks=major_ticks)
+    precision_ax.set_ylabel("Precision", color="b")
+    precision_ax.set_xticks(minor_ticks, minor=True)
+    precision_ax.set_yticks(minor_ticks, minor=True)
+    precision_ax.grid(visible=True, which="major", linestyle="-", axis="both")
+    precision_ax.grid(visible=True, which="minor", linestyle="--", axis="both")
 
-    thresholds_ax = precisoion_ax.twinx()
+    thresholds_ax = precision_ax.twinx()
     pt_curve = thresholds_ax.scatter(recall[0:-1], thresholds, label="threhsold", c="g", s=1)
     thresholds_ax.set(yticks=major_ticks, ylim=[0.00, 1.05])
     thresholds_ax.set_yticks(minor_ticks, minor=True)
     thresholds_ax.set_ylabel("Threshold", color="g")
 
-    precisoion_ax.legend([pr_curve, pt_curve], ["precision", "threshold"])
+    precision_ax.legend([pr_curve, pt_curve], ["precision", "threshold"])
 
     fig.savefig(IO.work_dir() / f"{base_file_name}.png", bbox_inches="tight")
     plt.close(fig)

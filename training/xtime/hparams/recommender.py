@@ -102,7 +102,7 @@ class DefaultRecommender(object):
             >>> q = Query()
             ... _ = self.recommend(q.tags.model == 'lightgbm' and q.tags.tasks.any([TaskType.BINARY_CLASSIFICATION]))
         Returns:
-            Lsit of hyperparameter specifications.
+            List of hyperparameter specifications.
         """
         matches: t.List[t.Dict] = self._db.search(query)
         return [match["params"] for match in matches]
