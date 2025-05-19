@@ -74,7 +74,7 @@ class TelcoCustomerChurnBuilder(DatasetBuilder):
         # This field has type int: convert to float
         data["tenure"] = data["tenure"].astype(float)
 
-        # This field is object, convert to floating point numbers and remove nans
+        # This field is object, convert to floating point numbers and remove NaNs
         data["TotalCharges"] = pd.to_numeric(data["TotalCharges"], errors="coerce")
         data.dropna(axis=0, how="any", inplace=True)
 

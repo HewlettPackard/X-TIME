@@ -42,7 +42,7 @@ def exception_if_debug(error: Exception, logger: logging.Logger) -> t.Optional[E
 
 
 def ignore_exceptions(default_value: t.Any = None):
-    """Function decorator that can be used to supress all exceptions raised by the decorated function.
+    """Function decorator that can be used to suppress all exceptions raised by the decorated function.
 
     Args:
         default_value: The value to return when an exception is caught.

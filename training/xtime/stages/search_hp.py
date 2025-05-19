@@ -116,7 +116,7 @@ def search_hp(
         # there maybe duplicate parameters in the `search_alg` instance that will not be set (e.g.,
         # BasicVariantGenerator's max_concurrent parameter).
         tune_config = _init_search_algorithm(
-            # The `max_concurrent_trials` can be overriden in `_init_search_algorithm`
+            # The `max_concurrent_trials` can be overridden in `_init_search_algorithm`
             TuneConfig(
                 metric=METRICS.get_primary_metric(ctx.dataset.metadata.task),
                 mode="min",
