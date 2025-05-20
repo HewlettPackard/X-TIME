@@ -16,6 +16,7 @@
 
 import copy
 import json
+import logging
 import os
 import typing as t
 from pathlib import Path
@@ -41,8 +42,10 @@ __all__ = [
     "from_file",
 ]
 
+logger = logging.getLogger(__name__)
 
-HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict]]]
+
+HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict, None]]]
 """Specification options for hyperparameters (HP).
 
     - dict: Ready-to-use dictionary of HPs mapping HP names to values. 
@@ -151,10 +154,8 @@ def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
         if source.startswith("auto:"):
             hp_dict = from_auto(source)
         elif source.startswith("mlflow:///"):
-            # Retrieve hyperparameters from an MLflow run.
             hp_dict = from_mlflow(source)
         elif source.startswith("file:") or os.path.isfile(source):
-            # Retrieve hyperparameters from a file.
             hp_dict = from_file(source)
         else:
             # Try to parse string that contains hyperparameters.
@@ -253,21 +254,18 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
     if not params:
         return {}
 
-    # These imports may be required by the `eval` call below.
-    import math  # noqa # pylint: disable=unused-import
-
-    from ray import tune  # noqa # pylint: disable=unused-import
-
-    from xtime.hparams import ValueSpec  # noqa # pylint: disable=unused-import
-
     # Iterate over each parameter and parse it.
     hp_dict = {}
+    idx: int
+    param: str
     for idx, param in enumerate(params.split(";")):
         # Check of this is an empty spec (e.g., `;` at the end such as "params:lr=0.3;batch=128;")
         param = param.strip()
         if not param:
             continue
         #
+        name: str
+        value: str
         try:
             name, value = param.split("=", maxsplit=1)
         except ValueError as err:
@@ -282,13 +280,8 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
                 f"Invalid parameter in from_string (params={params}, idx={idx}, param={param}). "
                 f"Parameter name ('{name}') is not a valid identifier."
             )
-        #
-        try:
-            # Try to evaluate the value, if failed, use as is its string value. Maybe confusing, but simplifies
-            # providing string values, e.g., model=xgboost instead of model='xgboost'.
-            hp_dict[name.strip()] = eval(value)
-        except NameError:
-            hp_dict[name.strip()] = value
+        hp_dict[name] = _try_eval_str_value(value)
+
     return hp_dict
 
 
@@ -360,8 +353,26 @@ def from_file(url: PathLike) -> t.Dict:
     Returns:
         Python dictionary.
     """
+    if isinstance(url, str):
+        url = _str_content(url, "file:")
+
     hp_dict: t.Dict = IO.load_dict(url)
     assert isinstance(hp_dict, dict), f"IO.load_dict did not return dictionary (type={type(hp_dict)})."
+
+    # TODO sergey: Need to agree on rules of parsing and overall structure of hparams dict.
+    # For now, assumption is the following: the hparams dict is a flat dictionary of hyperparameters where string values
+    # may actually contain some Python code that needs to be evaluated (e.g., ValueSpec struct). This can be fixed
+    # (serialization format) later.
+    for key in hp_dict.keys():
+        if isinstance(hp_dict[key], str):
+            hp_dict[key] = _try_eval_str_value(hp_dict[key])
+            if not isinstance(hp_dict[key], str):
+                logging.warning(
+                    "String hyperparameter (name=%s, url=%s) was evaluated to a non-string value. This is not a very "
+                    "well-tested feature and may not work as expected. Please, use it with caution.",
+                    key,
+                    url,
+                )
     return hp_dict
 
 
@@ -371,3 +382,28 @@ def _str_content(str_val: t.Optional[str], scheme: str) -> str:
     if str_val.startswith(scheme):
         str_val = str_val[len(scheme) :]
     return str_val
+
+
+def _try_eval_str_value(value: str) -> t.Any:
+    """Try evaluate string value.
+
+    Args:
+        value: String value to evaluate.
+    Returns:
+        Evaluation result or original value if evaluation failed.
+    """
+    # These imports may be required by the `eval` call below.
+    import math  # noqa # pylint: disable=unused-import
+
+    from ray import tune  # noqa # pylint: disable=unused-import
+
+    from xtime.hparams import ValueSpec  # noqa # pylint: disable=unused-import
+
+    try:
+        # Try to evaluate the value, if failed, use as is its string value. Maybe confusing, but simplifies
+        # providing string values, e.g., model=xgboost instead of model='xgboost'.
+        return eval(value)
+    except NameError:
+        ...
+
+    return value
