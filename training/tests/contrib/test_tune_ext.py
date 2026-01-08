@@ -157,7 +157,10 @@ class TestYamlRepresenters(TestCase):
             return
 
         if isinstance(sampler, sample.LogUniform):
-            self.assertEqual(base, sampler.base)
+            if hasattr(sampler, "base"):
+                # Looks like the `base` argument was deprecated and is not available starting
+                # some Ray version.
+                self.assertEqual(base, sampler.base)
             return
 
         if isinstance(sampler, sample.Normal):

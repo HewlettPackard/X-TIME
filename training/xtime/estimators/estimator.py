@@ -204,7 +204,7 @@ class Estimator:
                 if hasattr(ray_session, "_get_session"):
                     get_session: t.Callable = getattr(ray_session, "_get_session")
                 elif hasattr(ray_session, "get_session"):
-                    get_session = getattr(ray_session, "_get_session")
+                    get_session = getattr(ray_session, "get_session")
                 else:
 
                     def get_session() -> None:

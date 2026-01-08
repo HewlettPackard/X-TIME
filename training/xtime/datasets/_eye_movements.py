@@ -68,7 +68,9 @@ class EyeMovementsBuilder(DatasetBuilder):
 
         # Fetch dataset and its description from OpenML. Will be cached in ${HOME}/.openml
         data: OpenMLDataset = get_openml_dataset(
-            dataset_id="eye_movements", version=1, error_if_multiple=True, download_data=True
+            # 1044
+            # "eye_movements"
+            dataset_id=1044, version=1, error_if_multiple=True, download_data=True
         )
 
         # Load from local cache (x - pandas data frame, y - pandas series)

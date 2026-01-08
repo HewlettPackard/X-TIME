@@ -63,8 +63,12 @@ class GasConcentrationsBuilder(DatasetBuilder):
         test_size: float = 0.2
 
         # Fetch dataset and its description from OpenML. Will be cached in ${HOME}/.openml
+        # TODO sergey: 2026.01.07 replaced gas-drift-different-concentrations with 1477. Investigate why it was needed.
+        # https://www.openml.org/search?type=data&status=active&id=1477
         data: OpenMLDataset = get_openml_dataset(
-            dataset_id="gas-drift-different-concentrations", version=1, error_if_multiple=True, download_data=True
+            # 1477
+            # "gas-drift-different-concentrations"
+            dataset_id=1477, version=1, error_if_multiple=True, download_data=True
         )
 
         # Load from local cache

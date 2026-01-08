@@ -489,7 +489,10 @@ class YamlEncoder:
             rv, (sample.Integer, sample.Float)
         ), f"Only numerical variables can have loguniform and normal samplers (var={rv}, sampler={sampler}, q={q})."
         if sampler_t == "loguniform":
-            return _quantized(rv.loguniform(sampler["base"]))
+            if "base" in sampler:
+                return _quantized(rv.loguniform(sampler["base"]))
+            else:
+                return _quantized(rv.loguniform())
         if sampler_t == "quantized":
             return YamlEncoder._with_sampler(rv, sampler["sampler"], sampler["q"])
 
@@ -526,7 +529,8 @@ class YamlEncoder:
             raise ValueError(f"Unsupported sampler: {sampler}.")
 
         if isinstance(sampler, sample.LogUniform):
-            sdict.update(base=sampler.base)
+            if hasattr(sampler, "base"):
+                sdict.update(base=sampler.base)
         elif isinstance(sampler, sample.Normal):
             sdict.update(mean=sampler.mean, sd=sampler.sd)
         elif isinstance(sampler, sample.Quantized):
