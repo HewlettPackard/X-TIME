@@ -15,7 +15,6 @@
 ###
 
 import copy
-import typing as t
 from dataclasses import dataclass, field
 from enum import Enum
 
@@ -61,9 +60,9 @@ class Metadata:
     dataset: str
     model: str
     run_type: RunType
-    fit_params: t.Dict = field(default_factory=dict)
+    fit_params: dict = field(default_factory=dict)
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         return {
             "dataset": self.dataset,
             "model": self.model,
@@ -77,6 +76,6 @@ class Context:
     """Context for a run."""
 
     metadata: Metadata
-    dataset: t.Optional[Dataset] = None
+    dataset: Dataset | None = None
     # FIXME sergey: this needs to be fixed.
-    callbacks: t.Optional[t.List["Callback"]] = None  # noqa: F821
+    callbacks: list["Callback"] | None = None  # noqa: F821

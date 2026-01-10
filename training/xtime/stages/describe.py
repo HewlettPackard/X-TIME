@@ -14,21 +14,19 @@
 # limitations under the License.
 ###
 
-import typing as t
-
 import pandas as pd
 
 from xtime.contrib.tune_ext import Analysis
 from xtime.io import IO
 
 
-def describe(report_type: str, run: t.Optional[str] = None, file: t.Optional[str] = None) -> None:
+def describe(report_type: str, run: str | None = None, file: str | None = None) -> None:
     """Describe experiment with `REPORT_TYPE` report stored as MLflow `RUN` run, optionally save to `OUTPUT` file."""
     if report_type in ("summary", "best_trial") and run is None:
         print("When report type is `summary` or `best_trial`, MLflow run ID must be provided (--run=RUN_ID).")
         exit(1)
 
-    summary: t.Optional[t.Union[t.Dict, pd.DataFrame]] = None
+    summary: dict | pd.DataFrame | None = None
     if report_type == "summary":
         assert run is not None, "The `run` can't be none here."
         summary = Analysis.get_summary(run)

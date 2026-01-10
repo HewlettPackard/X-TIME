@@ -13,18 +13,18 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-import typing as t
+from typing import TypeVar
 from unittest import TestCase
 
 from xtime.hparams import get_hparams
 from xtime.ml import Task
 
-TaskLike = t.TypeVar("TaskLike", bound=Task)
+TaskLike = TypeVar("TaskLike", bound=Task)
 
 
 class TestRecommender(TestCase):
     def test_default_lightgbm(self):
-        params: t.Dict = get_hparams("auto:default:model=lightgbm;task=multi_class_classification")
+        params: dict = get_hparams("auto:default:model=lightgbm;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,
@@ -40,22 +40,22 @@ class TestRecommender(TestCase):
         )
 
     def test_default_dummy_classifier(self):
-        params: t.Dict = get_hparams("auto:default:model=dummy;task=multi_class_classification")
+        params: dict = get_hparams("auto:default:model=dummy;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"strategy": "prior", "random_state": 1})
 
     def test_default_dummy_regressor(self):
-        params: t.Dict = get_hparams("auto:default:model=dummy;task=regression")
+        params: dict = get_hparams("auto:default:model=dummy;task=regression")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"strategy": "mean"})
 
     def test_default_rf(self):
-        params: t.Dict = get_hparams("auto:default:model=rf;task=multi_class_classification")
+        params: dict = get_hparams("auto:default:model=rf;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(params, {"n_estimators": 100, "max_depth": 6, "random_state": 1})
 
     def test_default_catboost(self):
-        params: t.Dict = get_hparams("auto:default:model=catboost;task=multi_class_classification")
+        params: dict = get_hparams("auto:default:model=catboost;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,
@@ -71,7 +71,7 @@ class TestRecommender(TestCase):
         )
 
     def test_default_xgboost(self):
-        params: t.Dict = get_hparams("auto:default:model=xgboost;task=multi_class_classification")
+        params: dict = get_hparams("auto:default:model=xgboost;task=multi_class_classification")
         self.assertIsInstance(params, dict)
         self.assertDictEqual(
             params,

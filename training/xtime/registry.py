@@ -17,8 +17,8 @@
 import importlib
 import inspect
 import logging
-import typing as t
 from pathlib import Path
+from typing import Any
 
 from xtime.errors import XTimeError, maybe_suggest_debug_level
 
@@ -50,7 +50,7 @@ class ClassRegistry(object):
         self._path = path.resolve()
         self._module = module
         self._initialized = False
-        self._registry: t.Dict[str, t.Type] = {}
+        self._registry: dict[str, type] = {}
 
     def contains(self, name: str) -> bool:
         """Check if a class with the given name is registered in the registry."""
@@ -62,7 +62,7 @@ class ClassRegistry(object):
         self._maybe_init()
         return self._registry.get(name)
 
-    def keys(self) -> t.List[str]:
+    def keys(self) -> list[str]:
         self._maybe_init()
         return list(self._registry.keys())
 
@@ -128,7 +128,7 @@ class ClassRegistry(object):
 
         self._initialized = True
 
-    def _register(self, name: str, registrable: t.Any, module) -> None:
+    def _register(self, name: str, registrable: Any, module) -> None:
         if name in self._registry:
             raise ValueError(
                 f"Object with name ({name}) from module {module} already exists in registry ({self._registry[name]}). "

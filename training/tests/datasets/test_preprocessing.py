@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-import typing as t
 from functools import partial
 from unittest import TestCase
 
@@ -78,13 +77,13 @@ class TestTimeSeriesEncoderV1(TestCase):
     NUM_FEATURES = 19
 
     def test_features(self) -> None:
-        features: t.List[str] = TimeSeriesEncoderV1().features()
+        features: list[str] = TimeSeriesEncoderV1().features()
         self.assertIsInstance(features, list)
         self.assertEqual(TestTimeSeriesEncoderV1.NUM_FEATURES, len(features))
         for feature in features:
             self.assertIsInstance(feature, str)
 
-    def _check_features(self, features: t.Dict[str, t.Union[float, int]], num_ts: int = 1) -> None:
+    def _check_features(self, features: dict[str, float | int], num_ts: int = 1) -> None:
         self.assertIsInstance(features, dict)
         self.assertEqual(TestTimeSeriesEncoderV1.NUM_FEATURES * num_ts, len(features))
         for name, value in features.items():
@@ -103,17 +102,17 @@ class TestTimeSeriesEncoderV1(TestCase):
     def test_encode_many(self) -> None:
         encoder = TimeSeriesEncoderV1()
 
-        feature_list: t.List[t.Dict] = encoder.encode_many(np.random.randn(10, 100))
+        feature_list: list[dict] = encoder.encode_many(np.random.randn(10, 100))
         self.assertIsInstance(feature_list, list)
         for features in feature_list:
             self._check_features(features)
 
-        feature_list: t.List[t.Dict] = encoder.encode_many(np.random.randn(10, 100, 1))
+        feature_list: list[dict] = encoder.encode_many(np.random.randn(10, 100, 1))
         self.assertIsInstance(feature_list, list)
         for features in feature_list:
             self._check_features(features)
 
-        feature_list: t.List[t.Dict] = encoder.encode_many(np.random.randn(10, 100, 2), prefixes=["x_", "y_"])
+        feature_list: list[dict] = encoder.encode_many(np.random.randn(10, 100, 2), prefixes=["x_", "y_"])
         self.assertIsInstance(feature_list, list)
         for features in feature_list:
             self._check_features(features, num_ts=2)

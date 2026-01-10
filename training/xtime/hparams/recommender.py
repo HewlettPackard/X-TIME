@@ -15,7 +15,6 @@
 ###
 
 import math
-import typing as t
 
 from ray import tune
 from tinydb import Query, TinyDB
@@ -94,7 +93,7 @@ class DefaultRecommender(object):
             ]
         )
 
-    def recommend(self, query: Query) -> t.List[HParamsSpec]:
+    def recommend(self, query: Query) -> list[HParamsSpec]:
         """Recommend hyperparameters for a given query.
 
         Args:
@@ -104,13 +103,13 @@ class DefaultRecommender(object):
         Returns:
             List of hyperparameter specifications.
         """
-        matches: t.List[t.Dict] = self._db.search(query)
+        matches: list[dict] = self._db.search(query)
         return [match["params"] for match in matches]
 
-    def recommend_default_values(self, query: Query) -> t.List[HParams]:
-        matches: t.List[HParamsSpec] = self.recommend(query)
+    def recommend_default_values(self, query: Query) -> list[HParams]:
+        matches: list[HParamsSpec] = self.recommend(query)
         return [match.default() for match in matches]
 
-    def recommend_search_space(self, query: Query) -> t.List[HParamsSpace]:
-        matches: t.List[HParamsSpec] = self.recommend(query)
+    def recommend_search_space(self, query: Query) -> list[HParamsSpace]:
+        matches: list[HParamsSpec] = self.recommend(query)
         return [match.space() for match in matches]

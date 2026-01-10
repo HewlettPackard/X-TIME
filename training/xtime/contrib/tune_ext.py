@@ -17,8 +17,8 @@
 import copy
 import math
 import os
-import typing as t
 from pathlib import Path
+from typing import Any, Callable, TypeVar
 
 import mlflow
 import pandas as pd
@@ -47,9 +47,7 @@ def gpu_available() -> bool:
     return False
 
 
-def get_trial_dir(
-    trial_dir: Path, model_file: str, backup_trial_dir_resolver: t.Optional[t.Callable] = None
-) -> t.Optional[Path]:
+def get_trial_dir(trial_dir: Path, model_file: str, backup_trial_dir_resolver: Callable | None = None) -> Path | None:
     """Helper function to identify the directory containing all artifacts for a given Ray Tune trial.
 
     This is a temporarily ad-hoc solution that we needed due to original location of MLflow artifacts we had in our
@@ -93,7 +91,7 @@ class RayTuneDriverToMLflowLoggerCallback(Callback):
         self.best_value: float = math.inf if self.mode == "min" else -math.inf
         self.trial_index: int = 0
 
-    def on_trial_result(self, iteration: int, trials: t.List[Trial], trial: Trial, result: t.Dict, **info) -> None:
+    def on_trial_result(self, iteration: int, trials: list[Trial], trial: Trial, result: dict, **info) -> None:
         self.trial_index += 1
 
         value = result[self.metric]
@@ -109,7 +107,7 @@ class RayTuneDriverToMLflowLoggerCallback(Callback):
 
 class Analysis(object):
     @staticmethod
-    def get_trial_stats(run: str, **kwargs) -> t.List[t.Dict]:
+    def get_trial_stats(run: str, **kwargs) -> list[dict]:
         """Return descriptive statistics for a given hyperparameter search experiment.
 
         Not all models can be supported.
@@ -135,14 +133,14 @@ class Analysis(object):
         run_type: RunType = RunType(mlflow_run.data.tags["run_type"])
         if run_type != RunType.HPO:
             raise ValueError(f"Unsupported MLflow run ({mlflow_run.data.tags['run_type']})")
-        trials_stats: t.List[t.Dict] = []
+        trials_stats: list[dict] = []
         artifact_path: Path = Path(local_file_uri_to_path(mlflow_run.info.artifact_uri))
         task: Task = Task.from_dataset_info(IO.load_yaml(artifact_path / "dataset_info.yaml"))
-        trial_dirs: t.List[Path] = [_dir for _dir in (artifact_path / "ray_tune").iterdir() if _dir.is_dir()]
+        trial_dirs: list[Path] = [_dir for _dir in (artifact_path / "ray_tune").iterdir() if _dir.is_dir()]
 
         if kwargs.get("skip_model_stats", False) is True:
 
-            def get_model_stats(*_args, **_kwargs) -> t.Dict:
+            def get_model_stats(*_args, **_kwargs) -> dict:
                 return {}
         else:
             if mlflow_run.data.tags["model"] == "xgboost":
@@ -171,7 +169,7 @@ class Analysis(object):
             }
 
             try:
-                model_stats: t.Dict = get_model_stats(resolved_trial_dir, task.type)
+                model_stats: dict = get_model_stats(resolved_trial_dir, task.type)
                 for k, v in model_stats.items():
                     trial_stats["model_" + k] = v
             except (IOError, EOFError):
@@ -179,11 +177,11 @@ class Analysis(object):
                 print("WARNING can't get model stats, dir=", resolved_trial_dir.as_posix())
                 continue
 
-            model_params: t.Dict = IO.load_dict(resolved_trial_dir / "params.json")
+            model_params: dict = IO.load_dict(resolved_trial_dir / "params.json")
             for k, v in model_params.items():
                 trial_stats["param_" + k] = v
 
-            metrics: t.Dict = IO.load_dict(resolved_trial_dir / "result.json")
+            metrics: dict = IO.load_dict(resolved_trial_dir / "result.json")
             _known_metrics = {
                 "dataset_accuracy",
                 "dataset_loss_total",
@@ -207,13 +205,13 @@ class Analysis(object):
         return trials_stats
 
     @staticmethod
-    def get_summary(run: str) -> t.Dict:
+    def get_summary(run: str) -> dict:
         """Get the summary of a run.
 
         Args:
             run: The MLflow run ID or MLflow URI.
         """
-        summary: t.Dict = {}
+        summary: dict = {}
         mlflow_run_id = run[10:] if run.startswith("mlflow:///") else run
         mlflow_run = mlflow.get_run(mlflow_run_id)
         run_type = RunType(mlflow_run.data.tags["run_type"])
@@ -238,9 +236,9 @@ class Analysis(object):
                 }
 
             summary["best_run"] = {}
-            best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
+            best_trial: Trial | None = experiment.get_best_trial(perf_metric, mode="min")
             if best_trial is not None:
-                trial_log_dir: t.Optional[str] = _trial_log_dir(best_trial)
+                trial_log_dir: str | None = _trial_log_dir(best_trial)
                 best_params = IO.load_json((Path(trial_log_dir) / "params.json").as_posix())
                 best_results = IO.load_json((Path(trial_log_dir) / "result.json").as_posix())
                 best_results = {k: best_results[k] for k in perf_metrics if k in best_results}
@@ -263,7 +261,7 @@ class Analysis(object):
             raise ValueError(f"Unsupported run type ({mlflow_run.data.tags['run_type']})")
 
     @staticmethod
-    def get_best_trial(mlflow_uri: str) -> t.Dict:
+    def get_best_trial(mlflow_uri: str) -> dict:
         """Return information about the best Ray Tune trial in one MLflow run.
 
         Prerequisites:
@@ -297,7 +295,7 @@ class Analysis(object):
         # Get primary ML metric that this task is to be evaluated on.
         perf_metric = METRICS.get_primary_metric(ds_metadata.task)
         # Get the best Ray Tune trial that minimizes given metric
-        best_trial: t.Optional[Trial] = experiment.get_best_trial(perf_metric, mode="min")
+        best_trial: Trial | None = experiment.get_best_trial(perf_metric, mode="min")
         # Create return object
         model = mlflow_run.data.tags["model"]
         model_file_name: str = LegacySavedModelInfo(model).file_name()
@@ -307,7 +305,7 @@ class Analysis(object):
             "dataset_info_file": (artifact_path / "dataset_info.yaml").as_posix(),  # Info about dataset
         }
         if best_trial is not None:
-            trial_log_dir: t.Optional[str] = _trial_log_dir(best_trial)
+            trial_log_dir: str | None = _trial_log_dir(best_trial)
             best_trial_info.update(
                 {
                     "tune_trial_id": best_trial.trial_id,  # Ray Tune Run ID
@@ -332,13 +330,13 @@ class Analysis(object):
         Current constraints:
             - Record key is dataset + model +
         """
-        runs: t.List[Run] = MLflow.get_runs(
+        runs: list[Run] = MLflow.get_runs(
             experiment_ids=MLflow.get_experiment_ids(),
             filter_string="params.algorithm = 'random' AND params.config LIKE 'mlflow%'",
         )
 
         # Check if we have multiple runs for dataset/model pair
-        cache: t.Dict[str, Run] = {}
+        cache: dict[str, Run] = {}
         for run in runs:
             key = run.data.params["problem"] + "/" + run.data.params["model"]
             if key in cache:
@@ -352,7 +350,7 @@ class Analysis(object):
 
         # Build a data frame containing results from all Ray Tune trials for the found runs. If no trials failed, then
         # data frame will contain len(runs) * 20 records, where 20 was the default number of trials for best models.
-        results: t.List[t.Dict] = []
+        results: list[dict] = []
         for run in runs:
             artifact_path: Path = Path(local_file_uri_to_path(run.info.artifact_uri))
             experiment = tune.ExperimentAnalysis((artifact_path / "ray_tune").as_posix())
@@ -360,11 +358,11 @@ class Analysis(object):
             ds_metadata = DatasetMetadata.from_json(IO.load_yaml(artifact_path / "dataset_info.yaml"))
             metrics = ["test_mse"] if ds_metadata.task.type.regression() else ["test_accuracy", "test_loss_mean"]
 
-            trials: t.List[Trial] = experiment.trials or []
+            trials: list[Trial] = experiment.trials or []
             for trial in trials:
                 if trial.status != Trial.TERMINATED:
                     continue
-                trial_log_dir: t.Optional[str] = _trial_log_dir(trial)
+                trial_log_dir: str | None = _trial_log_dir(trial)
                 result = {
                     "dataset": run.data.params["problem"],
                     "model": run.data.params["model"],
@@ -394,7 +392,7 @@ def _check_mode(mode: str) -> str:
     return mode
 
 
-def _trial_log_dir(trial: Trial) -> t.Optional[str]:
+def _trial_log_dir(trial: Trial) -> str | None:
     """Return (local?) trial directory.
 
     Why it is here? See the implementation:
@@ -413,7 +411,7 @@ def _trial_log_dir(trial: Trial) -> t.Optional[str]:
     return trial.logdir
 
 
-RandomVarDomain = t.TypeVar("RandomVarDomain", bound=sample.Domain)
+RandomVarDomain = TypeVar("RandomVarDomain", bound=sample.Domain)
 """Domain types for random variables (children of `Domain` class) such as `Float`, `Integer` and `Categorical`."""
 
 
@@ -421,7 +419,7 @@ class YamlEncoder:
     @staticmethod
     def represent(dumper: yaml.representer.BaseRepresenter, rv: RandomVarDomain) -> yaml.nodes.MappingNode:
         """Represent given random variable for yaml dumper."""
-        sampler: t.Dict = YamlEncoder.sampler_to_dict(rv.sampler)
+        sampler: dict = YamlEncoder.sampler_to_dict(rv.sampler)
         if isinstance(rv, sample.Integer):
             return dumper.represent_mapping(
                 "ray.tune.search.sample.Integer", [("lower", rv.lower), ("upper", rv.upper), ("sampler", sampler)]
@@ -437,28 +435,28 @@ class YamlEncoder:
         raise ValueError(f"Unsupported domain ({rv}).")
 
     @staticmethod
-    def construct_float(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+    def construct_float(loader: yaml.loader.Loader, node: yaml.Node) -> Any:
         """Reconstruct floating point domain."""
         assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
-        values: t.Dict = loader.construct_mapping(node, deep=True)
+        values: dict = loader.construct_mapping(node, deep=True)
         return YamlEncoder._with_sampler(sample.Float(values["lower"], values["upper"]), values["sampler"])
 
     @staticmethod
-    def construct_integer(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+    def construct_integer(loader: yaml.loader.Loader, node: yaml.Node) -> Any:
         """Reconstruct integer domain."""
         assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
-        values: t.Dict = loader.construct_mapping(node, deep=True)
+        values: dict = loader.construct_mapping(node, deep=True)
         return YamlEncoder._with_sampler(sample.Integer(values["lower"], values["upper"]), values["sampler"])
 
     @staticmethod
-    def construct_category(loader: yaml.loader.Loader, node: yaml.Node) -> t.Any:
+    def construct_category(loader: yaml.loader.Loader, node: yaml.Node) -> Any:
         """Reconstruct categorical domain."""
         assert isinstance(node, yaml.MappingNode), "Expecting Mapping node here."
-        values: t.Dict = loader.construct_mapping(node, deep=True)
+        values: dict = loader.construct_mapping(node, deep=True)
         return YamlEncoder._with_sampler(sample.Categorical(values["categories"]), values["sampler"])
 
     @staticmethod
-    def _with_sampler(rv: RandomVarDomain, sampler: t.Dict, q: t.Optional[int] = None) -> RandomVarDomain:
+    def _with_sampler(rv: RandomVarDomain, sampler: dict, q: int | None = None) -> RandomVarDomain:
         """Add to random variable appropriate sampler based on its dictionary representation.
 
         Args:
@@ -470,7 +468,7 @@ class YamlEncoder:
             Input variable (that is modified in-place) with properly set sampler.
         """
 
-        def _quantized(_rv: t.Union[sample.Integer, sample.Float]) -> sample.Domain:
+        def _quantized(_rv: sample.Integer | sample.Float) -> sample.Domain:
             assert q is None or (
                 q is not None and not isinstance(_rv, sample.Categorical)
             ), f"Samplers for categorical variables cannot be quantized (var={_rv})."
@@ -505,7 +503,7 @@ class YamlEncoder:
         raise ValueError(f"Unexpected sampler ({sampler}).")
 
     @staticmethod
-    def sampler_to_dict(sampler: sample.Sampler) -> t.Dict:
+    def sampler_to_dict(sampler: sample.Sampler) -> dict:
         """Represent a sampler using python dictionary.
 
         Args:
@@ -520,7 +518,7 @@ class YamlEncoder:
             (sample.Uniform, "uniform"),
             (sample.LogUniform, "loguniform"),
         ]
-        sdict: t.Dict[str, t.Any] = {"_sampler": "none"}
+        sdict: dict[str, Any] = {"_sampler": "none"}
         for stype, sname in names:
             if isinstance(sampler, stype):
                 sdict["_sampler"] = sname

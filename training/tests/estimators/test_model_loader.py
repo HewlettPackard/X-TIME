@@ -14,7 +14,6 @@
 # limitations under the License.
 ###
 import os
-import typing as t
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from unittest import TestCase
@@ -63,7 +62,7 @@ class TestModelLoader(TestCase):
         x, y = x.astype("float32"), y.astype("int32")
         x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=42)
 
-        feature_names: t.List[str] = [f"feature_{i}" for i in range(num_features)]
+        feature_names: list[str] = [f"feature_{i}" for i in range(num_features)]
         type_ = TaskType.BINARY_CLASSIFICATION if num_classes == 2 else TaskType.MULTI_CLASS_CLASSIFICATION
         return Dataset(
             metadata=DatasetMetadata(
@@ -96,7 +95,7 @@ class TestModelLoader(TestCase):
         x, y = x.astype("float32"), y.astype("int32")
         x_train, x_test, y_train, y_test = train_test_split(x, y, train_size=0.8, random_state=42)
 
-        feature_names: t.List[str] = [f"feature_{i}" for i in range(num_features)]
+        feature_names: list[str] = [f"feature_{i}" for i in range(num_features)]
         return Dataset(
             metadata=DatasetMetadata(
                 name="random-regression-dataset",
@@ -115,7 +114,7 @@ class TestModelLoader(TestCase):
         self.regression_dataset = self.make_regression_dataset()
 
     def _test_manual_loading(
-        self, estimator_cls: t.Type[Estimator], model_cls: t.Type, dataset: Dataset, params: t.Optional[t.Dict] = None
+        self, estimator_cls: type[Estimator], model_cls: type, dataset: Dataset, params: dict | None = None
     ) -> None:
         if params is None:
             params = {"n_estimators": 5}
@@ -130,7 +129,7 @@ class TestModelLoader(TestCase):
             self.assertIsInstance(model, model_cls)
 
     def _test_automated_loading(
-        self, estimator_cls: t.Type[Estimator], model_cls: t.Type, dataset: Dataset, params: t.Optional[t.Dict] = None
+        self, estimator_cls: type[Estimator], model_cls: type, dataset: Dataset, params: dict | None = None
     ) -> None:
         if params is None:
             params = {"n_estimators": 5}

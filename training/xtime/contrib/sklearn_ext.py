@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-import typing as t
 from pathlib import Path
 
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
@@ -25,7 +24,7 @@ from xtime.ml import TaskType
 __all__ = ["get_model_stats"]
 
 
-def get_model_stats(model_path: Path, task_type: TaskType) -> t.Dict:
+def get_model_stats(model_path: Path, task_type: TaskType) -> dict:
     """Compute some basic statistics of a mode.
 
     Args:
@@ -35,7 +34,7 @@ def get_model_stats(model_path: Path, task_type: TaskType) -> t.Dict:
     Returns:
         Dictionary with some descriptive statistics of this model.
     """
-    model: t.Union[RandomForestClassifier, RandomForestRegressor] = Model.load_model(
+    model: RandomForestClassifier | RandomForestRegressor = Model.load_model(
         model_path, LegacySavedModelInfo("rf", task_type.value)
     )
     if not isinstance(model, (RandomForestClassifier, RandomForestRegressor)):

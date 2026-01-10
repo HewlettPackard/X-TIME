@@ -14,7 +14,6 @@
 # limitations under the License.
 ###
 
-import typing as t
 from unittest import TestCase
 
 from xtime.datasets import DatasetBuilder, RegisteredDatasetFactory
@@ -23,7 +22,7 @@ from xtime.estimators.estimator import get_expected_available_estimators
 
 
 class TestRegistry(TestCase):
-    def check_registry(self, registry, keys: t.List[str], base_cls):
+    def check_registry(self, registry, keys: list[str], base_cls):
         for key in keys:
             self.assertTrue(issubclass(registry.get(key), base_cls))
 

@@ -15,7 +15,6 @@
 ###
 
 import copy
-import typing as t
 from pathlib import Path
 
 from xtime.errors import DatasetError
@@ -46,7 +45,7 @@ class CatboostEstimator(Estimator):
         TaskType.REGRESSION: "RMSE",
     }
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         super().__init__()
         params = copy.deepcopy(params)
         params.update(

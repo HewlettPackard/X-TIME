@@ -18,8 +18,8 @@ import copy
 import json
 import logging
 import os
-import typing as t
 from pathlib import Path
+from typing import Any, Callable, Iterable
 
 import numpy as np
 from ray.tune.search.sample import Domain
@@ -45,7 +45,7 @@ __all__ = [
 logger = logging.getLogger(__name__)
 
 
-HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict, None]]]
+HParamsSource = dict | str | Iterable[str | dict | None]
 """Specification options for hyperparameters (HP).
 
     - dict: Ready-to-use dictionary of HPs mapping HP names to values. 
@@ -59,10 +59,10 @@ HParamsSource = t.Union[t.Dict, str, t.Iterable[t.Union[str, t.Dict, None]]]
         - ''
 """
 
-HParams = t.Dict
+HParams = dict
 """Dictionary of hyperparameters. It should map from a parameter name to a parameter (primitive) value."""
 
-HParamsSpace = t.Dict
+HParamsSpace = dict
 """Hyperparameter search space (maybe, framework-specific). But can also map a parameter name to just its value."""
 
 
@@ -80,7 +80,7 @@ class JsonEncoder(json.JSONEncoder):
 class ValueSpec(object):
     """Hyperparameter value specification defining its type, default value and prior distribution to sample from."""
 
-    def __init__(self, dtype: t.Callable, default: t.Any, space: t.Any) -> None:
+    def __init__(self, dtype: Callable, default: Any, space: Any) -> None:
         """Initialize this instance.
 
         Args:
@@ -105,7 +105,7 @@ class HParamsSpec(object):
     def __init__(self, **kwargs) -> None:
         for name, value in kwargs.items():
             assert isinstance(value, ValueSpec), f"Invalid HP value spec ({value}) for HP `{name}`."
-        self.params: t.Dict[str, ValueSpec] = copy.deepcopy(kwargs)
+        self.params: dict[str, ValueSpec] = copy.deepcopy(kwargs)
 
     def default(self) -> HParams:
         """Return dictionary with default values."""
@@ -115,12 +115,12 @@ class HParamsSpec(object):
         """Return search space for this set of hyperparameters."""
         return {name: value.space for name, value in self.params.items()}
 
-    def sample(self) -> t.Optional[HParams]:
+    def sample(self) -> HParams | None:
         """Return a random sample from a search space."""
         configs = [config for _, config in generate_variants(self.space())]
         return np.random.choice(configs) if configs else None
 
-    def merge(self, *args: t.Dict, use_default: bool = True) -> t.Dict:
+    def merge(self, *args: dict, use_default: bool = True) -> dict:
         _params = self.default() if use_default else {}
         for arg in args:
             _params.update(arg or {})
@@ -130,14 +130,14 @@ class HParamsSpec(object):
         return _params
 
 
-def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
+def get_hparams(source: HParamsSource | None = None) -> dict:
     """Retrieve/convert hyperparameters from/in source to standard representation - dictionary.
     Args:
         source: Source or sources of hyperparameters. For possible values and how they are processed see the source
             code of this function.
     """
 
-    hp_dict: t.Any = None
+    hp_dict: Any = None
     if source is None:
         # Just empty dict of hyperparameters.
         hp_dict = {}
@@ -170,7 +170,7 @@ def get_hparams(source: t.Optional[HParamsSource] = None) -> t.Dict:
     )
 
 
-def from_auto(params: t.Optional[str] = None) -> t.Dict:
+def from_auto(params: str | None = None) -> dict:
     """Request hyperparameters from an external entity such as hyperparameter recommender.
 
     Args:
@@ -196,9 +196,9 @@ def from_auto(params: t.Optional[str] = None) -> t.Dict:
     if not params:
         return {}
 
-    source_and_query: t.List[str] = params.split(":", maxsplit=1)
+    source_and_query: list[str] = params.split(":", maxsplit=1)
     source, query_str = (source_and_query[0], None) if len(source_and_query) == 1 else source_and_query
-    query_params: t.Dict = from_string(query_str)
+    query_params: dict = from_string(query_str)
 
     if source == "default":
         from tinydb import Query
@@ -221,9 +221,9 @@ def from_auto(params: t.Optional[str] = None) -> t.Dict:
 
         recommender = DefaultRecommender()
         if run_type == RunType.TRAIN.value:
-            recommendations: t.List[t.Dict] = recommender.recommend_default_values(query)
+            recommendations: list[dict] = recommender.recommend_default_values(query)
         elif run_type == RunType.HPO.value:
-            recommendations: t.List[t.Dict] = recommender.recommend_search_space(query)
+            recommendations: list[dict] = recommender.recommend_search_space(query)
         else:
             raise ValueError(f"Unknown run_type={run_type}. Must be one of 'train', 'hpo'.")
 
@@ -234,7 +234,7 @@ def from_auto(params: t.Optional[str] = None) -> t.Dict:
         raise RuntimeError(f"Unsupported hyperparameter source (params={params}, source={source}).")
 
 
-def from_string(params: t.Optional[str] = None) -> t.Dict:
+def from_string(params: str | None = None) -> dict:
     """Parse hyperparameters provided by users on a command line.
 
     Args:
@@ -285,7 +285,7 @@ def from_string(params: t.Optional[str] = None) -> t.Dict:
     return hp_dict
 
 
-def from_mlflow(url: str) -> t.Dict:
+def from_mlflow(url: str) -> dict:
     """Load (best) configuration of hyperparameters from a MLflow run.
 
     If this MLflow run is a `train` run, return its parameters.
@@ -324,12 +324,12 @@ def from_mlflow(url: str) -> t.Dict:
         # Find the best trial and return its parameters
         artifact_path: Path = Path(local_file_uri_to_path(run.info.artifact_uri))
         if (artifact_path / "best_trial.yaml").is_file():
-            best_trial_info: t.Dict = IO.load_dict(artifact_path / "best_trial.yaml")
+            best_trial_info: dict = IO.load_dict(artifact_path / "best_trial.yaml")
             best_trial_path = artifact_path / best_trial_info["relative_path"]
         else:
             experiment = tune.ExperimentAnalysis((artifact_path / "ray_tune").as_posix())
-            dataset_info: t.Dict = IO.load_dict(artifact_path / "dataset_info.yaml")
-            best_trial: t.Optional[Trial] = experiment.get_best_trial(
+            dataset_info: dict = IO.load_dict(artifact_path / "dataset_info.yaml")
+            best_trial: Trial | None = experiment.get_best_trial(
                 "valid_mse" if dataset_info["Dataset"]["task"] == "REGRESSION" else "valid_loss_mean", mode="min"
             )
             if best_trial is None:
@@ -345,7 +345,7 @@ def from_mlflow(url: str) -> t.Dict:
     return hp_dict
 
 
-def from_file(url: PathLike) -> t.Dict:
+def from_file(url: PathLike) -> dict:
     """Load dictionary of hyperparameters from a file.
 
     Args:
@@ -356,7 +356,7 @@ def from_file(url: PathLike) -> t.Dict:
     if isinstance(url, str):
         url = _str_content(url, "file:")
 
-    hp_dict: t.Dict = IO.load_dict(url)
+    hp_dict: dict = IO.load_dict(url)
     assert isinstance(hp_dict, dict), f"IO.load_dict did not return dictionary (type={type(hp_dict)})."
 
     # TODO sergey: Need to agree on rules of parsing and overall structure of hparams dict.
@@ -376,7 +376,7 @@ def from_file(url: PathLike) -> t.Dict:
     return hp_dict
 
 
-def _str_content(str_val: t.Optional[str], scheme: str) -> str:
+def _str_content(str_val: str | None, scheme: str) -> str:
     assert str_val is None or isinstance(str_val, str), f"Invalid `str_val` type ({type(str_val)})."
     str_val = str_val.strip() if isinstance(str_val, str) else ""
     if str_val.startswith(scheme):
@@ -384,7 +384,7 @@ def _str_content(str_val: t.Optional[str], scheme: str) -> str:
     return str_val
 
 
-def _try_eval_str_value(value: str) -> t.Any:
+def _try_eval_str_value(value: str) -> Any:
     """Try evaluate string value.
 
     Args:

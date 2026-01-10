@@ -15,8 +15,8 @@
 ###
 
 import copy
-import typing as t
 from pathlib import Path
+from typing import cast
 
 try:
     from lightgbm.sklearn import LGBMClassifier, LGBMModel, LGBMRegressor
@@ -38,13 +38,13 @@ __all__ = ["LightGBMClassifierEstimator"]
 class LightGBMClassifierEstimator(Estimator):
     NAME = "lightgbm"
 
-    OBJECTIVES: t.Dict[TaskType, str] = {
+    OBJECTIVES: dict[TaskType, str] = {
         TaskType.BINARY_CLASSIFICATION: "binary",
         TaskType.MULTI_CLASS_CLASSIFICATION: "multiclass",
         TaskType.REGRESSION: "regression",
     }
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         """
         https://lightgbm.readthedocs.io/en/latest/Parameters.html
         """
@@ -52,7 +52,7 @@ class LightGBMClassifierEstimator(Estimator):
         params = copy.deepcopy(params)
         params["objective"] = LightGBMClassifierEstimator.OBJECTIVES[dataset_metadata.task.type]
         if dataset_metadata.task.type == TaskType.MULTI_CLASS_CLASSIFICATION:
-            task: ClassificationTask = t.cast(ClassificationTask, dataset_metadata.task)
+            task: ClassificationTask = cast(ClassificationTask, dataset_metadata.task)
             params["num_class"] = task.num_classes
         if gpu_available():
             params["device"] = "GPU"

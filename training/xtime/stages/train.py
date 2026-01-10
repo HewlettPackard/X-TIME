@@ -16,7 +16,6 @@
 
 import logging
 import sys
-import typing as t
 
 import mlflow
 
@@ -31,7 +30,7 @@ from xtime.run import Context, Metadata, RunType
 logger = logging.getLogger(__name__)
 
 
-def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
+def train(dataset: str, model: str, hparams: HParamsSource | None) -> None:
     """Train a model for a given problem using default, HP-optimized or pre-defined parameters.
 
     Enable GPUs by setting CUDA_VISIBLE_DEVICES variable (e.g., CUDA_VISIBLE_DEVICES=0 python -m xtime ...).
@@ -53,9 +52,9 @@ def train(dataset: str, model: str, hparams: t.Optional[HParamsSource]) -> None:
             hparams = f"auto:default:model={model};task={context.dataset.metadata.task.type.value};run_type=train"
             logger.info("Hyperparameters are not provided, using default ones: '%s'.", hparams)
 
-        hp_dict: t.Dict = get_hparams(hparams)
+        hp_dict: dict = get_hparams(hparams)
         logger.info("Hyperparameters resolved to: '%s'", hp_dict)
 
-        estimator: t.Type[Estimator] = get_estimator(model)
+        estimator: type[Estimator] = get_estimator(model)
         _ = estimator.fit(hp_dict, context)
         print(f"MLflowRun uri=mlflow:///{active_run.info.run_id}")

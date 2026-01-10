@@ -15,7 +15,6 @@
 ###
 
 import copy
-import typing as t
 from enum import Enum, unique
 
 __all__ = ["TaskType", "Task", "ClassificationTask", "RegressionTask", "FeatureType", "Feature", "METRICS"]
@@ -42,14 +41,14 @@ class TaskType(str, Enum):
 
 
 class Task:
-    def __init__(self, type_: t.Union[TaskType, str]) -> None:
+    def __init__(self, type_: TaskType | str) -> None:
         self.type = TaskType(type_)
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         return {"type": self.type.value}
 
     @staticmethod
-    def from_json(json_obj: t.Dict) -> "Task":
+    def from_json(json_obj: dict) -> "Task":
         json_obj = copy.deepcopy(json_obj)
         type_: TaskType = TaskType(json_obj.pop("type"))
         if type_.classification():
@@ -61,7 +60,7 @@ class Task:
         return cls(type_, **json_obj)
 
     @staticmethod
-    def from_dataset_info(json_obj: t.Dict) -> "Task":
+    def from_dataset_info(json_obj: dict) -> "Task":
         """Identify the task based upon information in `dataset_info.yaml` files.
 
         First versions of this project used different format of this file. This function process two different formats
@@ -91,7 +90,7 @@ class Task:
 
 
 class ClassificationTask(Task):
-    def __init__(self, type_: t.Union[TaskType, str], num_classes: t.Optional[int] = None) -> None:
+    def __init__(self, type_: TaskType | str, num_classes: int | None = None) -> None:
         type_ = TaskType(type_)
         assert type_.classification(), f"Not a classification task type ({type_})."
 
@@ -111,14 +110,14 @@ class ClassificationTask(Task):
         super().__init__(type_)
         self.num_classes: int = num_classes
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         _dict = super().to_json()
         _dict.update(num_classes=self.num_classes)
         return _dict
 
 
 class RegressionTask(Task):
-    def __init__(self, type_: t.Optional[t.Union[TaskType, str]] = None, **kwargs) -> None:
+    def __init__(self, type_: TaskType | str | None = None, **kwargs) -> None:
         assert len(kwargs) == 0, f"No additional parameters are supported ({kwargs})."
         type_ = TaskType(type_ or TaskType.REGRESSION)
         assert type_.regression(), f"Not a regression task type ({type_})."
@@ -157,16 +156,16 @@ class FeatureType(str, Enum):
 
 
 class Feature(object):
-    def __init__(self, name: str, type_: t.Union[FeatureType, str], **kwargs) -> None:
+    def __init__(self, name: str, type_: FeatureType | str, **kwargs) -> None:
         self.name = name
         self.type = FeatureType(type_)
         self.kwargs = copy.deepcopy(kwargs)
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         return {"name": self.name, "type": self.type.value, **self.kwargs}
 
     @classmethod
-    def from_json(cls, json_dict: t.Dict) -> "Feature":
+    def from_json(cls, json_dict: dict) -> "Feature":
         json_dict = copy.deepcopy(json_dict)
         name, type_ = json_dict.pop("name"), json_dict.pop("type")
         return cls(name=name, type_=type_, **json_dict)
@@ -195,7 +194,7 @@ class _Metrics:
             TaskType.REGRESSION: _Metrics.REGRESSION,
         }
 
-    def __getitem__(self, key: TaskType) -> t.List[str]:
+    def __getitem__(self, key: TaskType) -> list[str]:
         if not isinstance(key, TaskType) or key not in self._metrics:
             raise KeyError(
                 f"Invalid key (type={type(key)}, value={key}) in {self.__class__.__name__}. Expected keys of "
@@ -206,11 +205,11 @@ class _Metrics:
     def __len__(self) -> int:
         return len(self._metrics)
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         return copy.deepcopy(self._metrics)
 
     @staticmethod
-    def get_primary_metric(task: t.Union[Task, TaskType]) -> str:
+    def get_primary_metric(task: Task | TaskType) -> str:
         if isinstance(task, Task):
             task = task.type
         return "valid_mse" if task.regression() else "valid_loss_mean"

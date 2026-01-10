@@ -15,7 +15,7 @@
 ###
 import functools
 import logging
-import typing as t
+from typing import Any
 
 __all__ = [
     "maybe_suggest_debug_level",
@@ -28,7 +28,7 @@ __all__ = [
 ]
 
 
-def maybe_suggest_debug_level(logger: t.Optional[logging.Logger] = None, prefix: str = " ", suffix: str = ".") -> str:
+def maybe_suggest_debug_level(logger: logging.Logger | None = None, prefix: str = " ", suffix: str = ".") -> str:
     if logger is None or not logger.isEnabledFor(logging.DEBUG):
         return (
             f"{prefix}Detailed information is logged when logging level is "
@@ -37,11 +37,11 @@ def maybe_suggest_debug_level(logger: t.Optional[logging.Logger] = None, prefix:
     return ""
 
 
-def exception_if_debug(error: Exception, logger: logging.Logger) -> t.Optional[Exception]:
+def exception_if_debug(error: Exception, logger: logging.Logger) -> Exception | None:
     return error if logger.isEnabledFor(logging.DEBUG) else None
 
 
-def ignore_exceptions(default_value: t.Any = None):
+def ignore_exceptions(default_value: Any = None):
     """Function decorator that can be used to suppress all exceptions raised by the decorated function.
 
     Args:
@@ -101,7 +101,7 @@ class EstimatorError(XTimeError):
         return error
 
     @classmethod
-    def library_not_installed(cls, estimator: str, library: str, dep_groups: t.List[str]) -> "EstimatorError":
+    def library_not_installed(cls, estimator: str, library: str, dep_groups: list[str]) -> "EstimatorError":
         return EstimatorError.missing_prerequisites(
             f"{estimator} estimator is not available because `{library}` library is not installed. "
             f"This library is optional in XTIME and should be installed by specifying one of the following optional "

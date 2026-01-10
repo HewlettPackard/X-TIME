@@ -17,7 +17,6 @@
 import logging
 import os
 import re
-import typing as t
 from itertools import product
 from pathlib import Path
 
@@ -88,7 +87,7 @@ class HARTHBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
-        self._dataset_dir: t.Optional[Path] = None
+        self._dataset_dir: Path | None = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.
@@ -175,7 +174,7 @@ class HARTHBuilder(DatasetBuilder):
         )
         return dataset
 
-    def extract_subject_id(self, file_name: str) -> t.Optional[str]:
+    def extract_subject_id(self, file_name: str) -> str | None:
         """Extract subject ID from a file name.
 
         Regular expression pattern to match subject ID

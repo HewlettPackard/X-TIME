@@ -15,7 +15,6 @@
 ###
 import copy
 import logging
-import typing as t
 from pathlib import Path
 
 try:
@@ -46,14 +45,14 @@ class XGBoostEstimator(Estimator):
 
     NAME = "xgboost"
 
-    OBJECTIVES: t.Dict[TaskType, str] = {
+    OBJECTIVES: dict[TaskType, str] = {
         # Logistic Regression for binary classification, output probability.
         TaskType.BINARY_CLASSIFICATION: "binary:logistic",
         TaskType.MULTI_CLASS_CLASSIFICATION: "multi:softproba",
         TaskType.REGRESSION: "reg:squarederror",
     }
 
-    EVAL_METRICS: t.Dict[TaskType, t.List[str]] = {
+    EVAL_METRICS: dict[TaskType, list[str]] = {
         # `error`: 1.0 - accuracy, `log_Loss`: negative log likelihood
         TaskType.BINARY_CLASSIFICATION: ["error", "logloss"],
         # `merror`: 1.0 - accuracy, `mlogloss`: cross entropy loss
@@ -61,7 +60,7 @@ class XGBoostEstimator(Estimator):
         TaskType.REGRESSION: ["rmse"],
     }
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         super().__init__()
         params = copy.deepcopy(params)
         params.update(

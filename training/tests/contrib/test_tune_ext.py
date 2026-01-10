@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-import typing as t
+from typing import Any, Type
 from unittest import TestCase
 
 import ray.tune.search.sample as sample
@@ -49,7 +49,7 @@ class TestYamlRepresenters(TestCase):
         """Test serialization/deserialization for categorical domain (`Categorical`)."""
         cats = ["Garfield", "Tom Cat", "Puss in Boots"]
 
-        def _check(_rv: sample.Categorical, _sampler_t: t.Optional[t.Type]) -> None:
+        def _check(_rv: sample.Categorical, _sampler_t: Type | None) -> None:
             self.assertIsInstance(_rv, sample.Categorical)
             self.assertListEqual(cats, _rv.categories)
             self._check_sampler(type(_rv), _rv.sampler, sampler_type=_sampler_t)
@@ -69,22 +69,22 @@ class TestYamlRepresenters(TestCase):
 
         return deserialized_rv
 
-    def _check_object_type(self, obj: t.Any, expected_type: t.Optional[t.Type]) -> None:
+    def _check_object_type(self, obj: Any, expected_type: Type | None) -> None:
         if expected_type is None:
             self.assertIsNone(obj)
         else:
             self.assertIsInstance(obj, expected_type)
 
-    def _test_uniform_samplers(self, domain_t: t.Union[t.Type[sample.Integer], t.Type[sample.Float]]) -> None:
+    def _test_uniform_samplers(self, domain_t: Type[sample.Integer] | Type[sample.Float]) -> None:
         lower, upper, base, q = (10, 100, 6, 2)
 
         self.assertIn(domain_t, {sample.Integer, sample.Float}, "Invalid domain type.")
 
         def _check(
-            _rv: t.Union[sample.Integer, sample.Float],
-            _sampler_t: t.Optional[t.Type],
-            _q: t.Optional[int] = None,
-            _base: t.Optional[int] = None,
+            _rv: sample.Integer | sample.Float,
+            _sampler_t: Type | None,
+            _q: int | None = None,
+            _base: int | None = None,
         ) -> None:
             self.assertIsInstance(_rv, domain_t)
             self.assertEqual(lower, _rv.lower)
@@ -122,7 +122,7 @@ class TestYamlRepresenters(TestCase):
         mean, sd = 1.1, 0.45
         q = 0.1
 
-        def _check(_rv: sample.Float, _sampler_t: t.Optional[t.Type], _q: t.Optional[float] = None) -> None:
+        def _check(_rv: sample.Float, _sampler_t: Type | None, _q: float | None = None) -> None:
             self.assertEqual(float("-inf"), _rv.lower)
             self.assertEqual(float("+inf"), _rv.upper)
             self._check_sampler(type(_rv), _rv.sampler, sampler_type=_sampler_t, q=_q, mean=mean, sd=sd)
@@ -135,13 +135,13 @@ class TestYamlRepresenters(TestCase):
 
     def _check_sampler(
         self,
-        rv_type: t.Type,
-        sampler: t.Optional[sample.Sampler],
-        sampler_type: t.Optional[t.Type] = None,
-        base: t.Optional[int] = None,
-        q: t.Optional[t.Union[int, float]] = None,
-        mean: t.Optional[float] = None,
-        sd: t.Optional[float] = None,
+        rv_type: Type,
+        sampler: sample.Sampler | None,
+        sampler_type: Type | None = None,
+        base: int | None = None,
+        q: int | float | None = None,
+        mean: float | None = None,
+        sd: float | None = None,
     ) -> None:
         if q is not None:
             #

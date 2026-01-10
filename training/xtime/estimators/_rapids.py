@@ -16,7 +16,6 @@
 import copy
 import logging
 import pickle
-import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -48,7 +47,7 @@ logger = logging.getLogger(__name__)
 class RandomForestEstimator(Estimator):
     NAME = "rapids-rf"
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         super().__init__()
         params = copy.deepcopy(params)
         if "n_streams" not in params:

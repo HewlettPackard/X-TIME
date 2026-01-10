@@ -16,7 +16,6 @@
 
 import logging
 import os
-import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -59,7 +58,7 @@ class FDBuilder(DatasetBuilder):
         super().__init__()
         self.builders.update(default=self._build_default_dataset)
         self.encoder = TimeSeriesEncoderV1()
-        self._dataset_dir: t.Optional[Path] = None
+        self._dataset_dir: Path | None = None
 
     def _check_pre_requisites(self) -> None:
         # Check raw dataset exists.

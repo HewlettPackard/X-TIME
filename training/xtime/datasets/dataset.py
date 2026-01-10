@@ -19,9 +19,9 @@ import copy
 import importlib.util
 import logging
 import os
-import typing as t
 from dataclasses import dataclass, field
 from pathlib import Path
+from typing import Any, Callable, Iterable, cast
 from unittest import TestCase
 
 import numpy as np
@@ -60,7 +60,7 @@ class DatasetSplit:
     EVAL_SPLITS = ("valid", "test")
 
     x: pd.DataFrame
-    y: t.Optional[t.Union[pd.DataFrame, pd.Series]] = None
+    y: pd.DataFrame | pd.Series | None = None
 
     def __post_init__(self) -> None:
         if not isinstance(self.x, pd.DataFrame):
@@ -86,22 +86,22 @@ class DatasetMetadata:
     name: str
     version: str
     task: Task
-    features: t.List[Feature] = field(default_factory=lambda: [])
-    properties: t.Dict[str, t.Any] = field(default_factory=lambda: {})
+    features: list[Feature] = field(default_factory=lambda: [])
+    properties: dict[str, Any] = field(default_factory=lambda: {})
 
     def num_features(self) -> int:
         return len(self.features)
 
-    def feature_names(self) -> t.List[str]:
+    def feature_names(self) -> list[str]:
         return [feature.name for feature in self.features]
 
-    def categorical_feature_names(self) -> t.List[str]:
+    def categorical_feature_names(self) -> list[str]:
         return [feature.name for feature in self.features if feature.type.categorical()]
 
     def has_categorical_features(self) -> bool:
         return any(feature.type.categorical() for feature in self.features)
 
-    def to_json(self) -> t.Dict:
+    def to_json(self) -> dict:
         return {
             "name": self.name,
             "version": self.version,
@@ -111,7 +111,7 @@ class DatasetMetadata:
         }
 
     @classmethod
-    def from_json(cls, json_dict: t.Dict) -> "DatasetMetadata":
+    def from_json(cls, json_dict: dict) -> "DatasetMetadata":
         return cls(
             name=json_dict["name"],
             version=json_dict["version"],
@@ -126,16 +126,16 @@ class Dataset:
     """Dataset includes its metadata and splits."""
 
     metadata: DatasetMetadata
-    splits: t.Dict[str, DatasetSplit] = field(default_factory=lambda: {})
+    splits: dict[str, DatasetSplit] = field(default_factory=lambda: {})
 
     def __post_init__(self) -> None:
         # This string will be empty if there are no errors.
         error_msg: str = ""
         # These features are expected to be present in dataset splits.
-        expected_features: t.Set[str] = set([f.name for f in self.metadata.features])
+        expected_features: set[str] = set([f.name for f in self.metadata.features])
         for split_name, split_data in self.splits.items():
             # These are the actual features in this dataset split.
-            actual_features: t.Set[str] = set(split_data.x.columns)
+            actual_features: set[str] = set(split_data.x.columns)
             # Features that are not present in current split.
             missing_features = expected_features - actual_features
             if missing_features:
@@ -157,14 +157,14 @@ class Dataset:
                     # raise ValueError(f"Labels in '{split_name}' split should have int32 data type.")
                     logger.warning("Labels in '%s' split should have int32 data type.", split_name)
 
-    def num_examples(self, split_names: t.Optional[t.Union[str, t.Iterable[str]]] = None) -> int:
+    def num_examples(self, split_names: str | Iterable[str] | None = None) -> int:
         if not split_names:
             split_names = self.splits.keys()
         elif isinstance(split_names, str):
             split_names = [split_names]
         return sum(self.splits[name].x.shape[0] for name in split_names)
 
-    def split(self, split_name: t.Union[str, t.Iterable[str]]) -> t.Optional[DatasetSplit]:
+    def split(self, split_name: str | Iterable[str]) -> DatasetSplit | None:
         _names = [split_name] if isinstance(split_name, str) else split_name
         return next((self.splits[name] for name in _names if name in self.splits), None)
 
@@ -179,7 +179,7 @@ class Dataset:
 
         return self
 
-    def summary(self, verbose: bool = False) -> t.Dict:
+    def summary(self, verbose: bool = False) -> dict:
         """Return summary of the datasets.
 
         Args:
@@ -192,7 +192,7 @@ class Dataset:
         if not verbose:
             # Provide brief description about splits
             for name, split in self.splits.items():
-                y_shape: t.Optional[t.List[int]] = list(split.y.shape) if split.y is not None else None
+                y_shape: list[int] | None = list(split.y.shape) if split.y is not None else None
                 summary["splits"][name] = {"x": list(split.x.shape), "y": y_shape}
         else:
             # Provide detailed description about splits
@@ -316,7 +316,7 @@ class Dataset:
         Returns:
             Dataset instance.
         """
-        factories: t.List[DatasetFactory] = DatasetFactory.resolve_factories(dataset)
+        factories: list[DatasetFactory] = DatasetFactory.resolve_factories(dataset)
         registered_datasets = sorted(RegisteredDatasetFactory.registry.keys())
         if not factories:
             raise ValueError(
@@ -329,7 +329,7 @@ class Dataset:
         return factories[0].create(**kwargs)
 
     @staticmethod
-    def parse_name(name: str) -> t.Tuple[str, str]:
+    def parse_name(name: str) -> tuple[str, str]:
         """Parse name and return (name, version) tuple."""
         name = name.strip()
         if not name:
@@ -337,7 +337,7 @@ class Dataset:
         if ":" not in name:
             return name, ""
 
-        _split: t.List[str] = name.split(":", maxsplit=1)
+        _split: list[str] = name.split(":", maxsplit=1)
         assert len(_split) == 2, f"Expecting list size to be 2 (size={len(_split)})."
         return _split[0], _split[1]
 
@@ -345,7 +345,7 @@ class Dataset:
 class DatasetBuilder(object):
     """Base class for standard datasets."""
 
-    NAME: t.Optional[str] = None
+    NAME: str | None = None
 
     @staticmethod
     def _patch_minio() -> None:
@@ -353,7 +353,7 @@ class DatasetBuilder(object):
             logger.debug("[patch_minio] patch not performed: XTIME_DISABLE_PATCH_MINIO == 1.")
             return
 
-        proxy_url: t.Optional[str] = None
+        proxy_url: str | None = None
         for proxy_url_param in ("https_proxy", "HTTPS_PROXY", "http_proxy", "HTTP_PROXY"):
             if os.environ.get(proxy_url_param, None):
                 proxy_url = os.environ[proxy_url_param]
@@ -369,7 +369,7 @@ class DatasetBuilder(object):
             logger.debug("[patch_minio] patch not performed: already patched")
             return
 
-        def _decorate(fn: t.Callable) -> t.Callable:
+        def _decorate(fn: callable) -> callable:
             def _minio_init_wrapper(*args, **kwargs):
                 if "http_client" not in kwargs:
                     kwargs["http_client"] = urllib3.ProxyManager(proxy_url=proxy_url)
@@ -381,8 +381,8 @@ class DatasetBuilder(object):
         minio.Minio.__init__.__timex_patched = True
 
     def __init__(self, openml: bool = False) -> None:
-        self.builders: t.Dict[
-            str, t.Callable[..., Dataset]  # version name  # instance builder function returning 'Dataset' instance
+        self.builders: dict[
+            str, Callable[..., Dataset]  # version name  # instance builder function returning 'Dataset' instance
         ] = {}
         if openml:
             DatasetBuilder._patch_minio()
@@ -390,7 +390,7 @@ class DatasetBuilder(object):
     def version_supported(self, version: str) -> bool:
         return version in self.builders
 
-    def build(self, version: t.Optional[str] = None, **kwargs) -> Dataset:
+    def build(self, version: str | None = None, **kwargs) -> Dataset:
         version = version or "default"
         if version not in self.builders:
             raise ValueError(
@@ -455,7 +455,7 @@ class DatasetFactory(abc.ABC):
         raise NotImplementedError
 
     @staticmethod
-    def resolve_factories(dataset: str) -> t.List["DatasetFactory"]:
+    def resolve_factories(dataset: str) -> list["DatasetFactory"]:
         """Identify all factories that can create this dataset."""
         return list(
             filter(
@@ -483,7 +483,7 @@ class SerializedDatasetFactory(DatasetFactory):
         return Dataset.load(self.dir_path)
 
     @classmethod
-    def resolve(cls, dataset: str) -> t.Optional["SerializedDatasetFactory"]:
+    def resolve(cls, dataset: str) -> "SerializedDatasetFactory | None":
         """Try resolving dataset name as a previously serialized dataset.
 
         Args:
@@ -524,7 +524,7 @@ class RegisteredDatasetFactory(DatasetFactory):
         return self.registry.get(self.name)().build(self.version, **kwargs)
 
     @classmethod
-    def resolve(cls, dataset: str) -> t.Optional["RegisteredDatasetFactory"]:
+    def resolve(cls, dataset: str) -> "RegisteredDatasetFactory | None":
         name, version = Dataset.parse_name(dataset)
         if not name:
             return None
@@ -538,7 +538,7 @@ class DatasetPrerequisites:
     """Various standard checks for dataset prerequisites."""
 
     @staticmethod
-    def _get_install_lib_help(lib_name: str, groups: t.Union[str, t.List[str]]) -> str:
+    def _get_install_lib_help(lib_name: str, groups: str | list[str]) -> str:
         help_msg = (
             "The `%s` library is an extra dependency of this project belonging to the `%s` group(s). "
             "With `poetry`, install it by running either (as an example) `poetry install --extras %s` or "
@@ -577,12 +577,12 @@ class DatasetPrerequisites:
 
 
 class DatasetTestCase(TestCase):
-    NAME: t.Optional[str] = None
-    CLASS: t.Optional[t.Type[DatasetBuilder]] = None
-    DATASETS: t.List[t.Dict] = []
+    NAME: str | None = None
+    CLASS: type[DatasetBuilder] | None = None
+    DATASETS: list[dict] = []
 
     @staticmethod
-    def standard(version: str, common_params: t.Dict) -> t.Dict:
+    def standard(version: str, common_params: dict) -> dict:
         if version not in ("default", "numerical", "numerical32"):
             raise ValueError(f"Non-standard version: {version}")
         params = {
@@ -609,10 +609,10 @@ class DatasetTestCase(TestCase):
             for test_fn in params["test_cases"]:
                 test_fn(self, ds, params)
 
-    def _load_dataset(self, fully_qualified_name: str) -> t.Tuple[t.Any, str, str]:
+    def _load_dataset(self, fully_qualified_name: str) -> tuple[Any, str, str]:
         name, version = Dataset.parse_name(fully_qualified_name)
         self.assertIsNotNone(name, f"Dataset name is none (fully_qualified_name={fully_qualified_name}).")
-        dataset_builder_cls: t.Type = RegisteredDatasetFactory.registry.get(name)
+        dataset_builder_cls: type = RegisteredDatasetFactory.registry.get(name)
         self.assertIs(
             dataset_builder_cls,
             self.CLASS,
@@ -622,13 +622,13 @@ class DatasetTestCase(TestCase):
         return dataset_builder_cls().build(version), name, version
 
     @staticmethod
-    def _test_consistency(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+    def _test_consistency(self: "DatasetTestCase", ds: Dataset, params: dict) -> None:
         self.assertIsInstance(ds, Dataset)
         self.assertEqual(ds.metadata.name, self.CLASS.NAME)
         self.assertEqual(ds.metadata.version, params["version"])
         if ds.metadata.task.type.classification():
             self.assertIsInstance(ds.metadata.task, ClassificationTask)
-            cl_task: ClassificationTask = t.cast(ClassificationTask, ds.metadata.task)
+            cl_task: ClassificationTask = cast(ClassificationTask, ds.metadata.task)
             self.assertEqual(cl_task.num_classes, params["num_classes"])
         else:
             self.assertIsInstance(ds.metadata.task, RegressionTask)
@@ -640,7 +640,7 @@ class DatasetTestCase(TestCase):
             self.assertIn(split, ds.splits)
 
     @staticmethod
-    def _test_splits(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+    def _test_splits(self: "DatasetTestCase", ds: Dataset, params: dict) -> None:
         for split_name in params["splits"]:
             self.assertIn(split_name, ds.splits)
 
@@ -656,7 +656,7 @@ class DatasetTestCase(TestCase):
             self.assertEqual(split.x.shape[1], params["num_features"])
 
     @staticmethod
-    def _test_default_dataset(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+    def _test_default_dataset(self: "DatasetTestCase", ds: Dataset, params: dict) -> None:
         for _, split in ds.splits.items():
             self.assertEqual(len(split.x.columns), len(ds.metadata.features))
             for col, feature in zip(split.x.columns, ds.metadata.features):
@@ -684,7 +684,7 @@ class DatasetTestCase(TestCase):
                     self.assertTrue(False, f"Unrecognized feature type: col={col}, type={feature.type}")
 
     @staticmethod
-    def _test_numerical_dataset(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+    def _test_numerical_dataset(self: "DatasetTestCase", ds: Dataset, params: dict) -> None:
         for _, split in ds.splits.items():
             self.assertEqual(len(split.x.columns), len(ds.metadata.features))
             for col, feature in zip(split.x.columns, ds.metadata.features):
@@ -700,7 +700,7 @@ class DatasetTestCase(TestCase):
                 )
 
     @staticmethod
-    def _test_numerical32_dataset(self: "DatasetTestCase", ds: Dataset, params: t.Dict) -> None:
+    def _test_numerical32_dataset(self: "DatasetTestCase", ds: Dataset, params: dict) -> None:
         for _, split in ds.splits.items():
             self.assertEqual(len(split.x.columns), len(ds.metadata.features))
             for col, feature in zip(split.x.columns, ds.metadata.features):

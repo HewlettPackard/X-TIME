@@ -15,7 +15,6 @@
 ###
 
 import logging
-import typing as t
 from unittest import TestCase
 
 import pytest
@@ -115,8 +114,8 @@ class TestMain(TestCase):
         result: Result = CliRunner().invoke(model_list, [])
         self.assertEqual(result.exit_code, 0)
 
-        output_lines: t.List[str] = result.output.splitlines()
+        output_lines: list[str] = result.output.splitlines()
         self.assertEqual(output_lines[0].strip(), "Available models:")
 
-        available_models: t.List[str] = sorted((line[2:] for line in output_lines[1:] if line.startswith("- ")))
+        available_models: list[str] = sorted((line[2:] for line in output_lines[1:] if line.startswith("- ")))
         self.assertListEqual(available_models, get_expected_available_estimators())

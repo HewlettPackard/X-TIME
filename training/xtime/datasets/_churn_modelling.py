@@ -14,7 +14,6 @@
 # limitations under the License.
 ###
 import functools
-import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -41,7 +40,7 @@ from ..errors import DatasetError
 class ChurnModellingBuilder(DatasetBuilder):
     NAME = "churn_modelling"
 
-    def __init__(self, path: t.Optional[t.Union[str, Path]] = None, **kwargs) -> None:
+    def __init__(self, path: str | Path | None = None, **kwargs) -> None:
         super().__init__()
         self.builders.update(
             default=self._build_default_dataset,

@@ -15,7 +15,6 @@
 ###
 
 import tempfile
-import typing as t
 from pathlib import Path
 from unittest import TestCase
 
@@ -40,7 +39,7 @@ class TestUtils(TestCase):
         )
         return hparams_file
 
-    def _check_randint_value_spec(self, params: t.Dict) -> None:
+    def _check_randint_value_spec(self, params: dict) -> None:
         self.assertIsInstance(params, dict)
         self.assertEqual(1, len(params))
         self.assertIn("max_depth", params)
@@ -64,7 +63,7 @@ class TestUtils(TestCase):
         self.assertDictEqual({}, hp.get_hparams({}))
         self.assertDictEqual({"a": 1}, hp.get_hparams({"a": 1}))
         self.assertDictEqual({"a": 1, "b": 2}, hp.get_hparams({"a": 1, "b": 2}))
-        params: t.Dict = hp.get_hparams({"max_depth": hp.ValueSpec(int, 6, tune.randint(1, 11))})
+        params: dict = hp.get_hparams({"max_depth": hp.ValueSpec(int, 6, tune.randint(1, 11))})
         self._check_randint_value_spec(params)
 
     def test_from_string(self) -> None:
@@ -75,7 +74,7 @@ class TestUtils(TestCase):
             hp.get_hparams("max_leaves=256;max_depth=6;learning_rate=0.01;verbose=True;msg='hello'"),
         )
 
-        params: t.Dict = hp.get_hparams("max_depth=ValueSpec(int, 6, tune.randint(1, 11))")
+        params: dict = hp.get_hparams("max_depth=ValueSpec(int, 6, tune.randint(1, 11))")
         self._check_randint_value_spec(params)
 
     def test_from_params_protocol(self) -> None:
@@ -97,7 +96,7 @@ class TestUtils(TestCase):
         with tempfile.TemporaryDirectory() as tmp_dir:
             hparams_file: Path = self._save_example_hparams_config_to_file(tmp_dir, "hparams", "yaml")
 
-            hparams: t.Dict = hp.get_hparams(f"file:{hparams_file.as_posix()}")
+            hparams: dict = hp.get_hparams(f"file:{hparams_file.as_posix()}")
             self.assertIsInstance(hparams, dict)
             self.assertIn("max_depth", hparams)
 
@@ -110,7 +109,7 @@ class TestUtils(TestCase):
         tmp_dir: str
         with tempfile.TemporaryDirectory() as tmp_dir:
             hparams_file: Path = self._save_example_hparams_config_to_file(tmp_dir, "hparams", "yaml")
-            hparams: t.Dict = hp.get_hparams(
+            hparams: dict = hp.get_hparams(
                 [None, "", f"file:{hparams_file.as_posix()}", {}, "msg='hello_2'", {"a": 100}]
             )
             self.assertIsInstance(hparams, dict)

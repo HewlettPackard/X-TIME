@@ -15,7 +15,6 @@
 ###
 import pickle
 import sys
-import typing as t
 from pathlib import Path
 from unittest import TestCase, mock
 
@@ -30,7 +29,7 @@ from xtime.errors import DatasetError
 
 
 class TestDataset(TestCase):
-    def _check_serialized_dataset_structure(self, directory: Path, splits: t.List[str]) -> None:
+    def _check_serialized_dataset_structure(self, directory: Path, splits: list[str]) -> None:
         """Check serialized dataset structure.
 
         Args:
@@ -78,7 +77,7 @@ class TestDataset(TestCase):
 
     def test_registered_dataset_factory(self) -> None:
         # Get all registered datasets
-        dataset_names: t.List[str] = []
+        dataset_names: list[str] = []
         for dataset_name in RegisteredDatasetFactory.registry.keys():
             for dataset_version in RegisteredDatasetFactory.registry.get(dataset_name)().builders.keys():
                 dataset_names.append(f"{dataset_name}:{dataset_version}")
@@ -86,7 +85,7 @@ class TestDataset(TestCase):
         self.assertTrue(len(dataset_names) > 0, "No registered datasets found.")
         #
         for dataset_name in dataset_names:
-            factories: t.List[DatasetFactory] = DatasetFactory.resolve_factories(dataset_name)
+            factories: list[DatasetFactory] = DatasetFactory.resolve_factories(dataset_name)
             self.assertEqual(1, len(factories), f"Expected one factory for '{dataset_name}' dataset.")
             self.assertIsInstance(
                 factories[0],

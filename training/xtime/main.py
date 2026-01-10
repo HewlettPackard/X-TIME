@@ -17,7 +17,6 @@
 import json
 import logging
 import sys
-import typing as t
 from multiprocessing import Process
 from pathlib import Path
 
@@ -75,7 +74,7 @@ def _run_search_hp_pipeline(
     dataset: str,
     model: str,
     algorithm: str,
-    hparams: t.Optional[t.Tuple[str]],
+    hparams: tuple | None,
     num_search_trials: int,
     num_validate_trials: int = 0,
     gpu: float = 0,
@@ -104,7 +103,7 @@ def _run_search_hp_pipeline(
     "[Logging Levels]({log_level}) for more details). Only messages with this logging level or higher are "
     "logged.".format(log_level="https://docs.python.org/3/library/logging.html#logging-levels"),
 )
-def cli(log_level: t.Optional[str]):
+def cli(log_level: str | None):
     if log_level:
         log_level = log_level.upper()
         logging.basicConfig(level=log_level)
@@ -128,7 +127,7 @@ def experiments() -> None: ...
 @dataset_arg
 @model_arg
 @params_option
-def experiment_train(dataset: str, model: str, params: t.Tuple[str]) -> None:
+def experiment_train(dataset: str, model: str, params: tuple[str, ...]) -> None:
     from xtime.stages.train import train
 
     try:
@@ -185,7 +184,7 @@ def experiment_search_hp(
     dataset: str,
     model: str,
     algorithm: str,
-    params: t.Tuple[str],
+    params: tuple[str, ...],
     num_search_trials: int,
     num_validate_trials: int = 0,
     gpu: float = 0,
@@ -253,7 +252,7 @@ def experiment_search_hp(
     help="Optional file name for report. The file extension defines serialization format. If not present, generated "
     "report will be printed on a console.",
 )
-def experiment_describe(report_type: str, run: t.Optional[str] = None, file: t.Optional[str] = None) -> None:
+def experiment_describe(report_type: str, run: str | None = None, file: str | None = None) -> None:
     from xtime.stages.describe import describe
 
     try:
@@ -279,7 +278,7 @@ def datasets() -> None: ...
 def dataset_describe(dataset: str, verbose: bool, format_: str) -> None:
     try:
         ds: Dataset = Dataset.create(dataset).validate()
-        summary: t.Dict = ds.summary(verbose=verbose)
+        summary: dict = ds.summary(verbose=verbose)
 
         if format_ == "json":
             json.dump(summary, sys.stdout, indent=4)
@@ -288,8 +287,8 @@ def dataset_describe(dataset: str, verbose: bool, format_: str) -> None:
 
             yaml.dump(summary, sys.stdout)
         else:
-            metadata: t.Dict = summary.pop("metadata")
-            features: t.List[t.Dict] = metadata.pop("features")
+            metadata: dict = summary.pop("metadata")
+            features: list[dict] = metadata.pop("features")
 
             print("METADATA (general)")
             json.dump(metadata, sys.stdout, indent=4)
@@ -370,11 +369,11 @@ def hparams() -> None: ...
 
 @hparams.command("query", help="Query hyperparameters for a given set of input specifications.")
 @params_option
-def hparams_query(params: t.Tuple[str]) -> None:
+def hparams_query(params: tuple[str, ...]) -> None:
     try:
         import xtime.hparams as hp
 
-        hp_dict: t.Dict = hp.get_hparams(params)
+        hp_dict: dict = hp.get_hparams(params)
         json.dump(hp_dict, sys.stdout, indent=4, cls=hp.JsonEncoder)
         print("")
     except Exception as err:

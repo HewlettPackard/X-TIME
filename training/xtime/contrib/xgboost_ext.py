@@ -14,7 +14,6 @@
 # limitations under the License.
 ###
 import json
-import typing as t
 from pathlib import Path
 
 import pandas as pd
@@ -37,7 +36,7 @@ class TreeTraversal:
         self.num_leaves = 0
         """Number of leaves in a tree."""
 
-    def traverse(self, node: t.Dict) -> "TreeTraversal":
+    def traverse(self, node: dict) -> "TreeTraversal":
         """Traverse the tree starting with `node` node."""
         self.depth = 0
         self.num_leaves = 0
@@ -49,14 +48,14 @@ class TreeTraversal:
     def __repr__(self) -> str:
         return f"TreeTraversal(depth={self.depth}, num_leaves={self.num_leaves}, num_nodes={self.num_nodes})"
 
-    def as_dict(self, prefix: str = "") -> t.Dict:
+    def as_dict(self, prefix: str = "") -> dict:
         return {
             f"{prefix}depth": self.depth,
             f"{prefix}num_leaves": self.num_leaves,
             f"{prefix}num_nodes": self.num_nodes,
         }
 
-    def _traverse(self, node: t.Dict) -> None:
+    def _traverse(self, node: dict) -> None:
         """Recursively traverse the tree."""
         if not isinstance(node, dict) or "nodeid" not in node:
             return
@@ -70,9 +69,7 @@ class TreeTraversal:
                 self._traverse(child)
 
 
-def get_model_stats(
-    model_dir: Path, task_type: TaskType, num_trees: int = 0, cache: t.Optional[t.Dict] = None
-) -> t.Dict:
+def get_model_stats(model_dir: Path, task_type: TaskType, num_trees: int = 0, cache: dict | None = None) -> dict:
     """Compute some basic statistics of an XGBoost model.
 
     Args:
@@ -88,7 +85,7 @@ def get_model_stats(
         to actual number of trees, then number of trees will equal to this number.
     """
 
-    def _get_stats(_trees: pd.DataFrame) -> t.Dict:
+    def _get_stats(_trees: pd.DataFrame) -> dict:
         _num_trees = _trees.shape[0] if num_trees <= 0 else min(num_trees, _trees.shape[0])
         return {
             "max_depth": _trees["depth"][0:_num_trees].max(),

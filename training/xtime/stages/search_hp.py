@@ -18,7 +18,6 @@ import copy
 import logging
 import os
 import sys
-import typing as t
 from pathlib import Path
 
 import mlflow
@@ -49,13 +48,13 @@ def search_hp(
     dataset: str,
     model: str,
     algorithm: str,
-    hparams: t.Optional[HParamsSource],
+    hparams: HParamsSource | None,
     num_trials: int,
     gpu: float = 0,
     fit_params: str = "",
 ) -> str:
     print("[search_hp] ray_version:", ray.__version__)
-    estimator: t.Type[Estimator] = get_estimator(model)
+    estimator: type[Estimator] = get_estimator(model)
 
     ray_init_params = {"include_dashboard": True, "dashboard_host": "0.0.0.0"}
     if "XTIME_NOX_TEST" in os.environ:
@@ -109,7 +108,7 @@ def search_hp(
         if hparams is None:
             hparams = f"auto:default:model={model};task={ctx.dataset.metadata.task.type.value};run_type=hpo"
             logger.info("Hyperparameters are not provided, using default ones: '%s'.", hparams)
-        param_space: t.Dict = get_hparams(hparams)
+        param_space: dict = get_hparams(hparams)
         logger.info("Hyperparameter search space resolved to: '%s'", param_space)
 
         # Set any `tune_config` parameters before calling  the `_init_search_algorithm` method. The reason for this is
@@ -144,7 +143,7 @@ def search_hp(
         results: ResultGrid = tuner.fit()
 
         _set_run_status(results)
-        best_trial_metrics: t.Dict = _get_metrics_for_best_trial(results, ctx)
+        best_trial_metrics: dict = _get_metrics_for_best_trial(results, ctx)
         MLflow.log_metrics(best_trial_metrics)
         _save_best_trial_info(results, artifact_path, best_trial_metrics, active_run)
         _save_summary(artifact_path, active_run)
@@ -194,7 +193,7 @@ def _set_run_status(results: ResultGrid) -> None:
         mlflow.set_tag("status", "PARTIALLY_COMPLETED")
 
 
-def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
+def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> dict:
     """Return dictionary that maps a metric name to its value for this task.
 
     Returns:
@@ -202,11 +201,11 @@ def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
             for classification tasks it will include metrics such as `dataset_accuracy`, `train_accuracy` etc.
     """
     best_result: Result = results.get_best_result()
-    metrics: t.Dict = copy.deepcopy(best_result.metrics or {})
+    metrics: dict = copy.deepcopy(best_result.metrics or {})
 
     if ctx.dataset is not None:
-        expected_metrics: t.List[str] = METRICS[ctx.dataset.metadata.task.type]
-        missing_metrics: t.Set = {m for m in expected_metrics if m not in metrics}
+        expected_metrics: list[str] = METRICS[ctx.dataset.metadata.task.type]
+        missing_metrics: set[str] = {m for m in expected_metrics if m not in metrics}
         if missing_metrics:
             logger.warning(
                 "Expected metrics not found in best trial (log_dir=%s): dataset=%s, task=%s, expected_metrics=%s, "
@@ -221,14 +220,14 @@ def _get_metrics_for_best_trial(results: ResultGrid, ctx: Context) -> t.Dict:
     return metrics
 
 
-def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: t.Dict, active_run: ActiveRun) -> None:
+def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: dict, active_run: ActiveRun) -> None:
     best_result: Result = results.get_best_result()
 
     _relative_path: str = ""
     local_path: str = ""
     trial_uri: str = ""
 
-    log_dir: t.Optional[Path] = _get_log_dir(best_result)
+    log_dir: Path | None = _get_log_dir(best_result)
     if log_dir is not None:
         _relative_path = log_dir.relative_to(local_dir).as_posix()
         local_path = log_dir.as_posix()
@@ -250,14 +249,14 @@ def _save_best_trial_info(results: ResultGrid, local_dir: Path, metrics: t.Dict,
     )
 
 
-def _get_log_dir(result: Result) -> t.Optional[Path]:
+def _get_log_dir(result: Result) -> Path | None:
     if hasattr(result, "log_dir"):
         # Prior to 2.7.0 (https://github.com/ray-project/ray/blob/ray-2.6.3/python/ray/air/result.py)
-        log_dir: t.Optional[Path] = result.log_dir
+        log_dir: Path | None = result.log_dir
     elif hasattr(result, "path"):
         # 2.7.0 and above (https://github.com/ray-project/ray/blob/ray-2.7.0/python/ray/air/result.py)
         # TODO sergey this can theoretically point to a remote FS such as S3.
-        log_dir: t.Optional[Path] = Path(result.path) if result.path is not None else None
+        log_dir: Path | None = Path(result.path) if result.path is not None else None
     else:
         raise NotImplementedError(
             "Do not know how to get logging dir using `ray.air.result.Result` instance. Ray version "

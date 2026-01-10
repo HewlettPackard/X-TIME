@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ###
-import typing as t
 from unittest import TestCase
 
 import pytest
@@ -32,7 +31,7 @@ class TestCatboostEstimator(TestCase):
         ds: Dataset = Dataset.create("churn_modelling:numerical")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: t.Dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
 
     @with_temp_work_dir
@@ -40,5 +39,5 @@ class TestCatboostEstimator(TestCase):
         ds: Dataset = Dataset.create("year_prediction_msd:default")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: t.Dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)

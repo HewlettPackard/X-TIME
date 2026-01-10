@@ -17,9 +17,9 @@
 import logging
 import os
 import re
-import typing as t
 import urllib.parse as url_parser
 from pathlib import Path
+from typing import Any
 
 import mlflow
 from mlflow import MlflowClient
@@ -40,7 +40,7 @@ logger = logging.getLogger(__name__)
 class MLflow(object):
     @staticmethod
     def set_tags(
-        dataset: t.Optional[str] = None, run_type: t.Optional[RunType] = None, task: t.Optional[Task] = None, **kwargs
+        dataset: str | None = None, run_type: RunType | None = None, task: Task | None = None, **kwargs
     ) -> None:
         """Helper method that sets tags for active MLflow run.
 
@@ -60,7 +60,7 @@ class MLflow(object):
         mlflow.set_tags(kwargs)
 
     @staticmethod
-    def get_experiment_ids(client: t.Optional[MlflowClient] = None) -> t.List[str]:
+    def get_experiment_ids(client: MlflowClient | None = None) -> list[str]:
         """Return all MLflow experiment IDs.
 
         Args:
@@ -72,8 +72,8 @@ class MLflow(object):
         if client is None:
             client = MlflowClient()
 
-        ids: t.List[str] = []
-        page_token: t.Optional[str] = None
+        ids: list[str] = []
+        page_token: str | None = None
         while True:
             experiments: PagedList[Experiment] = client.search_experiments(page_token=page_token)
             ids.extend(e.experiment_id for e in experiments)
@@ -85,10 +85,10 @@ class MLflow(object):
 
     @staticmethod
     def get_runs(
-        client: t.Optional[MlflowClient] = None,
-        experiment_ids: t.Optional[t.List[str]] = None,
+        client: MlflowClient | None = None,
+        experiment_ids: list[str] | None = None,
         filter_string: str = "",
-    ) -> t.List[Run]:
+    ) -> list[Run]:
         """Return MLflow runs that match given query (filter string).
 
         Args:
@@ -103,8 +103,8 @@ class MLflow(object):
         if client is None:
             client = MlflowClient()
 
-        runs: t.List[Run] = []
-        page_token: t.Optional[str] = None
+        runs: list[Run] = []
+        page_token: str | None = None
         while True:
             _runs: PagedList[Run] = client.search_runs(
                 experiment_ids=experiment_ids if experiment_ids is not None else MLflow.get_experiment_ids(client),
@@ -119,7 +119,7 @@ class MLflow(object):
         return runs
 
     @staticmethod
-    def create_experiment(client: t.Optional[MlflowClient] = None) -> None:
+    def create_experiment(client: MlflowClient | None = None) -> None:
         """Create a new MLflow experiment with name specified in `MLFLOW_EXPERIMENT_NAME` environment variable.
 
         Args:
@@ -143,7 +143,7 @@ class MLflow(object):
             mlflow.create_experiment(name)
 
     @staticmethod
-    def get_tags_from_env() -> t.Dict:
+    def get_tags_from_env() -> dict:
         """Return dictionary of tags specified via environment.
 
         Users can provide addition tags to be associated with MLflow runs. It's the same format that hyperparameters are
@@ -155,9 +155,7 @@ class MLflow(object):
         return hparams.from_string(os.environ.get("MLFLOW_TAGS", None))
 
     @staticmethod
-    def get_artifact_path(
-        run: t.Optional[Run] = None, ensure_exists: bool = True, raise_if_not_exist: bool = False
-    ) -> Path:
+    def get_artifact_path(run: Run | None = None, ensure_exists: bool = True, raise_if_not_exist: bool = False) -> Path:
         """Return path to artifact directory for given MLflow run.
 
         Args:
@@ -184,7 +182,7 @@ class MLflow(object):
         return local_dir
 
     @staticmethod
-    def init_run(run: t.Optional[Run]) -> None:
+    def init_run(run: Run | None) -> None:
         """Initialize MLflow run.
 
         For now, it does not do a lot of things, mainly ensuring that the artifact directory exists. So, it's a wrapper
@@ -196,7 +194,7 @@ class MLflow(object):
         _ = MLflow.get_artifact_path(run, ensure_exists=True)
 
     @staticmethod
-    def log_metrics(metrics: t.Dict[str, t.Any]) -> None:
+    def log_metrics(metrics: dict[str, Any]) -> None:
         """Log metrics with current MLflow run ignoring some metrics and checking for MLflow exceptions.
 
         This function logs metrics with current MLflow run. These metrics can come from different platforms, such as
@@ -210,7 +208,6 @@ class MLflow(object):
         _metrics_to_ignore = {
             "timesteps_total",
             "time_this_iter_s",
-            "timesteps_total",
             "episodes_total",
             "training_iteration",
             "timestamp",
@@ -243,18 +240,18 @@ class MLflow(object):
         if parsed.scheme == "mlflow":
             while run_id and run_id[0] == "/":
                 run_id = run_id[1:]
-        matches: t.List[str] = re.findall(r"^[a-zA-Z0-9]+$", run_id)
+        matches: list[str] = re.findall(r"^[a-zA-Z0-9]+$", run_id)
         if not matches or matches[0] != run_id:
             logger.warning("Probably invalid MLflow URL (%s). Run ID was resolved to '%s'.", url, run_id)
         return run_id
 
     @staticmethod
-    def get_run_name() -> t.Optional[str]:
+    def get_run_name() -> str | None:
         """Return MLflow run name from environment variable.
         Returns:
             Run name (string) or None if not set.
         """
-        run_name: t.Optional[str] = os.environ.get("MLFLOW_RUN_NAME", None)
+        run_name: str | None = os.environ.get("MLFLOW_RUN_NAME", None)
         if isinstance(run_name, str):
             run_name = run_name.strip()
         return run_name

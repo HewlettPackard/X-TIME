@@ -18,9 +18,9 @@ import copy
 import importlib
 import logging
 import os
-import typing as t
 from dataclasses import dataclass
 from pathlib import Path
+from typing import Any, Callable
 from unittest import TestCase
 
 import mlflow
@@ -67,7 +67,7 @@ class Callback(object):
 
     def after_fit(self, dataset: Dataset, estimator: "Estimator") -> None: ...
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: dict[str, Any]) -> None:
         """Called after the model's final evaluation.
 
         Args:
@@ -79,7 +79,7 @@ class Callback(object):
 
 
 class ContainerCallback(Callback):
-    def __init__(self, callbacks: t.Optional[t.List[Callback]]) -> None:
+    def __init__(self, callbacks: list[Callback] | None) -> None:
         self.callbacks = callbacks or []
 
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
@@ -90,20 +90,20 @@ class ContainerCallback(Callback):
         for callback in self.callbacks:
             callback.after_fit(dataset, estimator)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: dict[str, Any]) -> None:
         for callback in self.callbacks:
             callback.after_test(dataset, estimator, metrics)
 
 
 class MLflowCallback(Callback):
-    def __init__(self, hparams: t.Dict, ctx: Context) -> None:
+    def __init__(self, hparams: dict, ctx: Context) -> None:
         mlflow.log_params(hparams)
         MLflow.set_tags(dataset=ctx.metadata.dataset, run_type=ctx.metadata.run_type, model=ctx.metadata.model)
 
     def before_fit(self, dataset: Dataset, estimator: "Estimator") -> None:
         MLflow.set_tags(task=dataset.metadata.task)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: dict[str, Any]) -> None:
         # TODO: (sergey) why did I come up with this implementation originally (in other words, why not dumping all
         #       metrics)? Is it because the metric value for some reason could be non-numeric?
         # mlflow.log_metrics({name: float(metrics[name]) for name in METRICS[dataset.metadata.task.type]})
@@ -120,17 +120,17 @@ class TrainCallback(Callback):
 
     def __init__(
         self,
-        work_dir: t.Union[str, Path],
-        hparams: t.Dict,
+        work_dir: str | Path,
+        hparams: dict,
         ctx: Context,
-        run_info_file: t.Optional[str] = None,
-        data_info_file: t.Optional[str] = None,
-        model_info_file: t.Optional[str] = None,
-        test_info_file: t.Optional[str] = None,
+        run_info_file: str | None = None,
+        data_info_file: str | None = None,
+        model_info_file: str | None = None,
+        test_info_file: str | None = None,
     ) -> None:
         self.work_dir = Path(work_dir)
         self.hparams = encode(copy.deepcopy(hparams))
-        self.context: t.Dict = encode(ctx.metadata.to_json())
+        self.context: dict = encode(ctx.metadata.to_json())
         self.run_info_file = run_info_file or "run_info.yaml"
         self.data_info_file = data_info_file or "data_info.yaml"
         self.model_info_file = model_info_file or "model_info.yaml"
@@ -169,13 +169,13 @@ class TrainCallback(Callback):
             metadata["model"]["num_classes"] = dataset.metadata.task.num_classes
         IO.save_yaml(metadata, self.work_dir / self.model_info_file, raise_on_error=False)
 
-    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: t.Dict[str, t.Any]) -> None:
+    def after_test(self, dataset: Dataset, estimator: "Estimator", metrics: dict[str, Any]) -> None:
         IO.save_yaml(encode(metrics), self.work_dir / self.test_info_file)
 
 
 class Estimator:
     def __init__(self, *args, **kwargs) -> None:
-        self.params: t.Optional[t.Dict] = None
+        self.params: dict | None = None
         self.model = None
 
     @abc.abstractmethod
@@ -185,7 +185,7 @@ class Estimator:
     def fit_model(self, dataset: Dataset, **kwargs) -> None: ...
 
     @classmethod
-    def fit(cls, hparams: t.Dict, ctx: Context) -> t.Dict:
+    def fit(cls, hparams: dict, ctx: Context) -> dict:
         """Train a model using hyperparameters in `params` and additional run details in `context`.
 
         context: callback (Callback), dataset (Dataset), problem (str), model (str), run_type (str), fit_params (dict),
@@ -202,7 +202,7 @@ class Estimator:
             #      `lightgbm` classifiers are used.
             if getattr(cls, "NAME", None) == "lightgbm":
                 if hasattr(ray_session, "_get_session"):
-                    get_session: t.Callable = getattr(ray_session, "_get_session")
+                    get_session: Callable = getattr(ray_session, "_get_session")
                 elif hasattr(ray_session, "get_session"):
                     get_session = getattr(ray_session, "get_session")
                 else:
@@ -232,12 +232,12 @@ class Estimator:
         estimator.fit_model(dataset, **ctx.metadata.fit_params)
         callback.after_fit(dataset, estimator)
 
-        metrics: t.Dict = estimator.evaluate(dataset)
+        metrics: dict = estimator.evaluate(dataset)
         callback.after_test(dataset, estimator, metrics)
 
         return metrics
 
-    def evaluate(self, dataset: Dataset, **kwargs) -> t.Dict[str, t.Any]:
+    def evaluate(self, dataset: Dataset, **kwargs) -> dict[str, Any]:
         if dataset.metadata.task.type.classification():
             metrics = self._evaluate_classifier(dataset, **kwargs)
         elif dataset.metadata.task.type.regression():
@@ -252,9 +252,7 @@ class Estimator:
             raise ValueError(f"Unsupported machine learning task {dataset.metadata.task}")
         return metrics
 
-    def _evaluate_classifier(
-        self, dataset: Dataset, predict_proba_kwargs: t.Optional[t.Dict] = None
-    ) -> t.Dict[str, t.Any]:
+    def _evaluate_classifier(self, dataset: Dataset, predict_proba_kwargs: dict | None = None) -> dict[str, Any]:
         """Report results of a training run.
 
         TODO: I can already have here results for train/valid (eval) splits.
@@ -278,7 +276,7 @@ class Estimator:
         ), "Invalid task type (expecting `ClassificationTask` task)."
         task: ClassificationTask = dataset.metadata.task
 
-        def _evaluate(x, y: t.Union[np.ndarray, pd.Series], name: str) -> None:
+        def _evaluate(x, y: np.ndarray | pd.Series, name: str) -> None:
             nonlocal _num_examples
 
             if isinstance(y, pd.Series):
@@ -289,7 +287,7 @@ class Estimator:
                 )
 
             # (n_samples, 2)
-            predicted_probas: t.Union[np.ndarray, pd.DataFrame] = self.model.predict_proba(x, **predict_proba_kwargs)
+            predicted_probas: np.ndarray | pd.DataFrame = self.model.predict_proba(x, **predict_proba_kwargs)
             if isinstance(predicted_probas, pd.DataFrame):
                 # This is the case for (some?) models from RAPIDS library.
                 predicted_probas = predicted_probas.values
@@ -332,10 +330,10 @@ class Estimator:
 
         return metrics
 
-    def _evaluate_regressor(self, dataset: Dataset) -> t.Dict[str, t.Any]:
+    def _evaluate_regressor(self, dataset: Dataset) -> dict[str, Any]:
         """Evaluate regressor model."""
         # Baseline predictor (strategy=mean) will be used to compute out-of-sample R-squared metric.
-        baseline_y_pred: t.Optional[float] = None
+        baseline_y_pred: float | None = None
         train_y_vals: np.ndarray = dataset.splits[DatasetSplit.TRAIN].y.values
         if train_y_vals.ndim == 1 or (train_y_vals.ndim == 2 and train_y_vals.shape[1] == 1):
             baseline_y_pred = train_y_vals.flatten().mean()
@@ -345,7 +343,7 @@ class Estimator:
         metrics = {"dataset_mse": 0.0}
         _num_examples = 0
 
-        def _evaluate(x: pd.DataFrame, y: t.Union[pd.DataFrame, pd.Series], name: str) -> None:
+        def _evaluate(x: pd.DataFrame, y: pd.DataFrame | pd.Series, name: str) -> None:
             nonlocal _num_examples
             _num_examples += len(y)
 
@@ -362,7 +360,7 @@ class Estimator:
             metrics[f"{name}_r2"] = r2_score(y_true=y, y_pred=y_pred)
 
         for split_name in (DatasetSplit.TRAIN, DatasetSplit.VALID, DatasetSplit.TEST):
-            split: t.Optional[DatasetSplit] = dataset.split(split_name)
+            split: DatasetSplit | None = dataset.split(split_name)
             if split is not None:
                 _evaluate(split.x, split.y, split_name)
 
@@ -375,7 +373,7 @@ class Estimator:
         return metrics
 
     @staticmethod
-    def make_model(dataset_metadata: DatasetMetadata, classifier_cls, regressor_cls, params: t.Dict) -> t.Any:
+    def make_model(dataset_metadata: DatasetMetadata, classifier_cls, regressor_cls, params: dict) -> Any:
         return classifier_cls(**params) if dataset_metadata.task.type.classification() else regressor_cls(**params)
 
 
@@ -386,7 +384,7 @@ def get_estimator_registry() -> ClassRegistry:
     return _registry
 
 
-def get_estimator(name: str) -> t.Type[Estimator]:
+def get_estimator(name: str) -> type[Estimator]:
     return _registry.get(name)
 
 
@@ -419,7 +417,7 @@ class LegacySavedModelInfo:
 
     def file_name(self) -> str:
         """Return model file name."""
-        model_to_file_name: t.Dict[str, str] = {
+        model_to_file_name: dict[str, str] = {
             "catboost": "model.bin",
             "lightgbm": "model.txt",
             "xgboost": "model.ubj",
@@ -438,7 +436,7 @@ class LegacySavedModelInfo:
         return LegacySavedModelInfo(model=model).file_name()
 
     @classmethod
-    def from_path(cls, path: Path) -> t.Optional["LegacySavedModelInfo"]:
+    def from_path(cls, path: Path) -> "LegacySavedModelInfo | None":
         """Determine saved model details using information from files created by xtime stages.
 
         Files that are read in this function are created by the TrainingCallback class.
@@ -450,17 +448,17 @@ class LegacySavedModelInfo:
 
         if (path / "model_info.yaml").is_file():
             # This is a new file that is not available for past experiments.
-            model_info: t.Dict = IO.load_dict(path / "model_info.yaml")
+            model_info: dict = IO.load_dict(path / "model_info.yaml")
             info.model = model_info.get("model", {}).get("name", "")
             info.task = model_info.get("model", {}).get("type", "")
         else:
             # Else, try standard run_info and data_info files.
             if (path / "run_info.yaml").is_file():
-                run_info: t.Dict = IO.load_dict(path / "run_info.yaml")
+                run_info: dict = IO.load_dict(path / "run_info.yaml")
                 info.model = run_info.get("context", {}).get("model", "")
 
             if (path / "data_info.yaml").is_file():
-                data_info: t.Dict = IO.load_dict(path / "data_info.yaml")
+                data_info: dict = IO.load_dict(path / "data_info.yaml")
                 info.task = data_info.get("task", {}).get("type", "")
 
         if info.is_valid():
@@ -482,7 +480,7 @@ class LegacySavedModelLoader:
     """
 
     @staticmethod
-    def load_model(path: Path, legacy_saved_model_info: LegacySavedModelInfo) -> t.Any:
+    def load_model(path: Path, legacy_saved_model_info: LegacySavedModelInfo) -> Any:
         """Load a model from a given path.
 
         Args:
@@ -551,7 +549,7 @@ class Model:
         return LegacySavedModelInfo.get_file_name(model_name)
 
     @staticmethod
-    def load_model(path: Path, legacy_saved_model_info: t.Optional[LegacySavedModelInfo] = None) -> t.Any:
+    def load_model(path: Path, legacy_saved_model_info: LegacySavedModelInfo | None = None) -> Any:
         """Load model stored in a given path.
 
         Args:
@@ -576,7 +574,7 @@ class Model:
         raise ValueError(f"Cannot load model from '{path}'.")
 
 
-def get_expected_available_estimators() -> t.List[str]:
+def get_expected_available_estimators() -> list[str]:
     """Return list of estimators in sorted order that are expected to be available in this system."""
     # Mapping from a library name to an estimator name.
     libraries = {"catboost": ["catboost"], "lightgbm": ["lightgbm"], "cuml": ["rapids-rf"], "xgboost": ["xgboost"]}
@@ -590,12 +588,12 @@ def get_expected_available_estimators() -> t.List[str]:
     return sorted(estimators)
 
 
-def unit_test_train_model(test_case: TestCase, model_name: str, model_class: t.Any, ds: Dataset) -> t.Dict:
+def unit_test_train_model(test_case: TestCase, model_name: str, model_class: Any, ds: Dataset) -> dict:
     model: Estimator = _registry.get(model_name)
     test_case.assertIs(
         model, model_class, f"model_name={model_name}, expected_model_class={model_class}, actual_model_class={model}"
     )
-    metrics: t.Dict = model.fit(
+    metrics: dict = model.fit(
         hparams=dict(n_estimators=1),
         ctx=Context(
             metadata=Metadata(dataset=ds.metadata.name, model=model_name, run_type=RunType.TRAIN),
@@ -607,7 +605,7 @@ def unit_test_train_model(test_case: TestCase, model_name: str, model_class: t.A
     return metrics
 
 
-def unit_test_check_metrics(test_case: TestCase, task: Task, metrics: t.Dict) -> None:
+def unit_test_check_metrics(test_case: TestCase, task: Task, metrics: dict) -> None:
     if task.type.classification():
         expected_metrics = []
         for split in ("dataset", "train", "valid", "test"):

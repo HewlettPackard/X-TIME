@@ -16,8 +16,8 @@
 
 import inspect
 import os
-import typing as t
 from pathlib import Path
+from typing import Callable
 
 import nox
 import tomlkit
@@ -68,7 +68,7 @@ def unit_tests(session: nox.Session, deps: str) -> None:
             must be available externally.
     """
     # Install this project and pytest (with `pip install`).
-    install_args: t.List[str] = [".[all]", "pytest", "pytest-xdist"]
+    install_args: list[str] = [".[all]", "pytest", "pytest-xdist"]
 
     # If pinned deps to be used, export constraints from `poetry.lock` file using `poetry`.
     if deps == "pinned":
@@ -204,7 +204,6 @@ def _validate_search_hp_run() -> None:
     folder.
     """
     import os
-    import typing as t
 
     import mlflow
     from mlflow.entities import Run
@@ -218,7 +217,7 @@ def _validate_search_hp_run() -> None:
     num_search_trials: int = int(os.environ["XTIME_NUM_SEARCH_TRIALS"])
 
     # There must be one experiment (Default + this one).
-    experiment_ids: t.List[str] = MLflow.get_experiment_ids()
+    experiment_ids: list[str] = MLflow.get_experiment_ids()
     assert (
         len(experiment_ids) == 2
     ), f"Expected two experiments (Default and {experiment_name}), but got {len(experiment_ids)}."
@@ -227,7 +226,7 @@ def _validate_search_hp_run() -> None:
     ), "Unexpected experiment name (s)."
 
     # There must be one run
-    runs: t.List[Run] = MLflow.get_runs()
+    runs: list[Run] = MLflow.get_runs()
     assert len(runs) == 1, f"Expected one run, but got {len(runs)}."
 
     # Verify run outputs
@@ -265,12 +264,12 @@ def _validate_search_hp_run() -> None:
     )
 
     # Validate ray tune trials using ray tune API
-    trial_stats: t.List[t.Dict] = Analysis.get_trial_stats(run.info.run_id, skip_model_stats=True)
+    trial_stats: list[dict] = Analysis.get_trial_stats(run.info.run_id, skip_model_stats=True)
     assert (
         len(trial_stats) == num_search_trials
     ), f"Number of trials do not match ({len(trial_stats)} != {num_search_trials})."
 
-    summary_from_api: t.Dict = Analysis.get_summary(run.info.run_id)
+    summary_from_api: dict = Analysis.get_summary(run.info.run_id)
     assert all(k in summary_from_file for k in summary_from_api.keys()), "Summary from API does not contain all keys."
 
     best_trial = Analysis.get_best_trial(run.info.run_id)
@@ -308,7 +307,7 @@ def _validate_train_run() -> None:
     print(f"[validate_train_run] 00/{n} start validation experiment={experiment_name}, model={model_name}.")
 
     # There must be one experiment.
-    experiment_ids: t.List[str] = MLflow.get_experiment_ids()
+    experiment_ids: list[str] = MLflow.get_experiment_ids()
     if len(experiment_ids) != 2:
         raise ValueError(f"Expected two experiments (Default and {experiment_name}), but got {len(experiment_ids)}.")
     for experiment_id in experiment_ids:
@@ -318,7 +317,7 @@ def _validate_train_run() -> None:
     print(f"[validate_train_run] 01/{n} experiments validated experiment_ids={experiment_ids}.")
 
     # There must be one run
-    runs: t.List[Run] = MLflow.get_runs()
+    runs: list[Run] = MLflow.get_runs()
     if len(runs) != 1:
         raise ValueError(f"Expected one run, but got {len(runs)}.")
     print(f"[validate_train_run] 02/{n} runs validated run_ids=[{runs[0].info.run_id}].")
@@ -419,7 +418,7 @@ def _validate_xtime_train_run(train_dir: Path, model_name: str) -> None:
     assert model is not None, "Failed to load the model."
 
 
-def _create_validate_file(location: Path, main_fn: t.Callable, deps: t.List[t.Callable]) -> Path:
+def _create_validate_file(location: Path, main_fn: Callable, deps: list[Callable]) -> Path:
     """Create a `validate.py` file to run in a nox session to validate outputs if XTIME stages (train / search_hp).
 
     Args:

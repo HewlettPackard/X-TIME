@@ -14,8 +14,8 @@
 # limitations under the License.
 ###
 import abc
-import typing as t
 from collections import Counter
+from typing import Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ from xtime.ml import Feature, FeatureType
 
 
 class DropColumns(BaseEstimator, TransformerMixin):
-    def __init__(self, cols: t.Union[t.List[str], str]) -> None:
+    def __init__(self, cols: str | list[str]) -> None:
         if not isinstance(cols, list):
             cols = [cols]
         self.cols = cols
@@ -41,7 +41,7 @@ class DropColumns(BaseEstimator, TransformerMixin):
 
 
 class ChangeColumnsType(BaseEstimator, TransformerMixin):
-    def __init__(self, cols: t.Union[t.List[str], str], dtype: t.Any) -> None:
+    def __init__(self, cols: str | list[str], dtype: Any) -> None:
         if not isinstance(cols, list):
             cols = [cols]
         self.cols = cols
@@ -57,7 +57,7 @@ class ChangeColumnsType(BaseEstimator, TransformerMixin):
 
 
 class ChangeColumnsTypeToCategory(BaseEstimator, TransformerMixin):
-    def __init__(self, features: t.List[Feature]) -> None:
+    def __init__(self, features: list[Feature]) -> None:
         self.features = features
 
     def fit(self, *_args, **_kwargs) -> "ChangeColumnsTypeToCategory":
@@ -73,7 +73,7 @@ class ChangeColumnsTypeToCategory(BaseEstimator, TransformerMixin):
 
 
 class CheckColumnsOrder(BaseEstimator, TransformerMixin):
-    def __init__(self, cols: t.Union[t.List[str], str], label: t.Optional[str] = None) -> None:
+    def __init__(self, cols: str | list[str], label: str | None = None) -> None:
         if not isinstance(cols, list):
             cols = [cols]
         self.cols = cols
@@ -99,11 +99,11 @@ class CheckColumnsOrder(BaseEstimator, TransformerMixin):
 
 
 class EncodeCategoricalColumns(BaseEstimator, TransformerMixin):
-    def __init__(self, cols: t.Union[t.List[str], str]) -> None:
+    def __init__(self, cols: str | list[str]) -> None:
         if not isinstance(cols, list):
             cols = [cols]
         self.cols = cols
-        self.encoders: t.List[OrdinalEncoder] = []
+        self.encoders: list[OrdinalEncoder] = []
 
     def fit(self, x: pd.DataFrame, *_args, **_kwargs) -> "EncodeCategoricalColumns":
         self.encoders = []
@@ -132,7 +132,7 @@ class TimeSeries:
     """
 
     @staticmethod
-    def mode(timeseries: t.Any) -> t.Any:
+    def mode(timeseries: Any) -> Any:
         """Identify the most common element in this timeseries segment.
         Args:
             timeseries: Time series segment.
@@ -146,8 +146,8 @@ class TimeSeries:
 
     @staticmethod
     def slide(
-        timeseries: t.Union[pd.DataFrame, pd.Series],
-        transform: t.Optional[t.Callable] = None,
+        timeseries: pd.DataFrame | pd.Series,
+        transform: Callable | None = None,
         window_size: int = 1,
         stride: int = 1,
     ) -> np.ndarray:
@@ -189,14 +189,14 @@ class TimeSeriesEncoder(abc.ABC):
     """Encoding time series segments for ML model models."""
 
     @abc.abstractmethod
-    def features(self) -> t.List[str]:
+    def features(self) -> list[str]:
         """Return list of feature names in this encoder."""
         raise NotImplementedError
 
     @abc.abstractmethod
     def encode(
-        self, segment: np.ndarray, prefix: t.Optional[str] = None, suffix: t.Optional[str] = None
-    ) -> t.Dict[str, t.Union[float, int]]:
+        self, segment: np.ndarray, prefix: str | None = None, suffix: str | None = None
+    ) -> dict[str, float | int]:
         """Encode a time series segment using a pre-defined set of features from time domain.
 
         Describe this is per segment per axis
@@ -212,7 +212,7 @@ class TimeSeriesEncoder(abc.ABC):
         """
         raise NotImplementedError
 
-    def encode_many(self, segments: np.ndarray, prefixes: t.Optional[t.List[str]] = None) -> t.List[t.Dict]:
+    def encode_many(self, segments: np.ndarray, prefixes: list[str] | None = None) -> list[dict]:
         """Encode multiple segments.
 
         Args:
@@ -239,7 +239,7 @@ class TimeSeriesEncoder(abc.ABC):
             assert segments.shape[2] == 1, f"Internal assert failed (shape = {segments.shape})."
             prefixes = [None]
 
-        feature_list: t.List[t.Dict] = []
+        feature_list: list[dict] = []
         for i in range(segments.shape[0]):
             features = {}
             for j in range(segments.shape[2]):
@@ -282,7 +282,7 @@ class TimeSeriesEncoderV1(TimeSeriesEncoder):
     def __init__(self) -> None:
         import tsfresh.feature_extraction.feature_calculators as ts_features
 
-        self._feature_calculators: t.Dict[str, t.Callable[[np.ndarray], t.Union[float, int]]] = {
+        self._feature_calculators: dict[str, Callable[[np.ndarray], float | int]] = {
             "abs_energy": lambda ts: float(ts_features.abs_energy(ts)),
             "absolute_sum_of_changes": lambda ts: float(ts_features.absolute_sum_of_changes(ts)),
             "count_above_mean": lambda ts: int(ts_features.count_above_mean(ts)),
@@ -304,12 +304,12 @@ class TimeSeriesEncoderV1(TimeSeriesEncoder):
             "variance": lambda ts: float(ts_features.variance(ts)),
         }
 
-    def features(self) -> t.List[str]:
+    def features(self) -> list[str]:
         return list(self._feature_calculators.keys())
 
     def encode(
-        self, segment: np.ndarray, prefix: t.Optional[str] = None, suffix: t.Optional[str] = None
-    ) -> t.Dict[str, t.Union[float, int]]:
+        self, segment: np.ndarray, prefix: str | None = None, suffix: str | None = None
+    ) -> dict[str, float | int]:
         segment = TimeSeriesEncoderV1.normalize_segment(segment)
         features = {name: calculate(segment) for name, calculate in self._feature_calculators.items()}
         if prefix or suffix:

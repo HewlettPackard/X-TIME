@@ -16,7 +16,6 @@
 
 import copy
 import pickle
-import typing as t
 from pathlib import Path
 
 from sklearn.dummy import DummyClassifier, DummyRegressor
@@ -32,7 +31,7 @@ from ..errors import DatasetError
 
 
 class ScikitLearnEstimator(Estimator):
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata, classifier_cls, regressor_cls) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata, classifier_cls, regressor_cls) -> None:
         super().__init__()
         params = copy.deepcopy(params)
 
@@ -53,12 +52,12 @@ class ScikitLearnEstimator(Estimator):
 class DummyEstimator(ScikitLearnEstimator):
     NAME = "dummy"
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         super().__init__(params, dataset_metadata, DummyClassifier, DummyRegressor)
 
 
 class RandomForestEstimator(ScikitLearnEstimator):
     NAME = "rf"
 
-    def __init__(self, params: t.Dict, dataset_metadata: DatasetMetadata) -> None:
+    def __init__(self, params: dict, dataset_metadata: DatasetMetadata) -> None:
         super().__init__(params, dataset_metadata, RandomForestClassifier, RandomForestRegressor)
