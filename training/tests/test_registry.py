@@ -54,6 +54,7 @@ class TestRegistry(TestCase):
             "madeline",
             "fraud_detection",
             "harth",
+            "metro_interstate_traffic_volume",
         ]
 
         self.assertIsInstance(names, list)
