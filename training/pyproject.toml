@@ -113,7 +113,10 @@ extend-select = ["I"]  # I - isort
 [tool.pytest.ini_options]
 markers = [
     "datasets: marks tests as ML datasets unit tests (deselect with '-m \"not datasets\"')",
-    "estimators: marks tests as ML models unit tests (deselect with '-m \"not models\"')",
+    "estimators: marks tests as ML models unit tests (deselect with '-m \"not estimators\"')",
+    "lightgbm: marks tests as LightGBM unit tests (deselect with '-m \"not lightgbm\"')",
+    "catboost: marks tests as CatBoost unit tests (deselect with '-m \"not catboost\"')",
+    "xgboost: marks tests as XGBoost unit tests (deselect with '-m \"not xgboost\"')",
     "cli: marks tests as Command Line Interface (CLI) unit tests (deselect with '-m \"not cli\"')"
 ]
 

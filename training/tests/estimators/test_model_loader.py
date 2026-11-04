@@ -19,23 +19,19 @@ from tempfile import TemporaryDirectory
 from unittest import TestCase
 
 import pandas as pd
-from catboost import CatBoostClassifier, CatBoostRegressor
-from lightgbm import Booster
+import pytest
 from sklearn.datasets import make_classification, make_regression
 from sklearn.dummy import DummyClassifier, DummyRegressor
 from sklearn.model_selection import train_test_split
-from xgboost import XGBClassifier, XGBRegressor
 
 from xtime.datasets import Dataset, DatasetMetadata, DatasetSplit
-from xtime.estimators._catboost import CatboostEstimator
-from xtime.estimators._lightgbm import LightGBMClassifierEstimator
 from xtime.estimators._sklearn import DummyEstimator, RandomForestEstimator
-from xtime.estimators._xgboost import XGBoostEstimator
 from xtime.estimators.estimator import Estimator, LegacySavedModelInfo, Model
 from xtime.ml import ClassificationTask, Feature, FeatureType, RegressionTask, TaskType
 from xtime.run import Context, Metadata, RunType
 
 
+@pytest.mark.estimators
 class TestModelLoader(TestCase):
     @staticmethod
     def make_classification_dataset(num_samples: int = 500, num_features: int = 20, num_classes: int = 3) -> Dataset:
@@ -124,7 +120,7 @@ class TestModelLoader(TestCase):
             save_dir = Path(temp_dir)
             estimator.save_model(save_dir)
             model = Model.load_model(
-                save_dir, LegacySavedModelInfo(getattr(estimator_cls, "NAME"), dataset.metadata.task.type.value)
+                save_dir, LegacySavedModelInfo(estimator_cls.NAME, dataset.metadata.task.type.value)
             )
             self.assertIsInstance(model, model_cls)
 
@@ -141,7 +137,7 @@ class TestModelLoader(TestCase):
                 params,
                 Context(
                     metadata=Metadata(
-                        dataset=dataset.metadata.name, model=getattr(estimator_cls, "NAME"), run_type=RunType.TRAIN
+                        dataset=dataset.metadata.name, model=estimator_cls.NAME, run_type=RunType.TRAIN
                     ),
                     dataset=dataset,
                 ),
@@ -152,27 +148,57 @@ class TestModelLoader(TestCase):
 
         os.chdir(work_dir)
 
+    @pytest.mark.catboost
     def test_catboost_manual_loading(self) -> None:
+        from catboost import CatBoostClassifier, CatBoostRegressor
+
+        from xtime.estimators._catboost import CatboostEstimator
+
         self._test_manual_loading(CatboostEstimator, CatBoostClassifier, self.classification_dataset)
         self._test_manual_loading(CatboostEstimator, CatBoostRegressor, self.regression_dataset)
 
+    @pytest.mark.catboost
     def test_catboost_automated_loading(self) -> None:
+        from catboost import CatBoostClassifier, CatBoostRegressor
+
+        from xtime.estimators._catboost import CatboostEstimator
+
         self._test_automated_loading(CatboostEstimator, CatBoostClassifier, self.classification_dataset)
         self._test_automated_loading(CatboostEstimator, CatBoostRegressor, self.regression_dataset)
 
+    @pytest.mark.xgboost
     def test_xgboost_manual_loading(self) -> None:
+        from xgboost import XGBClassifier, XGBRegressor
+
+        from xtime.estimators._xgboost import XGBoostEstimator
+
         self._test_manual_loading(XGBoostEstimator, XGBClassifier, self.classification_dataset)
         self._test_manual_loading(XGBoostEstimator, XGBRegressor, self.regression_dataset)
 
+    @pytest.mark.xgboost
     def test_xgboost_automated_loading(self) -> None:
+        from xgboost import XGBClassifier, XGBRegressor
+
+        from xtime.estimators._xgboost import XGBoostEstimator
+
         self._test_automated_loading(XGBoostEstimator, XGBClassifier, self.classification_dataset)
         self._test_automated_loading(XGBoostEstimator, XGBRegressor, self.regression_dataset)
 
+    @pytest.mark.lightgbm
     def test_lightgbm_manual_loading(self) -> None:
+        from lightgbm import Booster
+
+        from xtime.estimators._lightgbm import LightGBMClassifierEstimator
+
         self._test_manual_loading(LightGBMClassifierEstimator, Booster, self.classification_dataset)
         self._test_manual_loading(LightGBMClassifierEstimator, Booster, self.regression_dataset)
 
+    @pytest.mark.lightgbm
     def test_lightgbm_automated_loading(self) -> None:
+        from lightgbm import Booster
+
+        from xtime.estimators._lightgbm import LightGBMClassifierEstimator
+
         self._test_automated_loading(LightGBMClassifierEstimator, Booster, self.classification_dataset)
         self._test_automated_loading(LightGBMClassifierEstimator, Booster, self.regression_dataset)
 

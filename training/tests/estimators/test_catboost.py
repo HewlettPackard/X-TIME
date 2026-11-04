@@ -19,19 +19,25 @@ import pytest
 
 from xtime.contrib.unittest_ext import with_temp_work_dir
 from xtime.datasets import Dataset
-from xtime.estimators._catboost import CatboostEstimator
 from xtime.estimators.estimator import unit_test_check_metrics, unit_test_train_model
 
-pytestmark = pytest.mark.estimators
 
-
+@pytest.mark.estimators
+@pytest.mark.catboost
 class TestCatboostEstimator(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        from xtime.estimators._catboost import CatboostEstimator
+
+        cls.CatboostEstimator = CatboostEstimator
+
     @with_temp_work_dir
     def test_churn_modelling_numerical(self) -> None:
         ds: Dataset = Dataset.create("churn_modelling:numerical")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "catboost", self.CatboostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
 
     @with_temp_work_dir
@@ -39,5 +45,5 @@ class TestCatboostEstimator(TestCase):
         ds: Dataset = Dataset.create("year_prediction_msd:default")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: dict = unit_test_train_model(self, "catboost", CatboostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "catboost", self.CatboostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
