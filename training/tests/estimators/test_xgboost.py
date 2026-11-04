@@ -19,19 +19,25 @@ import pytest
 
 from xtime.contrib.unittest_ext import with_temp_work_dir
 from xtime.datasets import Dataset
-from xtime.estimators._xgboost import XGBoostEstimator
 from xtime.estimators.estimator import unit_test_check_metrics, unit_test_train_model
 
-pytestmark = pytest.mark.estimators
 
-
+@pytest.mark.estimators
+@pytest.mark.xgboost
 class TestXGBoostEstimator(TestCase):
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        from xtime.estimators._xgboost import XGBoostEstimator
+
+        cls.XGBoostEstimator = XGBoostEstimator
+
     @with_temp_work_dir
     def test_churn_modelling_numerical(self) -> None:
         ds: Dataset = Dataset.create("churn_modelling:numerical")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: dict = unit_test_train_model(self, "xgboost", XGBoostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "xgboost", self.XGBoostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
 
     @with_temp_work_dir
@@ -39,5 +45,5 @@ class TestXGBoostEstimator(TestCase):
         ds: Dataset = Dataset.create("year_prediction_msd:default")
         self.assertIsInstance(ds, Dataset)
 
-        metrics: dict = unit_test_train_model(self, "xgboost", XGBoostEstimator, ds)
+        metrics: dict = unit_test_train_model(self, "xgboost", self.XGBoostEstimator, ds)
         unit_test_check_metrics(self, ds.metadata.task, metrics)
